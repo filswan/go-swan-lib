@@ -1,1 +1,1 @@
-# -go-swan-lib
+# go-swan-lib
