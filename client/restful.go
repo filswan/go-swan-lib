@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"strings"
 
-	"go-swan-lib/logs"
-	"go-swan-lib/utils"
+	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/utils"
 )
 
 const HTTP_CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"

@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 
-	"go-swan-lib/constants"
-	"go-swan-lib/logs"
-	"go-swan-lib/model"
-	"go-swan-lib/utils"
+	"github.com/filswan/go-swan-lib/constants"
+	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/model"
+	"github.com/filswan/go-swan-lib/utils"
 )
 
 const GET_OFFLINEDEAL_LIMIT_DEFAULT = 50
