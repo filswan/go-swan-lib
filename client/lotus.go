@@ -345,7 +345,7 @@ type ClientStartDeal struct {
 }
 
 //"lotus client generate-car " + srcFilePath + " " + destCarFilePath
-func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.ConfDeal) (*string, error) {
+func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig) (*string, error) {
 	//costFloat, _ := cost.Float64()
 	//costStr := fmt.Sprintf("%.18f", costFloat)
 
@@ -364,7 +364,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 	clientStartDealParam := ClientStartDealParam{
 		Data:               clientStartDealParamData,
 		Wallet:             dealConfig.SenderWallet,
-		Miner:              *dealConfig.MinerFid,
+		Miner:              dealConfig.MinerFid,
 		EpochPrice:         "2",
 		MinBlocksDuration:  constants.DURATION,
 		ProviderCollateral: "0",
