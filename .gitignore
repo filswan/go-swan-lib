@@ -21,3 +21,4 @@
 ~/.swan/client/leveldbfile/LOCK
 ~/.swan/client/leveldbfile/LOG
 ~/.swan/client/leveldbfile/MANIFEST-000007
+~/.swan/client/leveldbfile/*
