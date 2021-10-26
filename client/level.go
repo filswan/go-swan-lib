@@ -1,4 +1,4 @@
-package leveldbapi
+package client
 
 import (
 	"go-swan-lib/logs"

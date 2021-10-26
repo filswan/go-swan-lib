@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"go-swan-lib/constants"
 	"go-swan-lib/logs"
 )
 
@@ -43,6 +44,24 @@ func IsPathFile(dirFullPath string) (*bool, error) {
 		err := fmt.Errorf("unknown path type")
 		logs.GetLogger().Error(err)
 		return nil, err
+	}
+}
+
+func GetPathType(dirFullPath string) int {
+	fi, err := os.Stat(dirFullPath)
+
+	if err != nil {
+		logs.GetLogger().Info(err)
+		return constants.PATH_TYPE_NOT_EXIST
+	}
+
+	switch mode := fi.Mode(); {
+	case mode.IsDir():
+		return constants.PATH_TYPE_DIR
+	case mode.IsRegular():
+		return constants.PATH_TYPE_FILE
+	default:
+		return constants.PATH_TYPE_UNKNOWN
 	}
 }
 
