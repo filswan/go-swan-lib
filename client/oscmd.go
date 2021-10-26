@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 
-	"go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/logs"
 )
 
 const SHELL_TO_USE = "bash"

@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"go-swan-lib/constants"
-	"go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/constants"
+	"github.com/filswan/go-swan-lib/logs"
 )
 
 func IsFileExists(filePath, fileName string) bool {

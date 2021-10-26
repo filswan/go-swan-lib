@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"strings"
 
-	"go-swan-lib/constants"
-	"go-swan-lib/logs"
-	"go-swan-lib/model"
-	"go-swan-lib/utils"
+	"github.com/filswan/go-swan-lib/constants"
+	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/model"
+	"github.com/filswan/go-swan-lib/utils"
 
 	"github.com/shopspring/decimal"
 )
@@ -481,7 +481,7 @@ func LotusGetMinerConfig(minerFid string) (*decimal.Decimal, *decimal.Decimal, *
 	return price, verifiedPrice, &maxPieceSize, &minPieceSize
 }
 
-func LotusProposeOfflineDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.ConfDeal, relativeEpoch int) (*string, *int, error) {
+func LotusProposeOfflineDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {
 	fastRetrieval := strings.ToLower(strconv.FormatBool(dealConfig.FastRetrieval))
 	verifiedDeal := strings.ToLower(strconv.FormatBool(dealConfig.VerifiedDeal))
 	costFloat, _ := cost.Float64()
@@ -500,7 +500,7 @@ func LotusProposeOfflineDeal(carFile model.FileDesc, cost decimal.Decimal, piece
 	cmd = cmd + " --start-epoch " + strconv.Itoa(startEpoch)
 	cmd = cmd + " --fast-retrieval=" + fastRetrieval + " --verified-deal=" + verifiedDeal
 	cmd = cmd + " --manual-piece-cid " + carFile.PieceCid + " --manual-piece-size " + strconv.FormatInt(pieceSize, 10)
-	cmd = cmd + " " + carFile.DataCid + " " + *dealConfig.MinerFid + " " + costStr + " " + strconv.Itoa(constants.DURATION)
+	cmd = cmd + " " + carFile.DataCid + " " + dealConfig.MinerFid + " " + costStr + " " + strconv.Itoa(constants.DURATION)
 	logs.GetLogger().Info(cmd)
 
 	if !dealConfig.SkipConfirmation {

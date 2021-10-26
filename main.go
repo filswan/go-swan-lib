@@ -1,8 +1,8 @@
 package main
 
 import (
-	leveldbapi "go-swan-lib/level_db_api"
-	"go-swan-lib/logs"
+	leveldbapi "github.com/filswan/go-swan-lib/level_db_api"
+	"github.com/filswan/go-swan-lib/logs"
 )
 
 func main() {
