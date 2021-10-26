@@ -1,7 +1,7 @@
 package main
 
 import (
-	leveldbapi "github.com/filswan/go-swan-lib/level_db_api"
+	leveldbapi "github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
