@@ -13,3 +13,11 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+~/.swan/client/leveldbfile/000002.ldb
+~/.swan/client/leveldbfile/000005.ldb
+~/.swan/client/leveldbfile/000006.log
+~/.swan/client/leveldbfile/CURRENT
+~/.swan/client/leveldbfile/CURRENT.bak
+~/.swan/client/leveldbfile/LOCK
+~/.swan/client/leveldbfile/LOG
+~/.swan/client/leveldbfile/MANIFEST-000007
