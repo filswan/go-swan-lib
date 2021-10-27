@@ -3,7 +3,8 @@ package constants
 const (
 	DEFAULT_SELECT_LIMIT = "100"
 
-	STORAGE_SERVER_TYPE_WEB_SERVER = "web server"
+	STORAGE_SERVER_TYPE_WEB_SERVER  = "web server"
+	STORAGE_SERVER_TYPE_IPFS_SERVER = "ipfs server"
 
 	SWAN_API_STATUS_SUCCESS = "success"
 
