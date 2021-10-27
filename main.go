@@ -8,12 +8,12 @@ import (
 func main() {
 	leveldbFile := "~/.swan/client/leveldbfile"
 	leveldbKey := "test"
-	err := leveldbapi.Put(leveldbFile, leveldbKey, "hello")
+	err := leveldbapi.LevelDbPut(leveldbFile, leveldbKey, "hello")
 	if err != nil {
 		logs.GetLogger().Error(err)
 	}
 
-	data, err := leveldbapi.Get(leveldbFile, leveldbKey)
+	data, err := leveldbapi.LevelDbGet(leveldbFile, leveldbKey)
 	if err != nil {
 		logs.GetLogger().Error(err)
 	}

@@ -243,3 +243,36 @@ func ReadFile(filePath string) (string, []byte, error) {
 
 	return sourceFileStat.Name(), data, nil
 }
+
+func CheckDir(dir string) error {
+	if len(dir) == 0 {
+		err := fmt.Errorf("dir is not provided")
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	if GetPathType(dir) != constants.PATH_TYPE_DIR {
+		err := fmt.Errorf("%s is not a directory", dir)
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func CreateDir(dir string) error {
+	if len(dir) == 0 {
+		err := fmt.Errorf("dir is not provided")
+		logs.GetLogger().Info(err)
+		return err
+	}
+
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		err := fmt.Errorf("%s, failed to create output dir:%s", err.Error(), dir)
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	return nil
+}
