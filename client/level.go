@@ -2,11 +2,12 @@ package client
 
 import (
 	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/utils"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
-func Put(dbFilepath, key, value string) error {
+func LevelDbPut(dbFilepath, key string, value interface{}) error {
 	db, err := leveldb.OpenFile(dbFilepath, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -14,7 +15,16 @@ func Put(dbFilepath, key, value string) error {
 	}
 	defer db.Close()
 
-	err = db.Put([]byte(key), []byte(value), nil)
+	var valStr string
+	switch valType := value.(type) {
+	case string:
+		valStr = valType
+		logs.GetLogger().Info("this is already string")
+	default:
+		valStr = utils.ToJson(value)
+	}
+
+	err = db.Put([]byte(key), []byte(valStr), nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
@@ -23,7 +33,7 @@ func Put(dbFilepath, key, value string) error {
 	return nil
 }
 
-func Get(dbFilepath, key string) ([]byte, error) {
+func LevelDbGet(dbFilepath, key string) ([]byte, error) {
 	db, err := leveldb.OpenFile(dbFilepath, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -40,7 +50,7 @@ func Get(dbFilepath, key string) ([]byte, error) {
 	return data, nil
 }
 
-func Delete(dbFilepath, key, value string) error {
+func LevelDbDelete(dbFilepath, key, value string) error {
 	db, err := leveldb.OpenFile(dbFilepath, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
