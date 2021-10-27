@@ -184,43 +184,6 @@ func ReadAllLines(dir, filename string) ([]string, error) {
 	return lines, nil
 }
 
-func copy(srcFilePath, destDir string) (int64, error) {
-	sourceFileStat, err := os.Stat(srcFilePath)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return 0, err
-	}
-
-	if !sourceFileStat.Mode().IsRegular() {
-		err = errors.New(srcFilePath + " is not a regular file")
-		logs.GetLogger().Error(err)
-		return 0, err
-	}
-
-	source, err := os.Open(srcFilePath)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return 0, err
-	}
-
-	defer source.Close()
-
-	destination, err := os.Create(destDir)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return 0, err
-	}
-
-	defer destination.Close()
-
-	nBytes, err := io.Copy(destination, source)
-	if err != nil {
-		logs.GetLogger().Error(err)
-	}
-
-	return nBytes, err
-}
-
 func ReadFile(filePath string) (string, []byte, error) {
 	sourceFileStat, err := os.Stat(filePath)
 	if err != nil {
@@ -242,4 +205,37 @@ func ReadFile(filePath string) (string, []byte, error) {
 	}
 
 	return sourceFileStat.Name(), data, nil
+}
+
+func IsDirExists(dir string) bool {
+	if len(dir) == 0 {
+		err := fmt.Errorf("dir is not provided")
+		logs.GetLogger().Error(err)
+		return false
+	}
+
+	if GetPathType(dir) != constants.PATH_TYPE_DIR {
+		err := fmt.Errorf("%s is not a directory", dir)
+		logs.GetLogger().Error(err)
+		return false
+	}
+
+	return true
+}
+
+func CreateDir(dir string) error {
+	if len(dir) == 0 {
+		err := fmt.Errorf("dir is not provided")
+		logs.GetLogger().Info(err)
+		return err
+	}
+
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		err := fmt.Errorf("%s, failed to create output dir:%s", err.Error(), dir)
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	return nil
 }
