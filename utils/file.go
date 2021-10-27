@@ -207,20 +207,20 @@ func ReadFile(filePath string) (string, []byte, error) {
 	return sourceFileStat.Name(), data, nil
 }
 
-func IsDirExists(dir string) error {
+func IsDirExists(dir string) bool {
 	if len(dir) == 0 {
 		err := fmt.Errorf("dir is not provided")
 		logs.GetLogger().Error(err)
-		return err
+		return false
 	}
 
 	if GetPathType(dir) != constants.PATH_TYPE_DIR {
 		err := fmt.Errorf("%s is not a directory", dir)
 		logs.GetLogger().Error(err)
-		return err
+		return false
 	}
 
-	return nil
+	return true
 }
 
 func CreateDir(dir string) error {
