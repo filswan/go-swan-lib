@@ -183,3 +183,11 @@ func UrlJoin(root string, parts ...string) string {
 
 	return url
 }
+
+func RandStringRunes(letterRunes []rune, strLen int) string {
+	b := make([]rune, strLen)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
