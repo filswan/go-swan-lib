@@ -39,7 +39,7 @@ func IpfsUploadCarFile(carFilePath string) (*string, error) {
 }
 
 func IpfsUploadCarFileByWebApi(apiUrl, carFilePath string) (*string, error) {
-	response, err := HttpPostFile(apiUrl, "", nil, "file", carFilePath)
+	response, err := HttpUploadFileByStream(apiUrl, carFilePath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err

@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	client.IpfsUploadCarFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go-workspace/src/go-swan-lib_DoraNebula/go.sum")
+	client.IpfsUploadCarFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go-workspace/src/testGo/go.mod")
 }
 
 func testRandStr() {
