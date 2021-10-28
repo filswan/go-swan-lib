@@ -17,3 +17,4 @@
 ~/.swan/client/leveldbfile/*.*
 logs/info.log
 logs/info.log
+logs/error.log
