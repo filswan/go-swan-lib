@@ -8,6 +8,7 @@ const (
 	STORAGE_SERVER_TYPE_IPFS_SERVER = "ipfs server"
 
 	SWAN_API_STATUS_SUCCESS = "success"
+	SWAN_API_STATUS_FAIL    = "fail"
 
 	TASK_TYPE_VERIFIED = "verified"
 	TASK_TYPE_REGULAR  = "regular"
