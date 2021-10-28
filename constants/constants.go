@@ -1,6 +1,7 @@
 package constants
 
 const (
+	EMPTY_STRING         = ""
 	DEFAULT_SELECT_LIMIT = "100"
 
 	STORAGE_SERVER_TYPE_WEB_SERVER  = "web server"

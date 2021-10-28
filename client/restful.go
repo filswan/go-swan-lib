@@ -130,6 +130,7 @@ func HttpRequestFile(httpMethod, url string, tokenString string, paramTexts map[
 
 	fileWriter, err := bodyWriter.CreateFormFile(paramFilename, filename)
 	if err != nil {
+		bodyWriter.Close()
 		logs.GetLogger().Info(err)
 		return "", err
 	}
@@ -139,6 +140,7 @@ func HttpRequestFile(httpMethod, url string, tokenString string, paramTexts map[
 	for key, val := range paramTexts {
 		err = bodyWriter.WriteField(key, val)
 		if err != nil {
+			bodyWriter.Close()
 			logs.GetLogger().Info(err)
 			return "", err
 		}
