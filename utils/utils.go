@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/filswan/go-swan-lib/logs"
 
 	"github.com/shopspring/decimal"
@@ -190,4 +191,18 @@ func RandStringRunes(letterRunes []rune, strLen int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func DecodeJwtToken(tokenStr string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenStr, nil)
+	if token == nil {
+		return nil, err
+	}
+	claims, _ := token.Claims.(jwt.MapClaims)
+
+	//for key, element := range claims {
+	//	fmt.Println("Key:", key, "=>", "Element:", element)
+	//}
+
+	return claims, nil
 }
