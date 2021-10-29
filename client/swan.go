@@ -23,8 +23,8 @@ type TokenAccessInfo struct {
 }
 
 type SwanClient struct {
-	ApiUrl string
-	Token  string
+	ApiUrl   string
+	JwtToken string
 }
 
 type GetOfflineDealResponse struct {
@@ -53,19 +53,19 @@ func (swanClient *SwanClient) SwanGetJwtToken(apiKey, accessToken string) error 
 	}
 
 	if len(swanClient.ApiUrl) == 0 {
-		err := fmt.Errorf("config [main].api_url is required")
+		err := fmt.Errorf("api url is required")
 		logs.GetLogger().Error(err)
 		return err
 	}
 
 	if len(data.ApiKey) == 0 {
-		err := fmt.Errorf("config [main].api_key is required")
+		err := fmt.Errorf("api key is required")
 		logs.GetLogger().Error(err)
 		return err
 	}
 
 	if len(data.AccessToken) == 0 {
-		err := fmt.Errorf("config [main].access_token is required")
+		err := fmt.Errorf("acess token is required")
 		logs.GetLogger().Error(err)
 		return err
 	}
@@ -106,26 +106,46 @@ func (swanClient *SwanClient) SwanGetJwtToken(apiKey, accessToken string) error 
 		return err
 	}
 
-	swanClient.Token = jwtToken["jwt"].(string)
+	swanClient.JwtToken = jwtToken["jwt"].(string)
 
 	return nil
 }
 
-func SwanGetClient(apiUrl, apiKey, accessToken string) (*SwanClient, error) {
+func SwanGetClient(apiUrl, apiKey, accessToken, jwtToken string) (*SwanClient, error) {
 	if len(apiUrl) == 0 {
-		err := fmt.Errorf("config [main].api_url is required")
+		err := fmt.Errorf("api url is required")
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if jwtToken == constants.EMPTY_STRING {
+		swanClient, err := SwanGetClientByKey(apiUrl, apiKey, accessToken)
+		return swanClient, err
+	}
+
+	swanClient := &SwanClient{
+		ApiUrl:   apiUrl,
+		JwtToken: jwtToken,
+	}
+
+	return swanClient, nil
+}
+
+func SwanGetClientByKey(apiUrl, apiKey, accessToken string) (*SwanClient, error) {
+	if len(apiUrl) == 0 {
+		err := fmt.Errorf("api url is required")
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if len(apiKey) == 0 {
-		err := fmt.Errorf("config [main].api_key is required")
+		err := fmt.Errorf("api key is required")
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if len(accessToken) == 0 {
-		err := fmt.Errorf("config [main].access_token is required")
+		err := fmt.Errorf("access token is required")
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
@@ -160,7 +180,7 @@ func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, limit
 	}
 
 	urlStr := swanClient.ApiUrl + "/offline_deals/" + minerFid + "?deal_status=" + status + "&limit=" + rowLimit + "&offset=0"
-	response := HttpGet(urlStr, swanClient.Token, "")
+	response := HttpGet(urlStr, swanClient.JwtToken, "")
 	getOfflineDealResponse := GetOfflineDealResponse{}
 	err := json.Unmarshal([]byte(response), &getOfflineDealResponse)
 	if err != nil {
@@ -199,7 +219,7 @@ func (swanClient *SwanClient) SwanUpdateOfflineDealStatus(dealId int, status str
 		params.Add("file_size", statusInfo[2])
 	}
 
-	response := HttpPut(apiUrl, swanClient.Token, strings.NewReader(params.Encode()))
+	response := HttpPut(apiUrl, swanClient.JwtToken, strings.NewReader(params.Encode()))
 
 	updateOfflineDealResponse := &UpdateOfflineDealResponse{}
 	err := json.Unmarshal([]byte(response), updateOfflineDealResponse)
@@ -246,7 +266,7 @@ func (swanClient *SwanClient) SwanCreateTask(task model.Task, csvFilePath string
 	params["max_price"] = (*task.MaxPrice).String()
 	params["expire_days"] = strconv.Itoa(*task.ExpireDays)
 
-	response, err := HttpPostFile(apiUrl, swanClient.Token, params, "file", csvFilePath)
+	response, err := HttpPostFile(apiUrl, swanClient.JwtToken, params, "file", csvFilePath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -285,7 +305,7 @@ func (swanClient *SwanClient) SwanGetTasks(limit *int) (*GetTaskResult, error) {
 		apiUrl = apiUrl + "?limit=" + strconv.Itoa(*limit)
 	}
 	//logs.GetLogger().Info("Getting My swan tasks info")
-	response := HttpGet(apiUrl, swanClient.Token, "")
+	response := HttpGet(apiUrl, swanClient.JwtToken, "")
 
 	if response == "" {
 		err := errors.New("failed to get tasks from swan")
@@ -368,7 +388,7 @@ func (swanClient *SwanClient) SwanGetOfflineDealsByTaskUuid(taskUuid string) (*G
 	}
 	apiUrl := swanClient.ApiUrl + "/tasks/" + taskUuid
 	logs.GetLogger().Info("Getting My swan tasks info")
-	response := HttpGet(apiUrl, swanClient.Token, "")
+	response := HttpGet(apiUrl, swanClient.JwtToken, "")
 
 	if response == "" {
 		err := errors.New("failed to get tasks from swan")
@@ -398,7 +418,7 @@ func (swanClient *SwanClient) SwanUpdateTaskByUuid(taskUuid string, minerFid str
 	params := map[string]string{}
 	params["miner_fid"] = minerFid
 
-	response, err := HttpPutFile(apiUrl, swanClient.Token, params, "file", csvFilePath)
+	response, err := HttpPutFile(apiUrl, swanClient.JwtToken, params, "file", csvFilePath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
@@ -432,7 +452,7 @@ func (swanClient *SwanClient) SwanUpdateAssignedTask(taskUuid, status, csvFilePa
 	params := map[string]string{}
 	params["status"] = status
 
-	response, err := HttpPutFile(apiUrl, swanClient.Token, params, "file", csvFilePath)
+	response, err := HttpPutFile(apiUrl, swanClient.JwtToken, params, "file", csvFilePath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err

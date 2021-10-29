@@ -45,4 +45,6 @@ const (
 	CSV_FILE_NAME_BY_TASK   = "-metadata.csv"
 	CSV_FILE_NAME_BY_DEAL   = "-deals.csv"
 	CSV_FILE_NAME_BY_AUTO   = "car.csv"
+
+	AuthorizationHeaderKey = "Authorization"
 )
