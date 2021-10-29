@@ -8,10 +8,12 @@ import (
 )
 
 func main() {
-	client.IpfsUploadCarFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go-workspace/src/testGo/go.mod")
+	utils.DecodeJwtToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjY5OTMwNDksImlhdCI6MTYzNTQ1NzA0OSwic3ViIjoyNTV9.SOoCPw55pQ-yAomKqzxVn8R5tWKBeHwRJfsoQFyxgvQ")
 }
 
 func testRandStr() {
+	client.IpfsUploadCarFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go-workspace/src/testGo/go.mod")
+
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 	logs.GetLogger().Info(utils.RandStringRunes(letterRunes, 6))
