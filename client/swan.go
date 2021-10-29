@@ -331,8 +331,40 @@ func (swanClient *SwanClient) SwanGetTasks(limit *int) (*GetTaskResult, error) {
 	return getTaskResult, nil
 }
 
+func (swanClient *SwanClient) SwanGetAssignedTasksByLimit(limit *int) (*GetTaskResult, error) {
+	apiUrl := swanClient.ApiUrl + "/tasks/status=Assigned"
+	if limit != nil {
+		apiUrl = apiUrl + "&limit=" + strconv.Itoa(*limit)
+	}
+	//logs.GetLogger().Info("Getting My swan tasks info")
+	response := HttpGet(apiUrl, swanClient.JwtToken, "")
+
+	if response == "" {
+		err := errors.New("failed to get tasks from swan")
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	//logs.GetLogger().Info(response)
+
+	getTaskResult := &GetTaskResult{}
+	err := json.Unmarshal([]byte(response), getTaskResult)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if getTaskResult.Status != constants.SWAN_API_STATUS_SUCCESS {
+		err := fmt.Errorf("error:%s", getTaskResult.Status)
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return getTaskResult, nil
+}
+
 func (swanClient *SwanClient) SwanGetAssignedTasks() ([]model.Task, error) {
-	getTaskResult, err := swanClient.SwanGetTasks(nil)
+	getTaskResult, err := swanClient.SwanGetAssignedTasksByLimit(nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -343,7 +375,7 @@ func (swanClient *SwanClient) SwanGetAssignedTasks() ([]model.Task, error) {
 	}
 	//logs.GetLogger().Info(len(getTaskResult.Data.Task), " ", getTaskResult.Data.TotalTaskCount)
 
-	getTaskResult, err = swanClient.SwanGetTasks(&getTaskResult.Data.TotalTaskCount)
+	getTaskResult, err = swanClient.SwanGetAssignedTasksByLimit(&getTaskResult.Data.TotalTaskCount)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
