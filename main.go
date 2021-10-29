@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	utils.DecodeJwtToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjY5OTMwNDksImlhdCI6MTYzNTQ1NzA0OSwic3ViIjoyNTV9.SOoCPw55pQ-yAomKqzxVn8R5tWKBeHwRJfsoQFyxgvQ")
+	utils.DecodeJwtToken("")
 }
 
 func testRandStr() {
