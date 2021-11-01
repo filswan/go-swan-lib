@@ -299,7 +299,7 @@ type GetTaskByUuidResultData struct {
 	TotalTaskCount int        `json:"total_task_count"`
 }
 
-func (swanClient *SwanClient) SwanGetTaskByUuid(uuid string) (*GetTaskResult, error) {
+func (swanClient *SwanClient) SwanGetTaskByUuid(uuid string) (*GetTaskByUuidResult, error) {
 	apiUrl := swanClient.ApiUrl + "/tasks/" + uuid
 	//logs.GetLogger().Info("Getting My swan tasks info")
 	response := HttpGet(apiUrl, swanClient.JwtToken, "")
@@ -312,20 +312,20 @@ func (swanClient *SwanClient) SwanGetTaskByUuid(uuid string) (*GetTaskResult, er
 
 	//logs.GetLogger().Info(response)
 
-	getTaskResult := &GetTaskResult{}
-	err := json.Unmarshal([]byte(response), getTaskResult)
+	getTaskByUuidResult := &GetTaskByUuidResult{}
+	err := json.Unmarshal([]byte(response), getTaskByUuidResult)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
-	if getTaskResult.Status != constants.SWAN_API_STATUS_SUCCESS {
-		err := fmt.Errorf("error:%s", getTaskResult.Status)
+	if getTaskByUuidResult.Status != constants.SWAN_API_STATUS_SUCCESS {
+		err := fmt.Errorf("error:%s", getTaskByUuidResult.Status)
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
-	return getTaskResult, nil
+	return getTaskByUuidResult, nil
 }
 
 type GetTaskResult struct {
