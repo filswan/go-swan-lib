@@ -288,6 +288,46 @@ func (swanClient *SwanClient) SwanCreateTask(task model.Task, csvFilePath string
 	return swanCreateTaskResponse, nil
 }
 
+type GetTaskByUuidResult struct {
+	Data   GetTaskResultData `json:"data"`
+	Status string            `json:"status"`
+}
+
+type GetTaskByUuidResultData struct {
+	Task           model.Task `json:"task"`
+	TotalItems     int        `json:"total_items"`
+	TotalTaskCount int        `json:"total_task_count"`
+}
+
+func (swanClient *SwanClient) SwanGetTaskByUuid(uuid string) (*GetTaskResult, error) {
+	apiUrl := swanClient.ApiUrl + "/tasks/" + uuid
+	//logs.GetLogger().Info("Getting My swan tasks info")
+	response := HttpGet(apiUrl, swanClient.JwtToken, "")
+
+	if response == "" {
+		err := errors.New("failed to get tasks from swan")
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	//logs.GetLogger().Info(response)
+
+	getTaskResult := &GetTaskResult{}
+	err := json.Unmarshal([]byte(response), getTaskResult)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if getTaskResult.Status != constants.SWAN_API_STATUS_SUCCESS {
+		err := fmt.Errorf("error:%s", getTaskResult.Status)
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return getTaskResult, nil
+}
+
 type GetTaskResult struct {
 	Data   GetTaskResultData `json:"data"`
 	Status string            `json:"status"`
