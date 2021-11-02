@@ -3,6 +3,7 @@ package lotus
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/logs"
@@ -174,7 +175,7 @@ func (lotusMarket *LotusMarket) LotusGetDealOnChainStatus(dealCid string) (strin
 	return status, message
 }
 
-func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string) string {
+func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string) error {
 	var params []interface{}
 	getDealInfoParam := DealCid{DealCid: dealCid}
 	params = append(params, getDealInfoParam)
@@ -189,22 +190,26 @@ func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string)
 
 	response := client.HttpPost(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
 	if response == "" {
-		msg := "no return"
-		logs.GetLogger().Error(msg)
-		return msg
+		err := fmt.Errorf("no response, please check your market api url:%s and access token", lotusMarket.ApiUrl)
+		logs.GetLogger().Error(err)
+		return err
 	}
 	logs.GetLogger().Info(response)
 
 	errorInfo := utils.GetFieldMapFromJson(response, "error")
 
 	if errorInfo == nil {
-		return ""
+		return nil
 	}
 
 	logs.GetLogger().Error(errorInfo)
 	errCode := int(errorInfo["code"].(float64))
 	errMsg := errorInfo["message"].(string)
-	msg := fmt.Sprintf("Error code:%d message:%s", errCode, errMsg)
-	logs.GetLogger().Error(msg)
-	return msg
+	err := fmt.Errorf("error code:%d message:%s", errCode, errMsg)
+	logs.GetLogger().Error(err)
+	if strings.Contains(response, "(need 'write')") {
+		logs.GetLogger().Error("please check your access token, it should have write access")
+		logs.GetLogger().Error(response)
+	}
+	return err
 }
