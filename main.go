@@ -3,12 +3,13 @@ package main
 import (
 	"github.com/filswan/go-swan-lib/client"
 	leveldbapi "github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/swan"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
 )
 
 func main() {
-	swanClient, err := client.SwanGetClient("", "", "", "")
+	swanClient, err := swan.SwanGetClient("", "", "", "")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
