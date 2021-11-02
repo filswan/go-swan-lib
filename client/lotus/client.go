@@ -1,14 +1,14 @@
-package client
+package lotus
 
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/model"
@@ -18,59 +18,18 @@ import (
 )
 
 const (
-	LOTUS_JSON_RPC_ID            = 7878
-	LOTUS_JSON_RPC_VERSION       = "2.0"
 	LOTUS_CLIENT_GET_DEAL_INFO   = "Filecoin.ClientGetDealInfo"
 	LOTUS_CLIENT_GET_DEAL_STATUS = "Filecoin.ClientGetDealStatus"
 	LOTUS_CHAIN_HEAD             = "Filecoin.ChainHead"
-	LOTUS_MARKET_GET_ASK         = "Filecoin.MarketGetAsk"
 	LOTUS_CLIENT_CALC_COMM_P     = "Filecoin.ClientCalcCommP"
 	LOTUS_CLIENT_IMPORT          = "Filecoin.ClientImport"
 	LOTUS_CLIENT_GEN_CAR         = "Filecoin.ClientGenCar"
 	LOTUS_CLIENT_START_DEAL      = "Filecoin.ClientStartDeal"
-	LOTUS_VERSION                = "Filecoin.Version"
 )
-
-type LotusJsonRpcParams struct {
-	JsonRpc string        `json:"jsonrpc"`
-	Method  string        `json:"method"`
-	Params  []interface{} `json:"params"`
-	Id      int           `json:"id"`
-}
 
 type LotusClient struct {
 	ApiUrl      string
 	AccessToken string
-}
-
-type LotusJsonRpcResult struct {
-	Id      int           `json:"id"`
-	JsonRpc string        `json:"jsonrpc"`
-	Error   *JsonRpcError `json:"error"`
-}
-
-type MarketGetAsk struct {
-	LotusJsonRpcResult
-	Result *MarketGetAskResult `json:"result"`
-}
-
-type JsonRpcError struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
-type MarketGetAskResult struct {
-	Ask MarketGetAskResultAsk
-}
-type MarketGetAskResultAsk struct {
-	Price         string
-	VerifiedPrice string
-	MinPieceSize  int
-	MaxPieceSize  int
-	Miner         string
-	Timestamp     int
-	Expiry        int
-	SeqNo         int
 }
 
 type ClientCalcCommP struct {
@@ -82,10 +41,6 @@ type ClientCalcCommPResult struct {
 	Root Cid
 	Size int
 }
-type Cid struct {
-	Cid string `json:"/"`
-}
-
 type ClientImport struct {
 	LotusJsonRpcResult
 	Result *ClientImportResult `json:"result"`
@@ -116,82 +71,59 @@ func LotusGetClient(apiUrl, accessToken string) (*LotusClient, error) {
 	return lotusClient, nil
 }
 
-type LotusVersionResult struct {
-	Version    string
-	APIVersion int
-	BlockDelay int
-}
-
-type LotusVersionResponse struct {
-	LotusJsonRpcResult
-	Result LotusVersionResult `json:"result"`
-}
-
-//"lotus client query-ask " + minerFid
-func (lotusClient *LotusClient) LotusVersion() (*string, error) {
+func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
 	var params []interface{}
 
 	jsonRpcParams := LotusJsonRpcParams{
 		JsonRpc: LOTUS_JSON_RPC_VERSION,
-		Method:  LOTUS_VERSION,
+		Method:  LOTUS_CHAIN_HEAD,
 		Params:  params,
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	//here the api url should be miner's api url, need to change later on
-	response := HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
-	if response == "" {
-		err := errors.New("no response from api")
-		logs.GetLogger().Error(err)
-		return nil, err
+	response := client.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
+
+	//logs.GetLogger().Info(response)
+
+	result := utils.GetFieldMapFromJson(response, "result")
+	if result == nil {
+		logs.GetLogger().Error("Failed to get result from:", lotusClient.ApiUrl)
+		return -1
 	}
 
-	lotusVersionResponse := &LotusVersionResponse{}
-	err := json.Unmarshal([]byte(response), lotusVersionResponse)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil, err
+	height := result["Height"]
+	if height == nil {
+		logs.GetLogger().Error("Failed to get height from:", lotusClient.ApiUrl)
+		return -1
 	}
 
-	if lotusVersionResponse.Error != nil {
-		msg := fmt.Sprintf("error, code:%d, message:%s", lotusVersionResponse.Error.Code, lotusVersionResponse.Error.Message)
-		err := errors.New(msg)
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
-	return &lotusVersionResponse.Result.Version, nil
+	heightFloat := height.(float64)
+	return int(heightFloat)
 }
 
-//"lotus client query-ask " + minerFid
-func (lotusClient *LotusClient) LotusMarketGetAsk() *MarketGetAskResultAsk {
+//"lotus-miner storage-deals list -v | grep -a " + dealCid
+func (lotusClient *LotusClient) LotusGetDealStatus(state int) string {
 	var params []interface{}
+	params = append(params, state)
 
 	jsonRpcParams := LotusJsonRpcParams{
 		JsonRpc: LOTUS_JSON_RPC_VERSION,
-		Method:  LOTUS_MARKET_GET_ASK,
+		Method:  LOTUS_CLIENT_GET_DEAL_STATUS,
 		Params:  params,
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	//here the api url should be miner's api url, need to change later on
-	response := HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
-	if response == "" {
-		return nil
+	response := client.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
+
+	//logs.GetLogger().Info(response)
+
+	result := utils.GetFieldStrFromJson(response, "result")
+	if result == "" {
+		logs.GetLogger().Error("Failed to get result from:", lotusClient.ApiUrl)
+		return ""
 	}
 
-	marketGetAsk := &MarketGetAsk{}
-	err := json.Unmarshal([]byte(response), marketGetAsk)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil
-	}
-
-	if marketGetAsk.Result == nil {
-		return nil
-	}
-
-	return &marketGetAsk.Result.Ask
+	return result
 }
 
 //"lotus client commP " + carFilePath
@@ -206,7 +138,7 @@ func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) *string {
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := HttpPost(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	response := client.HttpPost(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
 		return nil
 	}
@@ -247,7 +179,7 @@ func (lotusClient *LotusClient) LotusClientImport(filepath string, isCar bool) (
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	response := client.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
 		err := fmt.Errorf("lotus import file %s failed, no response from %s", filepath, lotusClient.ApiUrl)
 		logs.GetLogger().Error(err)
@@ -295,7 +227,7 @@ func (lotusClient *LotusClient) LotusClientGenCar(srcFilePath, destCarFilePath s
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	response := client.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
 		err := fmt.Errorf("failed to generate car, no response")
 		logs.GetLogger().Error(err)
@@ -381,7 +313,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	response := client.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
 		err := fmt.Errorf("failed to generate car, no response")
 		logs.GetLogger().Error(err)
@@ -409,7 +341,7 @@ func LotusGetMinerConfig(minerFid string) (*decimal.Decimal, *decimal.Decimal, *
 	cmd := "lotus client query-ask " + minerFid
 	logs.GetLogger().Info(cmd)
 
-	result, err := ExecOsCmd(cmd, true)
+	result, err := client.ExecOsCmd(cmd, true)
 
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -521,7 +453,7 @@ func LotusProposeOfflineDeal(carFile model.FileDesc, cost decimal.Decimal, piece
 		}
 	}
 
-	result, err := ExecOsCmd(cmd, true)
+	result, err := client.ExecOsCmd(cmd, true)
 
 	if err != nil {
 		logs.GetLogger().Error("Failed to submit the deal.")
