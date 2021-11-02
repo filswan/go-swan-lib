@@ -8,6 +8,22 @@ import (
 )
 
 func main() {
+	swanClient, err := client.SwanGetClient("", "", "", "")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+
+	tasks, err := swanClient.SwanGetAssignedTasks()
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+
+	for _, task := range tasks {
+		logs.GetLogger().Info(task.Uuid, " ", task.TaskFileName)
+	}
+
 	utils.DecodeJwtToken("")
 }
 
