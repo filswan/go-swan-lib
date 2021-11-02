@@ -372,7 +372,7 @@ func (swanClient *SwanClient) SwanGetTasks(limit *int) (*GetTaskResult, error) {
 }
 
 func (swanClient *SwanClient) SwanGetAssignedTasksByLimit(limit *int) (*GetTaskResult, error) {
-	apiUrl := swanClient.ApiUrl + "/tasks/status=Assigned"
+	apiUrl := swanClient.ApiUrl + "/tasks?status=Assigned"
 	if limit != nil {
 		apiUrl = apiUrl + "&limit=" + strconv.Itoa(*limit)
 	}
