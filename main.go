@@ -9,6 +9,16 @@ import (
 )
 
 func main() {
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+	var optionChars = "abcdefghijklmnopqrstuvwxyz0123456789"
+	for i := 0; i < 100; i++ {
+		randStr := utils.RandStringRunes(letterRunes, 6)
+		randStr1 := utils.RandString(optionChars, 6)
+		logs.GetLogger().Info(randStr, "  ", randStr1)
+	}
+}
+
+func testTask() {
 	swanClient, err := swan.SwanGetClient("", "", "", "")
 	if err != nil {
 		logs.GetLogger().Error(err)
