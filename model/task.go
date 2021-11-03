@@ -22,5 +22,6 @@ type Task struct {
 	UpdatedOn         string           `json:"updated_on"`
 	BidMode           *int             `json:"bid_mode"`
 	FastRetrieval     *int             `json:"fast_retrieval"`
+	SourceId          int              `json:"source_id"`
 	FastRetrievalBool bool
 }
