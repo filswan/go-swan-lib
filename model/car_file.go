@@ -17,4 +17,5 @@ type FileDesc struct {
 	PieceCid   string
 	MinerFid   *string
 	StartEpoch int
+	SourceId   int
 }
