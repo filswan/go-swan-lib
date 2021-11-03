@@ -186,11 +186,22 @@ func UrlJoin(root string, parts ...string) string {
 }
 
 func RandStringRunes(letterRunes []rune, strLen int) string {
+	rand.Seed(time.Now().UnixNano())
 	b := make([]rune, strLen)
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func RandString(optionChars string, strLen int) string {
+	rand.Seed(time.Now().UnixNano())
+	result := ""
+	for i := 0; i < strLen; i++ {
+		random := rand.Intn(len(optionChars))
+		result = result + optionChars[random:random+1]
+	}
+	return result
 }
 
 func DecodeJwtToken(tokenStr string) (jwt.MapClaims, error) {
