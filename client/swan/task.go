@@ -42,6 +42,7 @@ func (swanClient *SwanClient) SwanCreateTask(task model.Task, csvFilePath string
 	params["bid_mode"] = strconv.Itoa(*task.BidMode)
 	params["max_price"] = (*task.MaxPrice).String()
 	params["expire_days"] = strconv.Itoa(*task.ExpireDays)
+	params["source_id"] = strconv.Itoa(task.SourceId)
 
 	response, err := client.HttpPostFile(apiUrl, swanClient.JwtToken, params, "file", csvFilePath)
 	if err != nil {
