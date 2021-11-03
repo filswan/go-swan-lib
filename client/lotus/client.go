@@ -300,10 +300,16 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		EpochPrice:         "2",
 		MinBlocksDuration:  constants.DURATION,
 		ProviderCollateral: "0",
-		DealStartEpoch:     carFile.StartEpoch,
-		FastRetrieval:      dealConfig.FastRetrieval,
-		VerifiedDeal:       dealConfig.VerifiedDeal,
+		//DealStartEpoch:     carFile.StartEpoch,
+		FastRetrieval: dealConfig.FastRetrieval,
+		VerifiedDeal:  dealConfig.VerifiedDeal,
 	}
+	if carFile.StartEpoch != nil {
+		clientStartDealParam.DealStartEpoch = *carFile.StartEpoch
+	} else {
+		clientStartDealParam.DealStartEpoch = 0
+	}
+
 	params = append(params, clientStartDealParam)
 
 	jsonRpcParams := LotusJsonRpcParams{
