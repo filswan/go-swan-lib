@@ -3,6 +3,7 @@ package test
 import (
 	"strings"
 
+	"github.com/filswan/go-swan-lib/client/swan"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
 
@@ -78,5 +79,27 @@ func TestRestApiClient() {
 	logs.GetLogger().Info(title)
 
 	response = client.HttpDelete("https://jsonplaceholder.typicode.com/todos/1", "", todo)
+	logs.GetLogger().Info(response)
+}
+
+func TestSwanClient() {
+	swanClient, err := swan.SwanGetClient("", "", "", "")
+	if err != nil {
+		logs.GetLogger().Error(err)
+	}
+
+	deals := swanClient.SwanGetOfflineDeals("", "Downloading", "10")
+	logs.GetLogger().Info(deals)
+
+	response := swanClient.SwanUpdateOfflineDealStatus(2455, "Downloaded", "test note")
+	logs.GetLogger().Info(response)
+
+	response = swanClient.SwanUpdateOfflineDealStatus(2455, "Completed", "test note", "/test/test", "0003222")
+	logs.GetLogger().Info(response)
+
+	err = swanClient.SendHeartbeatRequest("")
+	if err != nil {
+		logs.GetLogger().Error(err)
+	}
 	logs.GetLogger().Info(response)
 }
