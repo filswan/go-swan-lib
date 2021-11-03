@@ -57,12 +57,6 @@ func LotusGetClient(apiUrl, accessToken string) (*LotusClient, error) {
 		return nil, err
 	}
 
-	if len(accessToken) == 0 {
-		err := fmt.Errorf("config lotus access_token is required and it should have admin access right")
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
 	lotusClient := &LotusClient{
 		ApiUrl:      apiUrl,
 		AccessToken: accessToken,

@@ -46,18 +46,6 @@ func GetLotusMarket(apiUrl, accessToken, clientApiUrl string) (*LotusMarket, err
 		return nil, err
 	}
 
-	if len(accessToken) == 0 {
-		err := fmt.Errorf("lotus market access token is required")
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
-	if len(clientApiUrl) == 0 {
-		err := fmt.Errorf("lotus client api url is required")
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
 	lotusMarket := &LotusMarket{
 		ApiUrl:       apiUrl,
 		AccessToken:  accessToken,
