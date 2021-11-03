@@ -33,10 +33,10 @@ func (swanClient *SwanClient) SwanCreateTask(task model.Task, csvFilePath string
 	params["description"] = task.Description
 	params["is_public"] = strconv.Itoa(*task.IsPublic)
 
-	params["type"] = *task.Type
+	params["type"] = task.Type
 
-	if task.MinerFid != nil {
-		params["miner_id"] = *task.MinerFid
+	if task.MinerFid != "" {
+		params["miner_id"] = task.MinerFid
 	}
 	params["fast_retrieval"] = strconv.FormatBool(task.FastRetrievalBool)
 	params["bid_mode"] = strconv.Itoa(*task.BidMode)
@@ -207,7 +207,7 @@ func (swanClient *SwanClient) SwanGetAssignedTasks() ([]model.Task, error) {
 	result := []model.Task{}
 
 	for _, task := range getTaskResult.Data.Task {
-		if task.Status == constants.TASK_STATUS_ASSIGNED && task.MinerFid != nil {
+		if task.Status == constants.TASK_STATUS_ASSIGNED && task.MinerFid != "" {
 			//logs.GetLogger().Info("id: ", task.Id, " task:", task.Status, " miner:", *task.MinerFid)
 			result = append(result, task)
 		}
