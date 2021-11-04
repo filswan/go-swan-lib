@@ -24,7 +24,6 @@ const (
 
 	TASK_IS_PUBLIC = 1
 
-	DURATION       = 1051200
 	EPOCH_PER_HOUR = 120
 
 	PATH_TYPE_NOT_EXIST = 0 //this path not exists
@@ -47,4 +46,11 @@ const (
 	CSV_FILE_NAME_BY_AUTO   = "car.csv"
 
 	AuthorizationHeaderKey = "Authorization"
+
+	TASK_SOURCE_ID_DEFAULT      = 0
+	TASK_SOURCE_ID_SWAN         = 1
+	TASK_SOURCE_ID_SWAN_CLIENT  = 2
+	TASK_SOURCE_ID_SWAN_FS3     = 3
+	TASK_SOURCE_ID_SWAN_PAYMENT = 4
+	TASK_SOURCE_ID_OTHER        = 5
 )

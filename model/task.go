@@ -23,5 +23,6 @@ type Task struct {
 	BidMode           *int             `json:"bid_mode"`
 	FastRetrieval     *int             `json:"fast_retrieval"`
 	SourceId          int              `json:"source_id"`
+	Duration          int              `json:"duration"`
 	FastRetrievalBool bool
 }

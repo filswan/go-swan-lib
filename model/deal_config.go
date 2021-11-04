@@ -12,9 +12,10 @@ type DealConfig struct {
 	StartEpoch       int
 	MinerFid         string
 	SenderWallet     string
+	Duration         int
 }
 
-func GetDealConfig(verifiedDeal, fastRetrieval, skipConfirmation bool, minerPrice decimal.Decimal, startEpoch int, minerFid, senderWallet string) *DealConfig {
+func GetDealConfig(verifiedDeal, fastRetrieval, skipConfirmation bool, minerPrice decimal.Decimal, startEpoch, duration int, minerFid, senderWallet string) *DealConfig {
 	dealConfig := &DealConfig{
 		VerifiedDeal:     verifiedDeal,
 		FastRetrieval:    fastRetrieval,
@@ -23,6 +24,7 @@ func GetDealConfig(verifiedDeal, fastRetrieval, skipConfirmation bool, minerPric
 		StartEpoch:       startEpoch,
 		MinerFid:         minerFid,
 		SenderWallet:     senderWallet,
+		Duration:         duration,
 	}
 
 	return dealConfig

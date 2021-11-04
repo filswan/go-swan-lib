@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/filswan/go-swan-lib/client"
-	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/model"
 	"github.com/filswan/go-swan-lib/utils"
@@ -292,7 +291,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		Wallet:             dealConfig.SenderWallet,
 		Miner:              dealConfig.MinerFid,
 		EpochPrice:         "2",
-		MinBlocksDuration:  constants.DURATION,
+		MinBlocksDuration:  dealConfig.Duration,
 		ProviderCollateral: "0",
 		//DealStartEpoch:     carFile.StartEpoch,
 		FastRetrieval: dealConfig.FastRetrieval,
@@ -422,17 +421,18 @@ func LotusProposeOfflineDeal(carFile model.FileDesc, cost decimal.Decimal, piece
 
 	logs.GetLogger().Info("wallet:", dealConfig.SenderWallet)
 	logs.GetLogger().Info("miner:", dealConfig.MinerFid)
+	logs.GetLogger().Info("start epoch:", startEpoch)
 	logs.GetLogger().Info("price:", dealConfig.MinerPrice)
 	logs.GetLogger().Info("total cost:", costStr)
-	logs.GetLogger().Info("start epoch:", startEpoch)
 	logs.GetLogger().Info("fast-retrieval:", fastRetrieval)
 	logs.GetLogger().Info("verified-deal:", verifiedDeal)
+	logs.GetLogger().Info("duration:", dealConfig.Duration)
 
 	cmd := "lotus client deal --from " + dealConfig.SenderWallet
 	cmd = cmd + " --start-epoch " + strconv.Itoa(startEpoch)
 	cmd = cmd + " --fast-retrieval=" + fastRetrieval + " --verified-deal=" + verifiedDeal
 	cmd = cmd + " --manual-piece-cid " + carFile.PieceCid + " --manual-piece-size " + strconv.FormatInt(pieceSize, 10)
-	cmd = cmd + " " + carFile.DataCid + " " + dealConfig.MinerFid + " " + costStr + " " + strconv.Itoa(constants.DURATION)
+	cmd = cmd + " " + carFile.DataCid + " " + dealConfig.MinerFid + " " + costStr + " " + strconv.Itoa(dealConfig.Duration)
 	logs.GetLogger().Info(cmd)
 
 	if !dealConfig.SkipConfirmation {
