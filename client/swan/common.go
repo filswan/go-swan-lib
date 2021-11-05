@@ -5,10 +5,10 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/filswan/go-swan-lib/client"
-	"github.com/filswan/go-swan-lib/constants"
-	"github.com/filswan/go-swan-lib/logs"
-	"github.com/filswan/go-swan-lib/utils"
+	"swan-lib/client"
+	"swan-lib/constants"
+	"swan-lib/logs"
+	"swan-lib/utils"
 )
 
 type TokenAccessInfo struct {
