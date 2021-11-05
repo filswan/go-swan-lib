@@ -8,8 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"swan-lib/logs"
+
 	"github.com/dgrijalva/jwt-go"
-	"github.com/filswan/go-swan-lib/logs"
 
 	"github.com/shopspring/decimal"
 )

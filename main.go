@@ -1,11 +1,10 @@
 package main
 
 import (
-	"github.com/filswan/go-swan-lib/client"
-	leveldbapi "github.com/filswan/go-swan-lib/client"
-	"github.com/filswan/go-swan-lib/client/swan"
-	"github.com/filswan/go-swan-lib/logs"
-	"github.com/filswan/go-swan-lib/utils"
+	"swan-lib/client"
+	"swan-lib/client/swan"
+	"swan-lib/logs"
+	"swan-lib/utils"
 )
 
 func main() {
@@ -49,12 +48,12 @@ func testRandStr() {
 func testLevelDb() {
 	leveldbFile := "~/.swan/client/leveldbfile"
 	leveldbKey := "test"
-	err := leveldbapi.LevelDbPut(leveldbFile, leveldbKey, "hello")
+	err := client.LevelDbPut(leveldbFile, leveldbKey, "hello")
 	if err != nil {
 		logs.GetLogger().Error(err)
 	}
 
-	data, err := leveldbapi.LevelDbGet(leveldbFile, leveldbKey)
+	data, err := client.LevelDbGet(leveldbFile, leveldbKey)
 	if err != nil {
 		logs.GetLogger().Error(err)
 	}

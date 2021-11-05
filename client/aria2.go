@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/filswan/go-swan-lib/logs"
-
-	"github.com/filswan/go-swan-lib/utils"
+	"swan-lib/logs"
+	"swan-lib/utils"
 )
 
 const ADD_URI = "aria2.addUri"

@@ -3,7 +3,7 @@ package utils
 import (
 	"encoding/json"
 
-	"github.com/filswan/go-swan-lib/logs"
+	"swan-lib/logs"
 )
 
 func GetFieldFromJson(jsonStr string, fieldName string) interface{} {
