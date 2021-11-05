@@ -12,9 +12,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"swan-lib/constants"
-	"swan-lib/logs"
-	"swan-lib/utils"
+	"github.com/filswan/go-swan-lib/constants"
+	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/utils"
 )
 
 const HTTP_CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"

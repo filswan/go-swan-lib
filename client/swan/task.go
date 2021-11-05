@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"swan-lib/client"
-	"swan-lib/constants"
-	"swan-lib/logs"
-	"swan-lib/model"
-	"swan-lib/utils"
+	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/constants"
+	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/model"
+	"github.com/filswan/go-swan-lib/utils"
 )
 
 type SwanCreateTaskResponse struct {

@@ -1,8 +1,8 @@
 package client
 
 import (
-	"swan-lib/logs"
-	"swan-lib/utils"
+	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/utils"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )
