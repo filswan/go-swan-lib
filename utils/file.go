@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"swan-lib/constants"
-	"swan-lib/logs"
+	"github.com/filswan/go-swan-lib/constants"
+	"github.com/filswan/go-swan-lib/logs"
 )
 
 func IsFileExists(filePath, fileName string) bool {

@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"swan-lib/client"
-	"swan-lib/constants"
-	"swan-lib/logs"
-	"swan-lib/model"
+	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/constants"
+	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/model"
 )
 
 type MinerResponse struct {

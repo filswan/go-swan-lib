@@ -1,10 +1,10 @@
 package main
 
 import (
-	"swan-lib/client"
-	"swan-lib/client/swan"
-	"swan-lib/logs"
-	"swan-lib/utils"
+	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/swan"
+	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/utils"
 )
 
 func main() {

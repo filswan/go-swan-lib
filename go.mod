@@ -1,4 +1,4 @@
-module swan-lib
+module github.com/filswan/go-swan-lib
 
 go 1.16
 
