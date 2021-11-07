@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/constants"
@@ -58,7 +59,7 @@ func (swanClient *SwanClient) SwanCreateTask(task model.Task, csvFilePath string
 		return nil, err
 	}
 
-	if swanCreateTaskResponse.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(swanCreateTaskResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s,%s", swanCreateTaskResponse.Status, swanCreateTaskResponse.Message)
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -98,7 +99,7 @@ func (swanClient *SwanClient) SwanGetTaskByUuid(uuid string) (*GetTaskByUuidResu
 		return nil, err
 	}
 
-	if getTaskByUuidResult.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(getTaskByUuidResult.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s", getTaskByUuidResult.Status)
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -141,7 +142,7 @@ func (swanClient *SwanClient) SwanGetTasks(limit *int) (*GetTaskResult, error) {
 		return nil, err
 	}
 
-	if getTaskResult.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(getTaskResult.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s", getTaskResult.Status)
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -173,7 +174,7 @@ func (swanClient *SwanClient) SwanGetAssignedTasksByLimit(limit *int) (*GetTaskR
 		return nil, err
 	}
 
-	if getTaskResult.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(getTaskResult.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s", getTaskResult.Status)
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -255,7 +256,7 @@ func (swanClient *SwanClient) SwanGetOfflineDealsByTaskUuid(taskUuid string) (*G
 		return nil, err
 	}
 
-	if getOfflineDealsByTaskUuidResult.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(getOfflineDealsByTaskUuidResult.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s", getOfflineDealsByTaskUuidResult.Status)
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -282,7 +283,7 @@ func (swanClient *SwanClient) SwanUpdateTaskByUuid(taskUuid string, minerFid str
 	}
 
 	status := utils.GetFieldStrFromJson(response, "status")
-	if status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(status, constants.SWAN_API_STATUS_SUCCESS) {
 		message := utils.GetFieldStrFromJson(response, "message")
 		err := fmt.Errorf("access:%s failed, status:%s, message:%s", apiUrl, status, message)
 		logs.GetLogger().Error(err)
@@ -316,7 +317,7 @@ func (swanClient *SwanClient) SwanUpdateAssignedTask(taskUuid, status, csvFilePa
 		return nil, err
 	}
 
-	if swanCreateTaskResponse.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(swanCreateTaskResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s,%s", swanCreateTaskResponse.Status, swanCreateTaskResponse.Message)
 		logs.GetLogger().Error(err)
 		return nil, err

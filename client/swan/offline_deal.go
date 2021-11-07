@@ -54,7 +54,7 @@ func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, limit
 		return nil
 	}
 
-	if getOfflineDealResponse.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(getOfflineDealResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		logs.GetLogger().Error("Get offline deal with status ", status, " failed")
 		return nil
 	}
@@ -100,8 +100,8 @@ func (swanClient *SwanClient) SwanUpdateOfflineDealStatus(dealId int, status str
 		return false
 	}
 
-	if updateOfflineDealResponse.Status != constants.SWAN_API_STATUS_SUCCESS {
-		logs.GetLogger().Error("Update offline deal with status ", status, " failed.", updateOfflineDealResponse.Data.Message)
+	if !strings.EqualFold(updateOfflineDealResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
+		logs.GetLogger().Error("Update offline deal status to ", status, " failed.", updateOfflineDealResponse.Data.Message)
 		return false
 	}
 
