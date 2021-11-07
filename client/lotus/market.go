@@ -147,7 +147,11 @@ func (lotusMarket *LotusMarket) LotusGetDealOnChainStatusFromDeals(deals []Deal,
 		}
 
 		status := lotusClient.LotusGetDealStatus(deal.State)
-		logs.GetLogger().Info("deal: ", dealCid, " status:", status, " message:", deal.Message)
+		msg := fmt.Sprintf("deal:%s,%s", dealCid, status)
+		if deal.Message != "" {
+			msg = msg + "," + deal.Message
+		}
+		logs.GetLogger().Info(msg)
 		return status, deal.Message
 	}
 
