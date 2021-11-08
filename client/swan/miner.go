@@ -36,7 +36,7 @@ func (swanClient *SwanClient) GetMiner(minerFid string) (*MinerResponse, error) 
 		return nil, err
 	}
 
-	if minerResponse.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(minerResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("status:%s, message:%s", minerResponse.Status, minerResponse.Message)
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -93,7 +93,7 @@ func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner mode
 		return
 	}
 
-	if minerResponse.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(minerResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		logs.GetLogger().Error("Error: failed to update bid configuration.", minerResponse.Message)
 		return
 	}

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/client/swan"
 	"github.com/filswan/go-swan-lib/logs"
@@ -8,6 +10,11 @@ import (
 )
 
 func main() {
+	logs.GetLogger().Info(strings.EqualFold("abc", "ABC"))
+	logs.GetLogger().Info(strings.EqualFold("abc", "abc"))
+}
+
+func testRandStr() {
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
 	var optionChars = "abcdefghijklmnopqrstuvwxyz0123456789"
 	for i := 0; i < 100; i++ {
@@ -37,12 +44,8 @@ func testTask() {
 	utils.DecodeJwtToken("")
 }
 
-func testRandStr() {
+func testIpfs() {
 	client.IpfsUploadCarFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go-workspace/src/testGo/go.mod")
-
-	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	logs.GetLogger().Info(utils.RandStringRunes(letterRunes, 6))
 }
 
 func testLevelDb() {

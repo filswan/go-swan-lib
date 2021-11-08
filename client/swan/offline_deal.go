@@ -2,6 +2,7 @@ package swan
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -54,7 +55,7 @@ func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, limit
 		return nil
 	}
 
-	if getOfflineDealResponse.Status != constants.SWAN_API_STATUS_SUCCESS {
+	if !strings.EqualFold(getOfflineDealResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		logs.GetLogger().Error("Get offline deal with status ", status, " failed")
 		return nil
 	}
@@ -100,8 +101,9 @@ func (swanClient *SwanClient) SwanUpdateOfflineDealStatus(dealId int, status str
 		return false
 	}
 
-	if updateOfflineDealResponse.Status != constants.SWAN_API_STATUS_SUCCESS {
-		logs.GetLogger().Error("Update offline deal with status ", status, " failed.", updateOfflineDealResponse.Data.Message)
+	if !strings.EqualFold(updateOfflineDealResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
+		err := fmt.Errorf("deal(id=%d),failed to update offline deal status to %s,%s", dealId, status, updateOfflineDealResponse.Data.Message)
+		logs.GetLogger().Error(err)
 		return false
 	}
 
