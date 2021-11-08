@@ -37,20 +37,17 @@ func ExecOsCmdBase(cmdStr string, out2Screen bool, checkStdErr bool) (string, er
 	}
 
 	err := cmd.Run()
-	if err != nil {
-		logs.GetLogger().Error(cmdStr)
-		logs.GetLogger().Error(stderrBuf.String())
-		logs.GetLogger().Error(err)
-		return "", err
-	}
-
-	if checkStdErr {
+	if err != nil || len(stderrBuf.String()) != 0 {
+		errMsg := cmdStr
 		if len(stderrBuf.String()) != 0 {
-			outErr := errors.New(stderrBuf.String())
-			logs.GetLogger().Error(cmdStr)
-			logs.GetLogger().Error(outErr)
-			return "", outErr
+			errMsg = errMsg + "," + stderrBuf.String()
 		}
+		if err != nil {
+			errMsg = errMsg + "," + err.Error()
+		}
+		outErr := errors.New(errMsg)
+		logs.GetLogger().Error(outErr)
+		return "", outErr
 	}
 
 	return stdoutBuf.String(), nil
