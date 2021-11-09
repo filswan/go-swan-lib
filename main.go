@@ -1,17 +1,34 @@
 package main
 
 import (
-	"strings"
-
 	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/lotus"
 	"github.com/filswan/go-swan-lib/client/swan"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
 )
 
 func main() {
-	logs.GetLogger().Info(strings.EqualFold("abc", "ABC"))
-	logs.GetLogger().Info(strings.EqualFold("abc", "abc"))
+	testLotusClientQeryAsk()
+}
+
+func testLotusClientQeryAsk() {
+	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+
+	minerConf, err := lotusClient.LotusClientQueryAsk("t03354")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+
+	logs.GetLogger().Info(minerConf.Price)
+	logs.GetLogger().Info(minerConf.VerifiedPrice)
+	logs.GetLogger().Info(minerConf.MinPieceSize)
+	logs.GetLogger().Info(minerConf.MaxPieceSize)
 }
 
 func testRandStr() {
