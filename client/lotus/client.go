@@ -17,6 +17,8 @@ import (
 )
 
 const (
+	LOTUS_CLIENT_MINER_QUERY     = "Filecoin.ClientMinerQueryOffer"
+	LOTUS_CLIENT_QUERY_ASK       = "Filecoin.ClientQueryAsk"
 	LOTUS_CLIENT_GET_DEAL_INFO   = "Filecoin.ClientGetDealInfo"
 	LOTUS_CLIENT_GET_DEAL_STATUS = "Filecoin.ClientGetDealStatus"
 	LOTUS_CHAIN_HEAD             = "Filecoin.ChainHead"
@@ -62,6 +64,100 @@ func LotusGetClient(apiUrl, accessToken string) (*LotusClient, error) {
 	}
 
 	return lotusClient, nil
+}
+
+type ClientMinerQuery struct {
+	LotusJsonRpcResult
+	Result ClientMinerQueryResult `json:"result"`
+}
+
+type ClientMinerQueryResult struct {
+	MinerPeer ClientMinerQueryResultPeer
+}
+
+type ClientMinerQueryResultPeer struct {
+	Address string
+	ID      string
+}
+
+func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, error) {
+	var params []interface{}
+	params = append(params, minerFid)
+	params = append(params, nil)
+	params = append(params, nil)
+
+	jsonRpcParams := LotusJsonRpcParams{
+		JsonRpc: LOTUS_JSON_RPC_VERSION,
+		Method:  LOTUS_CLIENT_MINER_QUERY,
+		Params:  params,
+		Id:      LOTUS_JSON_RPC_ID,
+	}
+
+	response := client.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+
+	clientMinerQuery := &ClientMinerQuery{}
+	err := json.Unmarshal([]byte(response), clientMinerQuery)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return "", err
+	}
+
+	if clientMinerQuery.Error != nil {
+		err := fmt.Errorf("error, code:%d,message:%s", clientMinerQuery.Error.Code, clientMinerQuery.Error.Message)
+		logs.GetLogger().Error(err)
+		return "", err
+	}
+
+	minerPeerId := clientMinerQuery.Result.MinerPeer.ID
+	return minerPeerId, nil
+}
+
+type ClientQueryAsk struct {
+	LotusJsonRpcResult
+	Result ClientQueryAskResult `json:"result"`
+}
+
+type ClientQueryAskResult struct {
+	Price         string
+	VerifiedPrice string
+	MinPieceSize  int
+	MaxPieceSize  int
+}
+
+func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*ClientQueryAskResult, error) {
+	minerPeerId, err := lotusClient.LotusClientMinerQuery(minerFid)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	var params []interface{}
+	params = append(params, minerPeerId)
+	params = append(params, minerFid)
+
+	jsonRpcParams := LotusJsonRpcParams{
+		JsonRpc: LOTUS_JSON_RPC_VERSION,
+		Method:  LOTUS_CLIENT_QUERY_ASK,
+		Params:  params,
+		Id:      LOTUS_JSON_RPC_ID,
+	}
+
+	response := client.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+
+	clientQueryAsk := &ClientQueryAsk{}
+	err = json.Unmarshal([]byte(response), clientQueryAsk)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if clientQueryAsk.Error != nil {
+		err := fmt.Errorf("error, code:%d,message:%s", clientQueryAsk.Error.Code, clientQueryAsk.Error.Message)
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return &clientQueryAsk.Result, nil
 }
 
 func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
