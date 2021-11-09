@@ -406,6 +406,33 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
 	startEpoch := dealConfig.StartEpoch - relativeEpoch
 
+	logs.GetLogger().Info("wallet:", dealConfig.SenderWallet)
+	logs.GetLogger().Info("miner:", dealConfig.MinerFid)
+	logs.GetLogger().Info("start epoch:", startEpoch)
+	logs.GetLogger().Info("price:", dealConfig.MinerPrice)
+	logs.GetLogger().Info("total cost:", cost.String())
+	logs.GetLogger().Info("fast-retrieval:", dealConfig.FastRetrieval)
+	logs.GetLogger().Info("verified-deal:", dealConfig.VerifiedDeal)
+	logs.GetLogger().Info("duration:", dealConfig.Duration)
+
+	if !dealConfig.SkipConfirmation {
+		logs.GetLogger().Info("Do you confirm to submit the deal?")
+		logs.GetLogger().Info("Press Y/y to continue, other key to quit")
+		reader := bufio.NewReader(os.Stdin)
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return nil, nil, err
+		}
+
+		response = strings.TrimRight(response, "\n")
+
+		if !strings.EqualFold(response, "Y") {
+			logs.GetLogger().Info("Your input is ", response, ". Now give up submit the deal.")
+			return nil, nil, nil
+		}
+	}
+
 	var params []interface{}
 	clientStartDealParamData := ClientStartDealParamData{
 		TransferType: "string value",
@@ -427,11 +454,6 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		DealStartEpoch:    startEpoch,
 		FastRetrieval:     dealConfig.FastRetrieval,
 		VerifiedDeal:      dealConfig.VerifiedDeal,
-	}
-	if carFile.StartEpoch != nil {
-		clientStartDealParam.DealStartEpoch = *carFile.StartEpoch
-	} else {
-		clientStartDealParam.DealStartEpoch = 0
 	}
 
 	params = append(params, clientStartDealParam)
