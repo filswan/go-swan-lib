@@ -410,7 +410,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 	logs.GetLogger().Info("miner:", dealConfig.MinerFid)
 	logs.GetLogger().Info("start epoch:", startEpoch)
 	logs.GetLogger().Info("price:", dealConfig.MinerPrice)
-	logs.GetLogger().Info("total cost:", cost.String())
+	logs.GetLogger().Info("cost per epoch(filecoin):", cost.String())
 	logs.GetLogger().Info("fast-retrieval:", dealConfig.FastRetrieval)
 	logs.GetLogger().Info("verified-deal:", dealConfig.VerifiedDeal)
 	logs.GetLogger().Info("duration:", dealConfig.Duration)
