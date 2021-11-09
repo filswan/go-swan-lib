@@ -384,32 +384,55 @@ type ClientStartDealParamData struct {
 	Root         Cid
 	PieceCid     Cid
 	PieceSize    int
-	RawBlockSize int
 }
 
 type ClientStartDealParam struct {
-	Data               ClientStartDealParamData
-	Wallet             string
-	Miner              string
-	EpochPrice         string
-	MinBlocksDuration  int
-	ProviderCollateral string
-	DealStartEpoch     int
-	FastRetrieval      bool
-	VerifiedDeal       bool
+	Data              ClientStartDealParamData
+	Wallet            string
+	Miner             string
+	EpochPrice        string
+	MinBlocksDuration int
+	DealStartEpoch    int
+	FastRetrieval     bool
+	VerifiedDeal      bool
 }
 
 type ClientStartDeal struct {
 	LotusJsonRpcResult
-	Result *Cid `json:"result"`
+	Result Cid `json:"result"`
 }
 
-//"lotus client generate-car " + srcFilePath + " " + destCarFilePath
-func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig) (*string, error) {
-	//costFloat, _ := cost.Float64()
-	//costStr := fmt.Sprintf("%.18f", costFloat)
+func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {
+	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
+	startEpoch := dealConfig.StartEpoch - relativeEpoch
 
-	var params []interface{}
+	logs.GetLogger().Info("wallet:", dealConfig.SenderWallet)
+	logs.GetLogger().Info("miner:", dealConfig.MinerFid)
+	logs.GetLogger().Info("start epoch:", startEpoch)
+	logs.GetLogger().Info("price:", dealConfig.MinerPrice)
+	logs.GetLogger().Info("cost per epoch(filecoin):", cost.String())
+	logs.GetLogger().Info("fast-retrieval:", dealConfig.FastRetrieval)
+	logs.GetLogger().Info("verified-deal:", dealConfig.VerifiedDeal)
+	logs.GetLogger().Info("duration:", dealConfig.Duration)
+
+	if !dealConfig.SkipConfirmation {
+		logs.GetLogger().Info("Do you confirm to submit the deal?")
+		logs.GetLogger().Info("Press Y/y to continue, other key to quit")
+		reader := bufio.NewReader(os.Stdin)
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return nil, nil, err
+		}
+
+		response = strings.TrimRight(response, "\n")
+
+		if !strings.EqualFold(response, "Y") {
+			logs.GetLogger().Info("Your input is ", response, ". Now give up submit the deal.")
+			return nil, nil, nil
+		}
+	}
+
 	clientStartDealParamData := ClientStartDealParamData{
 		TransferType: "string value",
 		Root: Cid{
@@ -418,26 +441,21 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		PieceCid: Cid{
 			Cid: carFile.PieceCid,
 		},
-		PieceSize:    int(pieceSize),
-		RawBlockSize: 42,
-	}
-	clientStartDealParam := ClientStartDealParam{
-		Data:               clientStartDealParamData,
-		Wallet:             dealConfig.SenderWallet,
-		Miner:              dealConfig.MinerFid,
-		EpochPrice:         "2",
-		MinBlocksDuration:  dealConfig.Duration,
-		ProviderCollateral: "0",
-		//DealStartEpoch:     carFile.StartEpoch,
-		FastRetrieval: dealConfig.FastRetrieval,
-		VerifiedDeal:  dealConfig.VerifiedDeal,
-	}
-	if carFile.StartEpoch != nil {
-		clientStartDealParam.DealStartEpoch = *carFile.StartEpoch
-	} else {
-		clientStartDealParam.DealStartEpoch = 0
+		PieceSize: int(pieceSize),
 	}
 
+	clientStartDealParam := ClientStartDealParam{
+		Data:              clientStartDealParamData,
+		Wallet:            dealConfig.SenderWallet,
+		Miner:             dealConfig.MinerFid,
+		EpochPrice:        epochPrice.String(),
+		MinBlocksDuration: dealConfig.Duration,
+		DealStartEpoch:    startEpoch,
+		FastRetrieval:     dealConfig.FastRetrieval,
+		VerifiedDeal:      dealConfig.VerifiedDeal,
+	}
+
+	var params []interface{}
 	params = append(params, clientStartDealParam)
 
 	jsonRpcParams := LotusJsonRpcParams{
@@ -449,26 +467,26 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 
 	response := client.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
-		err := fmt.Errorf("failed to generate car, no response")
+		err := fmt.Errorf("failed to send deal for %s, no response", carFile.CarFileName)
 		logs.GetLogger().Error(err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	clientStartDeal := &ClientStartDeal{}
 	err := json.Unmarshal([]byte(response), clientStartDeal)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	if clientStartDeal.Error != nil {
 		err := fmt.Errorf("error, code:%d, message:%s", clientStartDeal.Error.Code, clientStartDeal.Error.Message)
 		logs.GetLogger().Error(err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	logs.GetLogger().Info("Cid:", clientStartDeal.Result.Cid)
-	return &clientStartDeal.Result.Cid, nil
+	return &clientStartDeal.Result.Cid, &startEpoch, nil
 }
 
 func LotusProposeOfflineDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {
