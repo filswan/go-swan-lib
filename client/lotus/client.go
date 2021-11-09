@@ -165,14 +165,12 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 	}
 
 	price, err := decimal.NewFromString(clientQueryAsk.Result.Price)
-	err = json.Unmarshal([]byte(response), clientQueryAsk)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	verifiedPrice, err := decimal.NewFromString(clientQueryAsk.Result.VerifiedPrice)
-	err = json.Unmarshal([]byte(response), clientQueryAsk)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -186,6 +184,19 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 	}
 
 	return minerConfig, nil
+}
+
+func (lotusClient *LotusClient) LotusGetMinerConfig(minerFid string) (*decimal.Decimal, *decimal.Decimal, *int, *int) {
+	minerConf, err := lotusClient.LotusClientQueryAsk(minerFid)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, nil, nil, nil
+	}
+
+	minerPrice := minerConf.Price.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
+	minerVerifiedPrice := minerConf.VerifiedPrice.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
+
+	return &minerPrice, &minerVerifiedPrice, &minerConf.MaxPieceSize, &minerConf.MinPieceSize
 }
 
 func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
@@ -458,19 +469,6 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 
 	logs.GetLogger().Info("Cid:", clientStartDeal.Result.Cid)
 	return &clientStartDeal.Result.Cid, nil
-}
-
-func (lotusClient *LotusClient) LotusGetMinerConfig(minerFid string) (*decimal.Decimal, *decimal.Decimal, *int, *int) {
-	minerConf, err := lotusClient.LotusClientQueryAsk(minerFid)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil, nil, nil, nil
-	}
-
-	minerPrice := minerConf.Price.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
-	minerVerifiedPrice := minerConf.VerifiedPrice.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
-
-	return &minerPrice, &minerVerifiedPrice, &minerConf.MaxPieceSize, &minerConf.MinPieceSize
 }
 
 func LotusProposeOfflineDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {
