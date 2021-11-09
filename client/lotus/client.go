@@ -433,7 +433,6 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		}
 	}
 
-	var params []interface{}
 	clientStartDealParamData := ClientStartDealParamData{
 		TransferType: "string value",
 		Root: Cid{
@@ -456,6 +455,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		VerifiedDeal:      dealConfig.VerifiedDeal,
 	}
 
+	var params []interface{}
 	params = append(params, clientStartDealParam)
 
 	jsonRpcParams := LotusJsonRpcParams{
