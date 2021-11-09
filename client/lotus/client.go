@@ -414,6 +414,9 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 	logs.GetLogger().Info("fast-retrieval:", dealConfig.FastRetrieval)
 	logs.GetLogger().Info("verified-deal:", dealConfig.VerifiedDeal)
 	logs.GetLogger().Info("duration:", dealConfig.Duration)
+	logs.GetLogger().Info("data CID:", carFile.DataCid)
+	logs.GetLogger().Info("piece CID:", carFile.PieceCid)
+	logs.GetLogger().Info("piece size:", pieceSize)
 
 	if !dealConfig.SkipConfirmation {
 		logs.GetLogger().Info("Do you confirm to submit the deal?")
@@ -485,7 +488,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		return nil, nil, err
 	}
 
-	logs.GetLogger().Info("Cid:", clientStartDeal.Result.Cid)
+	logs.GetLogger().Info("deal CID:", clientStartDeal.Result.Cid)
 	return &clientStartDeal.Result.Cid, &startEpoch, nil
 }
 
