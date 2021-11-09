@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/model"
 	"github.com/filswan/go-swan-lib/utils"
@@ -123,8 +124,14 @@ type ClientQueryAskResult struct {
 	MinPieceSize  int
 	MaxPieceSize  int
 }
+type MinerConfig struct {
+	Price         decimal.Decimal
+	VerifiedPrice decimal.Decimal
+	MinPieceSize  int
+	MaxPieceSize  int
+}
 
-func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*ClientQueryAskResult, error) {
+func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConfig, error) {
 	minerPeerId, err := lotusClient.LotusClientMinerQuery(minerFid)
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -157,7 +164,39 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*ClientQue
 		return nil, err
 	}
 
-	return &clientQueryAsk.Result, nil
+	price, err := decimal.NewFromString(clientQueryAsk.Result.Price)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	verifiedPrice, err := decimal.NewFromString(clientQueryAsk.Result.VerifiedPrice)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	minerConfig := &MinerConfig{
+		Price:         price,
+		VerifiedPrice: verifiedPrice,
+		MinPieceSize:  clientQueryAsk.Result.MinPieceSize,
+		MaxPieceSize:  clientQueryAsk.Result.MaxPieceSize,
+	}
+
+	return minerConfig, nil
+}
+
+func (lotusClient *LotusClient) LotusGetMinerConfig(minerFid string) (*decimal.Decimal, *decimal.Decimal, *int, *int) {
+	minerConfig, err := lotusClient.LotusClientQueryAsk(minerFid)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, nil, nil, nil
+	}
+
+	minerPrice := minerConfig.Price.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
+	minerVerifiedPrice := minerConfig.VerifiedPrice.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
+
+	return &minerPrice, &minerVerifiedPrice, &minerConfig.MaxPieceSize, &minerConfig.MinPieceSize
 }
 
 func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
@@ -430,82 +469,6 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 
 	logs.GetLogger().Info("Cid:", clientStartDeal.Result.Cid)
 	return &clientStartDeal.Result.Cid, nil
-}
-
-func LotusGetMinerConfig(minerFid string) (*decimal.Decimal, *decimal.Decimal, *string, *string) {
-	cmd := "lotus client query-ask " + minerFid
-	logs.GetLogger().Info(cmd)
-
-	result, err := client.ExecOsCmd(cmd, true)
-
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil, nil, nil, nil
-	}
-
-	if len(result) == 0 {
-		logs.GetLogger().Error("Failed to get info for:", minerFid)
-		return nil, nil, nil, nil
-	}
-
-	lines := strings.Split(result, "\n")
-	logs.GetLogger().Info(lines)
-
-	var verifiedPrice *decimal.Decimal
-	var price *decimal.Decimal
-	var maxPieceSize string
-	var minPieceSize string
-	for _, line := range lines {
-		if strings.Contains(line, "Verified Price per GiB:") {
-			verifiedPrice, err = utils.GetDecimalFromStr(line)
-			if err != nil {
-				logs.GetLogger().Error("Failed to get miner VerifiedPrice from lotus")
-			} else {
-				logs.GetLogger().Info("miner verifiedPrice: ", *verifiedPrice)
-			}
-
-			continue
-		}
-
-		if strings.Contains(line, "Price per GiB:") {
-			price, err = utils.GetDecimalFromStr(line)
-			if err != nil {
-				logs.GetLogger().Error("Failed to get miner Price from lotus")
-			} else {
-				logs.GetLogger().Info("miner Price: ", *price)
-			}
-
-			continue
-		}
-
-		if strings.Contains(line, "Max Piece size:") {
-			words := strings.Split(line, ":")
-			if len(words) == 2 {
-				maxPieceSize = strings.Trim(words[1], " ")
-				if maxPieceSize != "" {
-					logs.GetLogger().Info("miner MaxPieceSize: ", maxPieceSize)
-				} else {
-					logs.GetLogger().Error("Failed to get miner MaxPieceSize from lotus")
-				}
-			}
-			continue
-		}
-
-		if strings.Contains(line, "Min Piece size:") {
-			words := strings.Split(line, ":")
-			if len(words) == 2 {
-				minPieceSize = strings.Trim(words[1], " ")
-				if minPieceSize != "" {
-					logs.GetLogger().Info("miner MinPieceSize: ", minPieceSize)
-				} else {
-					logs.GetLogger().Error("Failed to get miner MinPieceSize from lotus")
-				}
-			}
-			continue
-		}
-	}
-
-	return price, verifiedPrice, &maxPieceSize, &minPieceSize
 }
 
 func LotusProposeOfflineDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {

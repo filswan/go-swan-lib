@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/client/lotus"
 	"github.com/filswan/go-swan-lib/client/swan"
@@ -13,13 +15,15 @@ func main() {
 }
 
 func testLotusClientQeryAsk() {
+	logs.GetLogger().Info(1e18 == math.Pow10(18))
+	minerFid := "t03354"
 	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
 	}
 
-	minerConf, err := lotusClient.LotusClientQueryAsk("t03354")
+	minerConf, err := lotusClient.LotusClientQueryAsk(minerFid)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
@@ -29,6 +33,12 @@ func testLotusClientQeryAsk() {
 	logs.GetLogger().Info(minerConf.VerifiedPrice)
 	logs.GetLogger().Info(minerConf.MinPieceSize)
 	logs.GetLogger().Info(minerConf.MaxPieceSize)
+
+	price, verifiedPrice, maxSize, minSize := lotusClient.LotusGetMinerConfig(minerFid)
+	logs.GetLogger().Info(*price)
+	logs.GetLogger().Info(*verifiedPrice)
+	logs.GetLogger().Info(*maxSize)
+	logs.GetLogger().Info(*minSize)
 }
 
 func testRandStr() {
