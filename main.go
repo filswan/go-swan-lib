@@ -31,11 +31,11 @@ func testLotusClientQeryAsk() {
 	logs.GetLogger().Info(minerConf.MinPieceSize)
 	logs.GetLogger().Info(minerConf.MaxPieceSize)
 
-	p, vp, maxS, minS := lotusClient.LotusGetMinerConfig(minerFid)
-	logs.GetLogger().Info(*p)
-	logs.GetLogger().Info(*vp)
-	logs.GetLogger().Info(*maxS)
-	logs.GetLogger().Info(*minS)
+	price, verifiedPrice, maxSize, minSize := lotusClient.LotusGetMinerConfig(minerFid)
+	logs.GetLogger().Info(*price)
+	logs.GetLogger().Info(*verifiedPrice)
+	logs.GetLogger().Info(*maxSize)
+	logs.GetLogger().Info(*minSize)
 }
 
 func testRandStr() {
