@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/client/lotus"
 	"github.com/filswan/go-swan-lib/client/swan"
@@ -13,6 +15,7 @@ func main() {
 }
 
 func testLotusClientQeryAsk() {
+	logs.GetLogger().Info(1e18 == math.Pow10(18))
 	minerFid := "t03354"
 	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "")
 	if err != nil {

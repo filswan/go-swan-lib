@@ -187,16 +187,16 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 }
 
 func (lotusClient *LotusClient) LotusGetMinerConfig(minerFid string) (*decimal.Decimal, *decimal.Decimal, *int, *int) {
-	minerConf, err := lotusClient.LotusClientQueryAsk(minerFid)
+	minerConfig, err := lotusClient.LotusClientQueryAsk(minerFid)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, nil, nil, nil
 	}
 
-	minerPrice := minerConf.Price.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
-	minerVerifiedPrice := minerConf.VerifiedPrice.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
+	minerPrice := minerConfig.Price.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
+	minerVerifiedPrice := minerConfig.VerifiedPrice.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
 
-	return &minerPrice, &minerVerifiedPrice, &minerConf.MaxPieceSize, &minerConf.MinPieceSize
+	return &minerPrice, &minerVerifiedPrice, &minerConfig.MaxPieceSize, &minerConfig.MinPieceSize
 }
 
 func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
