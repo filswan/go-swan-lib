@@ -11,7 +11,9 @@ import (
 )
 
 const (
-	LOTUS_MARKET_GET_ASK = "Filecoin.MarketGetAsk"
+	LOTUS_MARKET_GET_ASK               = "Filecoin.MarketGetAsk"
+	LOTUS_MARKET_IMPORT_DATA           = "Filecoin.MarketImportDealData"
+	LOTUS_MARKET_LIST_INCOMPLETE_DEALS = "Filecoin.MarketListIncompleteDeals"
 )
 
 type LotusMarket struct {
@@ -85,11 +87,6 @@ func (lotusMarket *LotusMarket) LotusMarketGetAsk() *MarketGetAskResultAsk {
 
 	return &marketGetAsk.Result.Ask
 }
-
-const (
-	LOTUS_MARKET_IMPORT_DATA           = "Filecoin.MarketImportDealData"
-	LOTUS_MARKET_LIST_INCOMPLETE_DEALS = "Filecoin.MarketListIncompleteDeals"
-)
 
 type DealCid struct {
 	DealCid string `json:"/"`
