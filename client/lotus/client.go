@@ -130,6 +130,7 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*ClientQue
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
+
 	var params []interface{}
 	params = append(params, minerPeerId)
 	params = append(params, minerFid)
