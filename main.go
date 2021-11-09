@@ -13,13 +13,14 @@ func main() {
 }
 
 func testLotusClientQeryAsk() {
+	minerFid := "t03354"
 	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
 	}
 
-	minerConf, err := lotusClient.LotusClientQueryAsk("t03354")
+	minerConf, err := lotusClient.LotusClientQueryAsk(minerFid)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
@@ -29,6 +30,12 @@ func testLotusClientQeryAsk() {
 	logs.GetLogger().Info(minerConf.VerifiedPrice)
 	logs.GetLogger().Info(minerConf.MinPieceSize)
 	logs.GetLogger().Info(minerConf.MaxPieceSize)
+
+	p, vp, maxS, minS := lotusClient.LotusGetMinerConfig(minerFid)
+	logs.GetLogger().Info(*p)
+	logs.GetLogger().Info(*vp)
+	logs.GetLogger().Info(*maxS)
+	logs.GetLogger().Info(*minS)
 }
 
 func testRandStr() {
