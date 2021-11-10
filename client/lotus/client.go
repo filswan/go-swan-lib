@@ -99,12 +99,13 @@ func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, 
 	clientMinerQuery := &ClientMinerQuery{}
 	err := json.Unmarshal([]byte(response), clientMinerQuery)
 	if err != nil {
+		err := fmt.Errorf("miner:%s,%s", minerFid, err.Error())
 		logs.GetLogger().Error(err)
 		return "", err
 	}
 
 	if clientMinerQuery.Error != nil {
-		err := fmt.Errorf("error, code:%d,message:%s", clientMinerQuery.Error.Code, clientMinerQuery.Error.Message)
+		err := fmt.Errorf("miner:%s,code:%d,message:%s", minerFid, clientMinerQuery.Error.Code, clientMinerQuery.Error.Message)
 		logs.GetLogger().Error(err)
 		return "", err
 	}
@@ -159,7 +160,7 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 	}
 
 	if clientQueryAsk.Error != nil {
-		err := fmt.Errorf("error, code:%d,message:%s", clientQueryAsk.Error.Code, clientQueryAsk.Error.Message)
+		err := fmt.Errorf("miner:%s,code:%d,message:%s", minerFid, clientQueryAsk.Error.Code, clientQueryAsk.Error.Message)
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
