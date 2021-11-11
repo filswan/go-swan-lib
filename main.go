@@ -37,6 +37,7 @@ func testGenerateUploadFile() {
 		filesizeInGigabyte, err := strconv.ParseInt(os.Args[4], 10, 64)
 		if err != nil {
 			logs.GetLogger().Error(err)
+			return
 		}
 
 		utils.GenerateFile(filepath, filename, filesizeInGigabyte)
@@ -50,9 +51,15 @@ func testGenerateUploadFile() {
 		apiUrl := os.Args[2]
 		filefullpath := os.Args[3]
 
+		if utils.IsFileExistsFullPath(filefullpath) {
+			logs.GetLogger().Error(filefullpath, " not exists")
+			return
+		}
+
 		carFileHash, err := client.IpfsUploadCarFileByWebApi(apiUrl, filefullpath)
 		if err != nil {
 			logs.GetLogger().Error(err)
+			return
 		}
 
 		logs.GetLogger().Info(*carFileHash)
