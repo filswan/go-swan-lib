@@ -44,7 +44,7 @@ func testGenerateUploadFile() {
 
 		logs.GetLogger().Info(*carFileHash)
 	default:
-		logs.GetLogger().Error("not supported subcommand")
+		logs.GetLogger().Error("only support subcommand:generate|upload")
 	}
 }
 
