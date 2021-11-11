@@ -259,6 +259,8 @@ func GenerateFile(filepath, filename string, filesize int64) {
 		return
 	}
 
+	logs.GetLogger().Info("start to generate file:", filefullpath, ", target size:", filesize, "GB")
+
 	filesizeInByte := filesize * 100000000
 	var i int64
 	for i = 0; i < filesizeInByte; i++ {
@@ -276,4 +278,6 @@ func GenerateFile(filepath, filename string, filesize int64) {
 		fmt.Println(err)
 		return
 	}
+
+	logs.GetLogger().Info("file:", filefullpath, " generated, size:", filesize, "GB")
 }
