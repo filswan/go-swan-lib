@@ -28,6 +28,10 @@ func testGenerateUploadFile() {
 	switch os.Args[1] {
 	case "generate":
 		logs.GetLogger().Println("usage:swan-lib generate filepath filename filesizeInGigabyte")
+		if len(os.Args) < 5 {
+			logs.GetLogger().Error("not enough arguments")
+			return
+		}
 		filepath := os.Args[2]
 		filename := os.Args[3]
 		filesizeInGigabyte, err := strconv.ParseInt(os.Args[4], 10, 64)
@@ -38,6 +42,11 @@ func testGenerateUploadFile() {
 		utils.GenerateFile(filepath, filename, filesizeInGigabyte)
 	case "upload":
 		logs.GetLogger().Println("usage:swan-lib upload apiUrl filefullpath")
+		if len(os.Args) < 4 {
+			logs.GetLogger().Error("not enough arguments")
+			return
+		}
+
 		apiUrl := os.Args[2]
 		filefullpath := os.Args[3]
 
