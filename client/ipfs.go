@@ -20,9 +20,9 @@ func IpfsUploadCarFileByWebApi(apiUrl, carFilePath string) (*string, error) {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
-	logs.GetLogger().Info(response)
+	//logs.GetLogger().Info(response)
 	carFileHash := utils.GetFieldStrFromJson(response, "Hash")
-	logs.GetLogger().Info(carFileHash)
+	//logs.GetLogger().Info(carFileHash)
 
 	if carFileHash == constants.EMPTY_STRING {
 		err := fmt.Errorf("cannot get file hash from response:%s", response)
