@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
@@ -250,18 +249,6 @@ func CreateDir(dir string) error {
 	}
 
 	return nil
-}
-
-func CallGenerateFile() {
-	fmt.Println("usage: generateFile filepath filename filesizeInGigabyte")
-	filepath := os.Args[1]
-	filename := os.Args[2]
-	filesizeInGigabyte, err := strconv.ParseInt(os.Args[3], 10, 64)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	GenerateFile(filepath, filename, filesizeInGigabyte)
 }
 
 func GenerateFile(filepath, filename string, filesize int64) {

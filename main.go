@@ -2,6 +2,8 @@ package main
 
 import (
 	"math"
+	"os"
+	"strconv"
 
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/client/lotus"
@@ -11,7 +13,39 @@ import (
 )
 
 func main() {
-	testLotusClientQeryAsk()
+	testGenerateUploadFile()
+}
+
+func testGenerateFile() {
+	utils.GenerateFile("./", "test.txt", 2)
+}
+
+func testGenerateUploadFile() {
+	switch os.Args[1] {
+	case "generate":
+		logs.GetLogger().Println("usage:swan-lib generate filepath filename filesizeInGigabyte")
+		filepath := os.Args[2]
+		filename := os.Args[3]
+		filesizeInGigabyte, err := strconv.ParseInt(os.Args[4], 10, 64)
+		if err != nil {
+			logs.GetLogger().Error(err)
+		}
+
+		utils.GenerateFile(filepath, filename, filesizeInGigabyte)
+	case "upload":
+		logs.GetLogger().Println("usage:swan-lib upload apiUrl filefullpath")
+		apiUrl := os.Args[2]
+		filefullpath := os.Args[3]
+
+		carFileHash, err := client.IpfsUploadCarFileByWebApi(apiUrl, filefullpath)
+		if err != nil {
+			logs.GetLogger().Error(err)
+		}
+
+		logs.GetLogger().Info(*carFileHash)
+	default:
+		logs.GetLogger().Error("not supported subcommand")
+	}
 }
 
 func testLotusClientQeryAsk() {
