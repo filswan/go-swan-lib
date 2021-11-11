@@ -21,6 +21,10 @@ func testGenerateFile() {
 }
 
 func testGenerateUploadFile() {
+	if len(os.Args) <= 1 {
+		logs.GetLogger().Error("please provide subcommand:generate|upload")
+		return
+	}
 	switch os.Args[1] {
 	case "generate":
 		logs.GetLogger().Println("usage:swan-lib generate filepath filename filesizeInGigabyte")
