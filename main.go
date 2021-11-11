@@ -51,7 +51,7 @@ func testGenerateUploadFile() {
 		apiUrl := os.Args[2]
 		filefullpath := os.Args[3]
 
-		if utils.IsFileExistsFullPath(filefullpath) {
+		if !utils.IsFileExistsFullPath(filefullpath) {
 			logs.GetLogger().Error(filefullpath, " not exists")
 			return
 		}
