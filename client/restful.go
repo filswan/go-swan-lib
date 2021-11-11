@@ -246,7 +246,7 @@ func HttpUploadFileByStream(uri, filefullpath string) (string, error) {
 	}
 
 	responseStr := string(responseBody)
-	logs.GetLogger().Info(responseStr)
+	//logs.GetLogger().Info(responseStr)
 	filesInfo := strings.Split(responseStr, "\n")
 	if len(filesInfo) < 4 {
 		err := fmt.Errorf("not enough files infor returned")
