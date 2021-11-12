@@ -2,6 +2,8 @@ package main
 
 import (
 	"math"
+	"os"
+	"strconv"
 
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/client/lotus"
@@ -11,7 +13,62 @@ import (
 )
 
 func main() {
-	testLotusClientQeryAsk()
+	swanClient, _ := swan.SwanGetClient("http://192.168.88.41:5002", "yr0wUW37PEm1ZUtes-0NVg", "878da9defc1841dd5ab9f4dcef1ec9af", "")
+	isV, _ := swanClient.CheckDatacap("t3u7pumush376xbytsgs5wabkhtadjzfydxxda2vzyasg7cimkcphswrq66j4dubbhwpnojqd3jie6ermpwvvq")
+	logs.GetLogger().Info(isV)
+	//testGenerateUploadFile()
+}
+
+func testGenerateFile() {
+	utils.GenerateFile("./", "test.txt", 2)
+}
+
+func testGenerateUploadFile() {
+	if len(os.Args) <= 1 {
+		logs.GetLogger().Error("please provide subcommand:generate|upload")
+		return
+	}
+	switch os.Args[1] {
+	case "generate":
+		logs.GetLogger().Println("usage:swan-lib generate filepath filename filesizeInGigabyte")
+		if len(os.Args) < 5 {
+			logs.GetLogger().Error("not enough arguments")
+			return
+		}
+		filepath := os.Args[2]
+		filename := os.Args[3]
+		filesizeInGigabyte, err := strconv.ParseInt(os.Args[4], 10, 64)
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return
+		}
+
+		utils.GenerateFile(filepath, filename, filesizeInGigabyte)
+	case "upload":
+		logs.GetLogger().Println("usage:swan-lib upload apiUrl filefullpath")
+		if len(os.Args) < 4 {
+			logs.GetLogger().Error("not enough arguments")
+			return
+		}
+
+		apiUrl := os.Args[2]
+		filefullpath := os.Args[3]
+
+		if !utils.IsFileExistsFullPath(filefullpath) {
+			logs.GetLogger().Error(filefullpath, " not exists")
+			return
+		}
+
+		carFileHash, err := client.IpfsUploadCarFileByWebApi(apiUrl, filefullpath)
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return
+		}
+
+		logs.GetLogger().Info(*carFileHash)
+	default:
+		logs.GetLogger().Error("only support subcommand:generate|upload")
+	}
 }
 
 func testLotusClientQeryAsk() {

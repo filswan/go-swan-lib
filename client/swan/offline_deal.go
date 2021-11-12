@@ -47,7 +47,7 @@ func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, limit
 	}
 
 	urlStr := swanClient.ApiUrl + "/offline_deals/" + minerFid + "?deal_status=" + status + "&limit=" + rowLimit + "&offset=0"
-	response := client.HttpGet(urlStr, swanClient.JwtToken, "")
+	response := client.HttpGet(urlStr, swanClient.SwanToken, "")
 	getOfflineDealResponse := GetOfflineDealResponse{}
 	err = json.Unmarshal([]byte(response), &getOfflineDealResponse)
 	if err != nil {
@@ -92,7 +92,7 @@ func (swanClient *SwanClient) SwanUpdateOfflineDealStatus(dealId int, status str
 		params.Add("file_size", statusInfo[2])
 	}
 
-	response := client.HttpPut(apiUrl, swanClient.JwtToken, strings.NewReader(params.Encode()))
+	response := client.HttpPut(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
 
 	updateOfflineDealResponse := &UpdateOfflineDealResponse{}
 	err = json.Unmarshal([]byte(response), updateOfflineDealResponse)

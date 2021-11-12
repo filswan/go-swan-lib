@@ -18,7 +18,7 @@ type TokenAccessInfo struct {
 
 type SwanClient struct {
 	ApiUrl      string
-	JwtToken    string
+	SwanToken   string
 	ApiKey      string
 	AccessToken string
 }
@@ -83,12 +83,12 @@ func (swanClient *SwanClient) SwanGetJwtToken() error {
 		return err
 	}
 
-	swanClient.JwtToken = jwtToken["jwt"].(string)
+	swanClient.SwanToken = jwtToken["jwt"].(string)
 
 	return nil
 }
 
-func SwanGetClient(apiUrl, apiKey, accessToken, jwtToken string) (*SwanClient, error) {
+func SwanGetClient(apiUrl, apiKey, accessToken, swanToken string) (*SwanClient, error) {
 	if len(apiUrl) == 0 {
 		err := fmt.Errorf("api url is required")
 		logs.GetLogger().Error(err)
@@ -99,10 +99,10 @@ func SwanGetClient(apiUrl, apiKey, accessToken, jwtToken string) (*SwanClient, e
 		ApiUrl:      apiUrl,
 		ApiKey:      apiKey,
 		AccessToken: accessToken,
-		JwtToken:    jwtToken,
+		SwanToken:   swanToken,
 	}
 
-	if jwtToken == constants.EMPTY_STRING {
+	if swanToken == constants.EMPTY_STRING {
 		err := swanClient.SwanGetJwtTokenUp3Times()
 		return swanClient, err
 	}
@@ -158,7 +158,7 @@ func (swanClient *SwanClient) SendHeartbeatRequest(minerFid string) error {
 	params := url.Values{}
 	params.Add("miner_id", minerFid)
 
-	response := client.HttpPost(apiUrl, swanClient.JwtToken, strings.NewReader(params.Encode()))
+	response := client.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
 
 	if strings.Contains(response, "fail") {
 		err := fmt.Errorf("failed to send heartbeat")
