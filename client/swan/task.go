@@ -46,7 +46,7 @@ func (swanClient *SwanClient) SwanCreateTask(task model.Task, csvFilePath string
 	params["source_id"] = strconv.Itoa(task.SourceId)
 	params["duration"] = strconv.Itoa(task.Duration)
 
-	response, err := client.HttpPostFile(apiUrl, swanClient.JwtToken, params, "file", csvFilePath)
+	response, err := client.HttpPostFile(apiUrl, swanClient.SwanToken, params, "file", csvFilePath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -82,7 +82,7 @@ type GetTaskByUuidResultData struct {
 func (swanClient *SwanClient) SwanGetTaskByUuid(uuid string) (*GetTaskByUuidResult, error) {
 	apiUrl := swanClient.ApiUrl + "/tasks/" + uuid
 	//logs.GetLogger().Info("Getting My swan tasks info")
-	response := client.HttpGet(apiUrl, swanClient.JwtToken, "")
+	response := client.HttpGet(apiUrl, swanClient.SwanToken, "")
 
 	if response == "" {
 		err := errors.New("failed to get tasks from swan")
@@ -125,7 +125,7 @@ func (swanClient *SwanClient) SwanGetTasks(limit *int) (*GetTaskResult, error) {
 		apiUrl = apiUrl + "?limit=" + strconv.Itoa(*limit)
 	}
 	//logs.GetLogger().Info("Getting My swan tasks info")
-	response := client.HttpGet(apiUrl, swanClient.JwtToken, "")
+	response := client.HttpGet(apiUrl, swanClient.SwanToken, "")
 
 	if response == "" {
 		err := errors.New("failed to get tasks from swan")
@@ -157,7 +157,7 @@ func (swanClient *SwanClient) SwanGetAssignedTasksByLimit(limit *int) (*GetTaskR
 		apiUrl = apiUrl + "&limit=" + strconv.Itoa(*limit)
 	}
 	//logs.GetLogger().Info("Getting My swan tasks info")
-	response := client.HttpGet(apiUrl, swanClient.JwtToken, "")
+	response := client.HttpGet(apiUrl, swanClient.SwanToken, "")
 
 	if response == "" {
 		err := errors.New("failed to get tasks from swan")
@@ -240,7 +240,7 @@ func (swanClient *SwanClient) SwanGetOfflineDealsByTaskUuid(taskUuid string) (*G
 	}
 	apiUrl := swanClient.ApiUrl + "/tasks/" + taskUuid
 	logs.GetLogger().Info("Getting My swan tasks info")
-	response := client.HttpGet(apiUrl, swanClient.JwtToken, "")
+	response := client.HttpGet(apiUrl, swanClient.SwanToken, "")
 
 	if response == "" {
 		err := errors.New("failed to get tasks from swan")
@@ -270,7 +270,7 @@ func (swanClient *SwanClient) SwanUpdateTaskByUuid(taskUuid string, minerFid str
 	params := map[string]string{}
 	params["miner_fid"] = minerFid
 
-	response, err := client.HttpPutFile(apiUrl, swanClient.JwtToken, params, "file", csvFilePath)
+	response, err := client.HttpPutFile(apiUrl, swanClient.SwanToken, params, "file", csvFilePath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
@@ -304,7 +304,7 @@ func (swanClient *SwanClient) SwanUpdateAssignedTask(taskUuid, status, csvFilePa
 	params := map[string]string{}
 	params["status"] = status
 
-	response, err := client.HttpPutFile(apiUrl, swanClient.JwtToken, params, "file", csvFilePath)
+	response, err := client.HttpPutFile(apiUrl, swanClient.SwanToken, params, "file", csvFilePath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err

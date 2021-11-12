@@ -55,4 +55,6 @@ const (
 	TASK_SOURCE_ID_OTHER        = 5
 
 	LOTUS_PRICE_MULTIPLE = 1e18
+
+	WALLET_NON_VERIFIED_MESSAGE = "Not a Verified Client"
 )

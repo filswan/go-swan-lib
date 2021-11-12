@@ -13,7 +13,10 @@ import (
 )
 
 func main() {
-	testGenerateUploadFile()
+	swanClient, _ := swan.SwanGetClient("http://192.168.88.41:5002", "yr0wUW37PEm1ZUtes-0NVg", "878da9defc1841dd5ab9f4dcef1ec9af", "")
+	isV, _ := swanClient.CheckDatacap("t3u7pumush376xbytsgs5wabkhtadjzfydxxda2vzyasg7cimkcphswrq66j4dubbhwpnojqd3jie6ermpwvvq")
+	logs.GetLogger().Info(isV)
+	//testGenerateUploadFile()
 }
 
 func testGenerateFile() {

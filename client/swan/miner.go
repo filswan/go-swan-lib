@@ -84,7 +84,7 @@ func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner mode
 	params.Add("start_epoch", strconv.Itoa(confMiner.StartEpoch))
 	params.Add("auto_bid_task_per_day", strconv.Itoa(confMiner.AutoBidTaskPerDay))
 
-	response := client.HttpPost(apiUrl, swanClient.JwtToken, strings.NewReader(params.Encode()))
+	response := client.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
 
 	minerResponse = &MinerResponse{}
 	err = json.Unmarshal([]byte(response), minerResponse)
