@@ -18,5 +18,5 @@ type FileDesc struct {
 	MinerFid   string
 	StartEpoch *int
 	SourceId   *int
-	Price      string
+	Cost       string
 }
