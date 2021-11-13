@@ -224,7 +224,7 @@ type GetOfflineDealsByTaskUuidResult struct {
 	Status string                              `json:"status"`
 }
 type GetOfflineDealsByTaskUuidResultData struct {
-	AverageBid       string              `json:"average_bid"`
+	//AverageBid       string              `json:"average_bid"`
 	BidCount         int                 `json:"bid_count"`
 	DealCompleteRate string              `json:"deal_complete_rate"`
 	Deal             []model.OfflineDeal `json:"deal"`
