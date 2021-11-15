@@ -373,8 +373,11 @@ func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) *string {
 
 	response := client.HttpPost(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
+		logs.GetLogger().Error("no response from:", lotusClient.ApiUrl)
 		return nil
 	}
+
+	logs.GetLogger().Info(response)
 
 	clientCalcCommP := &ClientCalcCommP{}
 	err := json.Unmarshal([]byte(response), clientCalcCommP)
@@ -383,7 +386,14 @@ func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) *string {
 		return nil
 	}
 
+	if clientCalcCommP.Error != nil {
+		err := fmt.Errorf("get piece CID failed for:%s, error code:%d, message:%s", filepath, clientCalcCommP.Error.Code, clientCalcCommP.Error.Message)
+		logs.GetLogger().Error(err)
+		return nil
+	}
+
 	if clientCalcCommP.Result == nil {
+		logs.GetLogger().Error("no result from:", lotusClient.ApiUrl)
 		return nil
 	}
 

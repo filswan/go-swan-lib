@@ -19,12 +19,14 @@ func main() {
 
 func testLotusClientDealInfo() {
 	logs.GetLogger().Info(1e18 == math.Pow10(18))
-	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "")
+	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.-Y4pF34RGOten6YXoau-sEMOWOEeiHwGh9u2lsl4cv8")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
 	}
-	lotusClient.LotusClientGetDealInfo("bafyreiexc7vhkgo3ep23ohwz54la6fmz3sydktquhy3fsvxae2hz5xb4xm")
+	pieceCid := lotusClient.LotusClientCalcCommP("/home/peware/swan-gh/gotest/test/sc/fs3test/volume_1637010138995215.car")
+	logs.GetLogger().Info(*pieceCid)
+	//lotusClient.LotusClientGetDealInfo("bafyreiexc7vhkgo3ep23ohwz54la6fmz3sydktquhy3fsvxae2hz5xb4xm")
 }
 
 func testDataCap() {
