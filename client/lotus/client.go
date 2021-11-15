@@ -81,6 +81,68 @@ type ClientMinerQueryResultPeer struct {
 	ID      string
 }
 
+type ClientDealInfo struct {
+	LotusJsonRpcResult
+	Result ClientDealResult `json:"result"`
+}
+
+type ClientDealResult struct {
+	Message    string
+	DealStages ClientDealStages
+}
+
+type ClientDealStages struct {
+	Stages []ClientDealStage
+}
+type ClientDealStage struct {
+	Name             string
+	Description      string
+	ExpectedDuration string
+	CreatedTime      string
+	UpdatedTime      string
+	Logs             []ClientDealStageLog
+}
+
+type ClientDealStageLog struct {
+	Log         string
+	UpdatedTime string
+}
+
+func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (string, error) {
+	var params []interface{}
+	cid := Cid{Cid: dealCid}
+	params = append(params, cid)
+
+	jsonRpcParams := LotusJsonRpcParams{
+		JsonRpc: LOTUS_JSON_RPC_VERSION,
+		Method:  LOTUS_CLIENT_GET_DEAL_INFO,
+		Params:  params,
+		Id:      LOTUS_JSON_RPC_ID,
+	}
+
+	response := client.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+
+	clientDealInfo := &ClientDealInfo{}
+	err := json.Unmarshal([]byte(response), clientDealInfo)
+	if err != nil {
+		err := fmt.Errorf("deal:%s,%s", dealCid, err.Error())
+		logs.GetLogger().Error(err)
+		return "", err
+	}
+
+	if clientDealInfo.Error != nil {
+		err := fmt.Errorf("deal:%s,code:%d,message:%s", dealCid, clientDealInfo.Error.Code, clientDealInfo.Error.Message)
+		logs.GetLogger().Error(err)
+		return "", err
+	}
+
+	fundsReserved := clientDealInfo.Result.DealStages.Stages[0].Logs[0].Log
+	fundsReservedNum := utils.GetNumStrFromStr(fundsReserved)
+	fundsReservedNum = strings.TrimSuffix(fundsReservedNum, ">")
+	logs.GetLogger().Info(fundsReserved, " ", fundsReservedNum)
+	return fundsReservedNum, nil
+}
+
 func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, error) {
 	var params []interface{}
 	params = append(params, minerFid)

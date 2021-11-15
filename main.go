@@ -13,10 +13,24 @@ import (
 )
 
 func main() {
+	testLotusClientDealInfo()
+	//testGenerateUploadFile()
+}
+
+func testLotusClientDealInfo() {
+	logs.GetLogger().Info(1e18 == math.Pow10(18))
+	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+	lotusClient.LotusClientGetDealInfo("bafyreiexc7vhkgo3ep23ohwz54la6fmz3sydktquhy3fsvxae2hz5xb4xm")
+}
+
+func testDataCap() {
 	swanClient, _ := swan.SwanGetClient("http://192.168.88.41:5002", "yr0wUW37PEm1ZUtes-0NVg", "878da9defc1841dd5ab9f4dcef1ec9af", "")
 	isV, _ := swanClient.CheckDatacap("t3u7pumush376xbytsgs5wabkhtadjzfydxxda2vzyasg7cimkcphswrq66j4dubbhwpnojqd3jie6ermpwvvq")
 	logs.GetLogger().Info(isV)
-	//testGenerateUploadFile()
 }
 
 func testGenerateFile() {
