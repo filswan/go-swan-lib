@@ -117,7 +117,7 @@ type ClientDealStageLog struct {
 }
 
 type ClientDealCost struct {
-	Cost                 string
+	CostComputed         string
 	ReserveClientFunds   string
 	DealProposalAccepted string
 }
@@ -159,7 +159,7 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientD
 	duration := decimal.NewFromInt(int64(clientDealInfo.Result.Duration))
 
 	clientDealCost := ClientDealCost{}
-	clientDealCost.Cost = pricePerEpoch.Mul(duration).String()
+	clientDealCost.CostComputed = pricePerEpoch.Mul(duration).String()
 
 	dealStages := clientDealInfo.Result.DealStages.Stages
 	for _, stage := range dealStages {
