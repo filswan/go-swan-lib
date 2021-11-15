@@ -80,16 +80,20 @@ func (swanClient *SwanClient) SwanUpdateOfflineDealStatus(dealId int, status str
 	params := url.Values{}
 	params.Add("status", status)
 
-	if len(statusInfo) > 0 {
+	if len(statusInfo) > 0 && len(statusInfo[0]) > 0 {
 		params.Add("note", statusInfo[0])
 	}
 
-	if len(statusInfo) > 1 {
+	if len(statusInfo) > 1 && len(statusInfo[1]) > 0 {
 		params.Add("file_path", statusInfo[1])
 	}
 
-	if len(statusInfo) > 2 {
+	if len(statusInfo) > 2 && len(statusInfo[2]) > 0 {
 		params.Add("file_size", statusInfo[2])
+	}
+
+	if len(statusInfo) > 3 && len(statusInfo[3]) > 0 {
+		params.Add("cost", statusInfo[3])
 	}
 
 	response := client.HttpPut(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
