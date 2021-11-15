@@ -27,6 +27,12 @@ const (
 	LOTUS_CLIENT_IMPORT          = "Filecoin.ClientImport"
 	LOTUS_CLIENT_GEN_CAR         = "Filecoin.ClientGenCar"
 	LOTUS_CLIENT_START_DEAL      = "Filecoin.ClientStartDeal"
+
+	STAGE_RESERVE_FUNDS     = "StorageDealReserveClientFunds"
+	STAGE_PROPOSAL_ACCEPTED = "StorageDealProposalAccepted"
+
+	FUNDS_RESERVED = "funds reserved"
+	FUNDS_RELEASED = "funds released"
 )
 
 type LotusClient struct {
@@ -87,8 +93,10 @@ type ClientDealInfo struct {
 }
 
 type ClientDealResult struct {
-	Message    string
-	DealStages ClientDealStages
+	Message       string
+	DealStages    ClientDealStages
+	PricePerEpoch string
+	Duration      int
 }
 
 type ClientDealStages struct {
@@ -108,7 +116,13 @@ type ClientDealStageLog struct {
 	UpdatedTime string
 }
 
-func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (string, error) {
+type ClientDealCost struct {
+	CostComputed         string
+	ReserveClientFunds   string
+	DealProposalAccepted string
+}
+
+func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientDealCost, error) {
 	var params []interface{}
 	cid := Cid{Cid: dealCid}
 	params = append(params, cid)
@@ -127,20 +141,48 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (string, 
 	if err != nil {
 		err := fmt.Errorf("deal:%s,%s", dealCid, err.Error())
 		logs.GetLogger().Error(err)
-		return "", err
+		return nil, err
 	}
 
 	if clientDealInfo.Error != nil {
 		err := fmt.Errorf("deal:%s,code:%d,message:%s", dealCid, clientDealInfo.Error.Code, clientDealInfo.Error.Message)
 		logs.GetLogger().Error(err)
-		return "", err
+		return nil, err
 	}
 
-	fundsReserved := clientDealInfo.Result.DealStages.Stages[0].Logs[0].Log
-	fundsReservedNum := utils.GetNumStrFromStr(fundsReserved)
-	fundsReservedNum = strings.TrimSuffix(fundsReservedNum, ">")
-	logs.GetLogger().Info(fundsReserved, " ", fundsReservedNum)
-	return fundsReservedNum, nil
+	pricePerEpoch, err := decimal.NewFromString(clientDealInfo.Result.PricePerEpoch)
+	if err != nil {
+		err := fmt.Errorf("deal:%s,%s", dealCid, err.Error())
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+	duration := decimal.NewFromInt(int64(clientDealInfo.Result.Duration))
+
+	clientDealCost := ClientDealCost{}
+	clientDealCost.CostComputed = pricePerEpoch.Mul(duration).String()
+
+	dealStages := clientDealInfo.Result.DealStages.Stages
+	for _, stage := range dealStages {
+		if strings.EqualFold(stage.Name, STAGE_RESERVE_FUNDS) {
+			for _, log := range stage.Logs {
+				if strings.Contains(log.Log, FUNDS_RESERVED) {
+					clientDealCost.ReserveClientFunds = utils.GetNumStrFromStr(log.Log)
+					clientDealCost.ReserveClientFunds = strings.TrimSuffix(clientDealCost.ReserveClientFunds, ">")
+				}
+			}
+		}
+		if strings.EqualFold(stage.Name, STAGE_PROPOSAL_ACCEPTED) {
+			for _, log := range stage.Logs {
+				if strings.Contains(log.Log, FUNDS_RELEASED) {
+					clientDealCost.DealProposalAccepted = utils.GetNumStrFromStr(log.Log)
+					clientDealCost.DealProposalAccepted = strings.TrimSuffix(clientDealCost.DealProposalAccepted, ">")
+				}
+			}
+		}
+	}
+
+	//logs.GetLogger().Info(clientDealCost)
+	return &clientDealCost, nil
 }
 
 func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, error) {
