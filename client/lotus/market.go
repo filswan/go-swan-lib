@@ -183,7 +183,7 @@ func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string)
 		logs.GetLogger().Error(err)
 		return err
 	}
-	logs.GetLogger().Info(response)
+	//logs.GetLogger().Info(response)
 
 	errorInfo := utils.GetFieldMapFromJson(response, "error")
 
@@ -191,14 +191,14 @@ func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string)
 		return nil
 	}
 
-	logs.GetLogger().Error(errorInfo)
+	//logs.GetLogger().Error(errorInfo)
 	errCode := int(errorInfo["code"].(float64))
 	errMsg := errorInfo["message"].(string)
 	err := fmt.Errorf("error code:%d message:%s", errCode, errMsg)
-	logs.GetLogger().Error(err)
+	//logs.GetLogger().Error(err)
 	if strings.Contains(response, "(need 'write')") {
 		logs.GetLogger().Error("please check your access token, it should have write access")
-		logs.GetLogger().Error(response)
+		logs.GetLogger().Error(err)
 	}
 	return err
 }
