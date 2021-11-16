@@ -24,8 +24,13 @@ func testLotusClientDealInfo() {
 		logs.GetLogger().Error(err)
 		return
 	}
-	pieceCid := lotusClient.LotusClientCalcCommP("/home/peware/swan-gh/gotest/test/sc/fs3test/volume_1637010138995215.car")
-	logs.GetLogger().Info(*pieceCid)
+	pieceCid := lotusClient.LotusClientCalcCommP("~/swan-gh/gotest/test/sc/fs3test/volume_1637010138995215.car")
+	if pieceCid != nil {
+		logs.GetLogger().Info(*pieceCid)
+	} else {
+		logs.GetLogger().Error("piece CID is nil")
+	}
+
 	//lotusClient.LotusClientGetDealInfo("bafyreiexc7vhkgo3ep23ohwz54la6fmz3sydktquhy3fsvxae2hz5xb4xm")
 }
 
