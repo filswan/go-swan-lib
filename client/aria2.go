@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/filswan/go-swan-lib/logs"
-	"github.com/filswan/go-swan-lib/utils"
 )
 
 const ADD_URI = "aria2.addUri"
@@ -125,10 +124,6 @@ func (aria2Client *Aria2Client) GenPayload4Download(method string, uri string, o
 
 func (aria2Client *Aria2Client) DownloadFile(uri string, outDir, outFilename string) *Aria2Download {
 	payload := aria2Client.GenPayload4Download(ADD_URI, uri, outDir, outFilename)
-
-	if utils.IsFileExists(outDir, outFilename) {
-		utils.RemoveFile(outDir, outFilename)
-	}
 
 	response := HttpPostNoToken(aria2Client.serverUrl, payload)
 	aria2Download := &Aria2Download{}
