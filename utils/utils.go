@@ -236,10 +236,10 @@ func CalculatePieceSize(fileSize int64) (int64, float64) {
 }
 
 func CalculateRealCost(sectorSizeBytes float64, pricePerGiB decimal.Decimal) decimal.Decimal {
-	logs.GetLogger().Info("sectorSizeBytes:", sectorSizeBytes, " pricePerGiB:", pricePerGiB)
+	//logs.GetLogger().Info("sectorSizeBytes:", sectorSizeBytes, " pricePerGiB:", pricePerGiB)
 	bytesPerGiB := decimal.NewFromInt(1024 * 1024 * 1024)
 	sectorSizeGiB := decimal.NewFromFloat(sectorSizeBytes).Div(bytesPerGiB)
 	realCost := sectorSizeGiB.Mul(pricePerGiB)
-	logs.GetLogger().Info("realCost:", realCost)
+	//logs.GetLogger().Info("realCost:", realCost)
 	return realCost
 }
