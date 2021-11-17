@@ -377,7 +377,7 @@ func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) *string {
 		return nil
 	}
 
-	logs.GetLogger().Info(response)
+	//logs.GetLogger().Info(response)
 
 	clientCalcCommP := &ClientCalcCommP{}
 	err := json.Unmarshal([]byte(response), clientCalcCommP)

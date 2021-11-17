@@ -226,8 +226,8 @@ func IsDirExists(dir string) bool {
 	}
 
 	if GetPathType(dir) != constants.PATH_TYPE_DIR {
-		err := fmt.Errorf("%s is not a directory", dir)
-		logs.GetLogger().Error(err)
+		//err := fmt.Errorf("%s is not a directory", dir)
+		//logs.GetLogger().Error(err)
 		return false
 	}
 
