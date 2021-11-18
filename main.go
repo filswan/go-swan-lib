@@ -13,7 +13,8 @@ import (
 )
 
 func main() {
-	utils.Convert2Title(" .  abc, bcd.  ..    test hello world.  ..  ")
+	result := utils.Convert2Title(" .  abc, bcd.  ..    test hello world.  ..  ")
+	logs.GetLogger().Info(result)
 	testLotusClientDealInfo()
 	//testGenerateUploadFile()
 }
