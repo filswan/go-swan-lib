@@ -144,15 +144,15 @@ func (lotusMarket *LotusMarket) LotusGetDealOnChainStatusFromDeals(deals []Deal,
 		}
 
 		status := lotusClient.LotusGetDealStatus(deal.State)
-		msg := fmt.Sprintf("deal:%s,%s", dealCid, status)
-		if deal.Message != "" {
-			msg = msg + "," + deal.Message
-		}
-		logs.GetLogger().Info(msg)
+		//msg := fmt.Sprintf("deal:%s,%s", dealCid, status)
+		//if deal.Message != "" {
+		//	msg = msg + "," + deal.Message
+		//}
+		//logs.GetLogger().Info(msg)
 		return status, deal.Message
 	}
 
-	logs.GetLogger().Error("Did not find your deal:", dealCid, " in the returned list.")
+	//logs.GetLogger().Error("Did not find your deal:", dealCid, " in the returned list.")
 
 	return "", ""
 }
