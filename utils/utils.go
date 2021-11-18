@@ -264,8 +264,8 @@ func Convert2Title(text string) string {
 		result = result + sentenceResult
 	}
 
-	result = strings.TrimSuffix(result, ".")
-	result = result + "."
-	logs.GetLogger().Info(result)
+	//result = strings.TrimSuffix(result, ".")
+	//result = result + "."
+	//logs.GetLogger().Info(result)
 	return result
 }
