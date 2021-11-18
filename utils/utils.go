@@ -243,3 +243,16 @@ func CalculateRealCost(sectorSizeBytes float64, pricePerGiB decimal.Decimal) dec
 	//logs.GetLogger().Info("realCost:", realCost)
 	return realCost
 }
+
+func Convert2Title(text string) string {
+	result := ""
+	sentences := strings.Split(text, ".")
+	for _, sentence := range sentences {
+		result = result + ". " + strings.Title(sentence)
+	}
+
+	result = strings.TrimPrefix(result, ". ")
+	result = strings.TrimSuffix(result, " ")
+	logs.GetLogger().Info(result)
+	return result
+}

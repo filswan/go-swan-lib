@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	testLotusClientDealInfo()
+	utils.Convert2Title("abc.bcd.")
 	//testGenerateUploadFile()
 }
 
