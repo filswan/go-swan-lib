@@ -248,11 +248,24 @@ func Convert2Title(text string) string {
 	result := ""
 	sentences := strings.Split(text, ".")
 	for _, sentence := range sentences {
-		result = result + ". " + strings.Title(sentence)
+		words := strings.Fields(sentence)
+		sentenceResult := ""
+		for _, word := range words {
+			if sentenceResult == "" {
+				sentenceResult = strings.Title(word)
+				continue
+			}
+			sentenceResult = sentenceResult + " " + word
+		}
+
+		if result != "" && sentenceResult != "" {
+			result = result + ". "
+		}
+		result = result + sentenceResult
 	}
 
-	result = strings.TrimPrefix(result, ". ")
-	result = strings.TrimSuffix(result, " ")
+	result = strings.TrimSuffix(result, ".")
+	result = result + "."
 	logs.GetLogger().Info(result)
 	return result
 }
