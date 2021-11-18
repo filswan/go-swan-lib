@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	utils.Change2Title("abc.bcd.")
+	utils.Convert2Title("abc.bcd.")
 	//testGenerateUploadFile()
 }
 

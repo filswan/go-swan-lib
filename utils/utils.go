@@ -244,7 +244,7 @@ func CalculateRealCost(sectorSizeBytes float64, pricePerGiB decimal.Decimal) dec
 	return realCost
 }
 
-func Change2Title(text string) string {
+func Convert2Title(text string) string {
 	result := ""
 	sentences := strings.Split(text, ".")
 	for _, sentence := range sentences {
