@@ -93,6 +93,7 @@ type ClientDealInfo struct {
 }
 
 type ClientDealResult struct {
+	State         int
 	Message       string
 	DealStages    ClientDealStages
 	PricePerEpoch string
@@ -116,13 +117,14 @@ type ClientDealStageLog struct {
 	UpdatedTime string
 }
 
-type ClientDealCost struct {
+type ClientDealCostStatus struct {
 	CostComputed         string
 	ReserveClientFunds   string
 	DealProposalAccepted string
+	Status               string
 }
 
-func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientDealCost, error) {
+func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientDealCostStatus, error) {
 	var params []interface{}
 	cid := Cid{Cid: dealCid}
 	params = append(params, cid)
@@ -158,31 +160,33 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientD
 	}
 	duration := decimal.NewFromInt(int64(clientDealInfo.Result.Duration))
 
-	clientDealCost := ClientDealCost{}
-	clientDealCost.CostComputed = pricePerEpoch.Mul(duration).String()
+	clientDealCostStatus := ClientDealCostStatus{}
+	clientDealCostStatus.CostComputed = pricePerEpoch.Mul(duration).String()
 
 	dealStages := clientDealInfo.Result.DealStages.Stages
 	for _, stage := range dealStages {
 		if strings.EqualFold(stage.Name, STAGE_RESERVE_FUNDS) {
 			for _, log := range stage.Logs {
 				if strings.Contains(log.Log, FUNDS_RESERVED) {
-					clientDealCost.ReserveClientFunds = utils.GetNumStrFromStr(log.Log)
-					clientDealCost.ReserveClientFunds = strings.TrimSuffix(clientDealCost.ReserveClientFunds, ">")
+					clientDealCostStatus.ReserveClientFunds = utils.GetNumStrFromStr(log.Log)
+					clientDealCostStatus.ReserveClientFunds = strings.TrimSuffix(clientDealCostStatus.ReserveClientFunds, ">")
 				}
 			}
 		}
 		if strings.EqualFold(stage.Name, STAGE_PROPOSAL_ACCEPTED) {
 			for _, log := range stage.Logs {
 				if strings.Contains(log.Log, FUNDS_RELEASED) {
-					clientDealCost.DealProposalAccepted = utils.GetNumStrFromStr(log.Log)
-					clientDealCost.DealProposalAccepted = strings.TrimSuffix(clientDealCost.DealProposalAccepted, ">")
+					clientDealCostStatus.DealProposalAccepted = utils.GetNumStrFromStr(log.Log)
+					clientDealCostStatus.DealProposalAccepted = strings.TrimSuffix(clientDealCostStatus.DealProposalAccepted, ">")
 				}
 			}
 		}
 	}
 
+	clientDealCostStatus.Status = lotusClient.LotusGetDealStatus(clientDealInfo.Result.State)
+
 	//logs.GetLogger().Info(clientDealCost)
-	return &clientDealCost, nil
+	return &clientDealCostStatus, nil
 }
 
 func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, error) {
