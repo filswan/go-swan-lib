@@ -57,4 +57,9 @@ const (
 	LOTUS_PRICE_MULTIPLE = 1e18
 
 	WALLET_NON_VERIFIED_MESSAGE = "Not a Verified Client"
+
+	LOTUS_AUTH_READ  = "read"
+	LOTUS_AUTH_WRITE = "write"
+	LOTUS_AUTH_SIGN  = "sign"
+	LOTUS_AUTH_ADMIN = "admin"
 )
