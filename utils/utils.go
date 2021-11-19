@@ -265,3 +265,28 @@ func Convert2Title(text string) string {
 	//logs.GetLogger().Info(result)
 	return result
 }
+
+func FirstLetter2Upper(text string) string {
+	text = strings.Trim(text, " ")
+	if text == "" {
+		return text
+	}
+	firstChar := byte(unicode.ToUpper(rune(text[0])))
+	return string(firstChar) + text[1:]
+}
+
+func SearchFloat64FromStr(source string) *float64 {
+	re := regexp.MustCompile("[0-9]+.?[0-9]*")
+	words := re.FindAllString(source, -1)
+	if len(words) > 0 {
+		numStr := strings.Trim(words[0], " ")
+		result, err := strconv.ParseFloat(numStr, 64)
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return nil
+		}
+		return &result
+	}
+
+	return nil
+}

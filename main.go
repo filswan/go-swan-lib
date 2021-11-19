@@ -8,18 +8,41 @@ import (
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/client/lotus"
 	"github.com/filswan/go-swan-lib/client/swan"
+	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
 )
 
 func main() {
+	testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
+}
+
+func testLotusAuthVerify(apiUrl, token string) {
+	auths, err := lotus.LotusAuthVerify(apiUrl, token)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+	logs.GetLogger().Info(auths)
+
+	isMatch, err := lotus.LotusCheckAuth(apiUrl, token, constants.LOTUS_AUTH_WRITE)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+	logs.GetLogger().Info(isMatch)
+}
+
+func test2Title() {
 	result := utils.Convert2Title("StorageDealStaged,funds computed:823728125000000,funds reserved:823728125000000,funds released:823728125000000")
 	logs.GetLogger().Info(result)
 	result = utils.Convert2Title("abc,    def.    txt    ddd ....a. . . ....")
 	logs.GetLogger().Info(result)
+	result = utils.FirstLetter2Upper("StorageDealStaged,funds computed:823728125000000,funds reserved:823728125000000,funds released:823728125000000")
+	logs.GetLogger().Info(result)
+	result = utils.FirstLetter2Upper("abc,    def.    txt    ddd ....a. . . ....")
+	logs.GetLogger().Info(result)
 	logs.GetLogger().Info("a"[1:])
-	testLotusClientDealInfo()
-	//testGenerateUploadFile()
 }
 
 func testLotusClientDealInfo() {
