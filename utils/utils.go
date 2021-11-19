@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/filswan/go-swan-lib/logs"
 
@@ -246,26 +247,21 @@ func CalculateRealCost(sectorSizeBytes float64, pricePerGiB decimal.Decimal) dec
 
 func Convert2Title(text string) string {
 	result := ""
-	sentences := strings.Split(text, ".")
+	separator := "."
+	sentences := strings.Split(text, separator)
 	for _, sentence := range sentences {
-		words := strings.Fields(sentence)
-		sentenceResult := ""
-		for _, word := range words {
-			if sentenceResult == "" {
-				sentenceResult = strings.Title(word)
-				continue
-			}
-			sentenceResult = sentenceResult + " " + word
+		sentence = strings.Trim(sentence, " ")
+		if len(sentence) == 0 {
+			continue
 		}
-
-		if result != "" && sentenceResult != "" {
-			result = result + ". "
+		firstChar := byte(unicode.ToUpper(rune(sentence[0])))
+		if result != "" {
+			result = result + separator + " "
 		}
-		result = result + sentenceResult
+		result = result + string(firstChar) + sentence[1:]
 	}
 
-	//result = strings.TrimSuffix(result, ".")
-	//result = result + "."
+	result = result + "."
 	//logs.GetLogger().Info(result)
 	return result
 }
