@@ -114,9 +114,9 @@ func (lotusMarket *LotusMarket) LotusGetDeals() []Deal {
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	logs.GetLogger().Info("Get deal list from ", lotusMarket.ApiUrl)
+	//logs.GetLogger().Info("Get deal list from ", lotusMarket.ApiUrl)
 	response := client.HttpGet(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
-	logs.GetLogger().Info("Got deal list from ", lotusMarket.ApiUrl)
+	//logs.GetLogger().Info("Got deal list from ", lotusMarket.ApiUrl)
 	deals := &MarketListIncompleteDeals{}
 	err := json.Unmarshal([]byte(response), deals)
 	if err != nil {
