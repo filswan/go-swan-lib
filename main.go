@@ -13,8 +13,10 @@ import (
 )
 
 func main() {
-	result := utils.Convert2Title(" .  abc, bcd.  ..    test hello world.  ..  ")
+	result := utils.Convert2Title("StorageDealStaged,funds computed:823728125000000,funds reserved:823728125000000,funds released:823728125000000")
+	result = utils.Convert2Title("abc,    def.    txt    ddd ....a")
 	logs.GetLogger().Info(result)
+	logs.GetLogger().Info("a"[1:])
 	testLotusClientDealInfo()
 	//testGenerateUploadFile()
 }
