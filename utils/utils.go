@@ -250,10 +250,10 @@ func Convert2Title(text string) string {
 	separator := "."
 	sentences := strings.Split(text, separator)
 	for _, sentence := range sentences {
+		sentence = strings.Trim(sentence, " ")
 		if len(sentence) == 0 {
 			continue
 		}
-		sentence = strings.Trim(sentence, " ")
 		firstChar := byte(unicode.ToUpper(rune(sentence[0])))
 		if result != "" {
 			result = result + separator + " "
