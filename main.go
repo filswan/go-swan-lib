@@ -14,7 +14,9 @@ import (
 )
 
 func main() {
-	testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
+	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
+	randVal := utils.GetRandInRange(1, 1000)
+	logs.GetLogger().Info(randVal)
 }
 
 func testLotusAuthVerify(apiUrl, token string) {
@@ -41,6 +43,8 @@ func test2Title() {
 	result = utils.FirstLetter2Upper("StorageDealStaged,funds computed:823728125000000,funds reserved:823728125000000,funds released:823728125000000")
 	logs.GetLogger().Info(result)
 	result = utils.FirstLetter2Upper("abc,    def.    txt    ddd ....a. . . ....")
+	logs.GetLogger().Info(result)
+	result = utils.FirstLetter2Upper("deal already imported,StorageDealPublish")
 	logs.GetLogger().Info(result)
 	logs.GetLogger().Info("a"[1:])
 }
