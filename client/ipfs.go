@@ -1,11 +1,15 @@
 package client
 
 import (
+	"context"
 	"fmt"
+	"os"
 
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
+	files "github.com/ipfs/go-ipfs-files"
+	ipfsClient "github.com/ipfs/go-ipfs-http-client"
 )
 
 func IpfsUploadCarFileByWebApi(apiUrl, carFilePath string) (*string, error) {
@@ -31,4 +35,37 @@ func IpfsUploadCarFileByWebApi(apiUrl, carFilePath string) (*string, error) {
 	}
 
 	return &carFileHash, nil
+}
+
+func IpfsCreateCarFile(apiUrl, srcFilesPath string) error {
+	/*
+		api, err := ipfsClient.NewPathApi(apiUrl)
+		if err != nil {
+			return err
+		}*/
+	api, err := ipfsClient.NewLocalApi()
+	if err != nil {
+		return err
+	}
+
+	stat, err := os.Stat(srcFilesPath)
+	if err != nil {
+		return err
+	}
+	// This walks the filesystem at /tmp/example/ and create a list of the files / directories we have.
+	node, err := files.NewSerialFile(srcFilesPath, true, stat)
+	if err != nil {
+		return err
+	}
+
+	// Add the files / directory to IPFS
+	path, err := api.Unixfs().Add(context.Background(), node)
+	if err != nil {
+		return err
+	}
+
+	// Output the resulting CID
+	fmt.Println(path.Root().String())
+
+	return nil
 }
