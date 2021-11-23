@@ -567,7 +567,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 
 	var params []interface{}
 	params = append(params, clientStartDealParam)
-	logs.GetLogger().Info(params...)
+	logs.GetLogger().Info(utils.ToJson(params))
 
 	jsonRpcParams := LotusJsonRpcParams{
 		JsonRpc: LOTUS_JSON_RPC_VERSION,
