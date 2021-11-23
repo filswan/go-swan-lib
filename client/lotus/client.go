@@ -525,18 +525,6 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
 	startEpoch := dealConfig.StartEpoch - relativeEpoch
 
-	logs.GetLogger().Info("wallet:", dealConfig.SenderWallet)
-	logs.GetLogger().Info("miner:", dealConfig.MinerFid)
-	logs.GetLogger().Info("start epoch:", startEpoch)
-	logs.GetLogger().Info("price:", dealConfig.MinerPrice)
-	logs.GetLogger().Info("cost per epoch(filecoin):", cost.String())
-	logs.GetLogger().Info("fast-retrieval:", dealConfig.FastRetrieval)
-	logs.GetLogger().Info("verified-deal:", dealConfig.VerifiedDeal)
-	logs.GetLogger().Info("duration:", dealConfig.Duration)
-	logs.GetLogger().Info("data CID:", carFile.DataCid)
-	logs.GetLogger().Info("piece CID:", carFile.PieceCid)
-	logs.GetLogger().Info("piece size:", pieceSize)
-
 	if !dealConfig.SkipConfirmation {
 		logs.GetLogger().Info("Do you confirm to submit the deal?")
 		logs.GetLogger().Info("Press Y/y to continue, other key to quit")
@@ -570,7 +558,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		Data:              clientStartDealParamData,
 		Wallet:            dealConfig.SenderWallet,
 		Miner:             dealConfig.MinerFid,
-		EpochPrice:        epochPrice.String(),
+		EpochPrice:        epochPrice.BigInt().String(),
 		MinBlocksDuration: dealConfig.Duration,
 		DealStartEpoch:    startEpoch,
 		FastRetrieval:     dealConfig.FastRetrieval,
@@ -579,6 +567,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 
 	var params []interface{}
 	params = append(params, clientStartDealParam)
+	logs.GetLogger().Info(params...)
 
 	jsonRpcParams := LotusJsonRpcParams{
 		JsonRpc: LOTUS_JSON_RPC_VERSION,
