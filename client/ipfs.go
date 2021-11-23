@@ -38,11 +38,10 @@ func IpfsUploadCarFileByWebApi(apiUrl, carFilePath string) (*string, error) {
 }
 
 func IpfsCreateCarFile(apiUrl, srcFilesPath string) error {
-	/*
-		api, err := ipfsClient.NewPathApi(apiUrl)
-		if err != nil {
-			return err
-		}*/
+	/*api, err := ipfsClient.NewPathApi(apiUrl)
+	if err != nil {
+		return err
+	}*/
 	api, err := ipfsClient.NewLocalApi()
 	if err != nil {
 		return err
@@ -64,8 +63,9 @@ func IpfsCreateCarFile(apiUrl, srcFilesPath string) error {
 		return err
 	}
 
+	logs.GetLogger().Info("path CID:", path.Cid())
 	// Output the resulting CID
-	fmt.Println(path.Root().String())
+	logs.GetLogger().Info("result CID:", path.Root().String())
 
 	return nil
 }
