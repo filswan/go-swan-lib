@@ -17,7 +17,7 @@ func main() {
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
 	randVal := utils.GetRandInRange(1, 1000)
 	logs.GetLogger().Info(randVal)
-	err := client.IpfsCreateCarFile("http://192.168.88.41:5001", "~/swan_dora/srcFiles")
+	err := client.IpfsCreateCarFile("http://192.168.88.41:5001", "/home/peware/swan_dora/srcFiles")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
