@@ -1,10 +1,11 @@
-package client
+package ipfs
 
 import (
 	"context"
 	"fmt"
 	"os"
 
+	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
@@ -13,7 +14,7 @@ import (
 )
 
 func IpfsUploadCarFileByWebApi(apiUrl, carFilePath string) (*string, error) {
-	response, err := HttpUploadFileByStream(apiUrl, carFilePath)
+	response, err := client.HttpUploadFileByStream(apiUrl, carFilePath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
