@@ -15,6 +15,11 @@ import (
 )
 
 func main() {
+	price := utils.ConvertPrice2AttoFil("0.0001 FIL")
+	logs.GetLogger().Info(price)
+	price = utils.ConvertPrice2AttoFil("1 fil")
+	logs.GetLogger().Info(price)
+
 	cids := []string{
 		"QmaLTsfGTynrnbFeG5CmPRqdbYa1E4jbD9GjzkXXugTPfx",
 		"QmdTf7TiBpYYv6sf7E9nbQdjLRDZLBvhSNwpGFf1B6zFtz",

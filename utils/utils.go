@@ -9,6 +9,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 
 	"github.com/dgrijalva/jwt-go"
@@ -299,7 +300,45 @@ func ConvertPrice2AttoFil(price string) string {
 	if len(fields) < 2 {
 		return fields[0]
 	}
-	priceAttoFil := GetInt64FromStr(fields[0])
+	priceAttoFil, err := decimal.NewFromString(fields[0])
+	if err != nil {
+		logs.GetLogger().Error()
+		return ""
+	}
+	unit := strings.ToUpper(fields[1])
+	switch unit {
+	case "FIL":
+		priceAttoFil = priceAttoFil.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
+	case "MILLIFIL":
+		priceAttoFil = priceAttoFil.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E15))
+	case "MICROFIL":
+		priceAttoFil = priceAttoFil.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E12))
+	case "NANOFIL":
+		priceAttoFil = priceAttoFil.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E9))
+	case "PICOFIL":
+		priceAttoFil = priceAttoFil.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E6))
+	case "FEMTOFIL":
+		priceAttoFil = priceAttoFil.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E3))
+	case "ATTOFIL":
+		priceAttoFil = priceAttoFil
+	default:
+		priceAttoFil = priceAttoFil
+	}
+
+	priceAttoFilStr := priceAttoFil.BigInt().String()
+
+	return priceAttoFilStr
+}
+
+func GetPriceFormat(price string) string {
+	fields := strings.Fields(price)
+	if len(fields) < 1 {
+		return ""
+	}
+	if len(fields) < 2 {
+		return fields[0]
+	}
+	priceAttoFil := int64(1)
 	unit := strings.ToUpper(fields[1])
 	switch unit {
 	case "FIL":
@@ -320,5 +359,8 @@ func ConvertPrice2AttoFil(price string) string {
 		priceAttoFil = priceAttoFil
 	}
 
-	return strconv.FormatInt(priceAttoFil, 10)
+	result := strconv.FormatInt(priceAttoFil, 10)
+	result = strings.TrimPrefix(result, "1")
+
+	return result
 }
