@@ -1,11 +1,10 @@
-package ipfs
+package client
 
 import (
 	"context"
 	"fmt"
 	"os"
 
-	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
@@ -13,8 +12,8 @@ import (
 	ipfsClient "github.com/ipfs/go-ipfs-http-client"
 )
 
-func IpfsUploadCarFileByWebApi(apiUrl, carFilePath string) (*string, error) {
-	response, err := client.HttpUploadFileByStream(apiUrl, carFilePath)
+func IpfsUploadFileByWebApi(apiUrl, filefullpath string) (*string, error) {
+	response, err := HttpUploadFileByStream(apiUrl, filefullpath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -26,16 +25,16 @@ func IpfsUploadCarFileByWebApi(apiUrl, carFilePath string) (*string, error) {
 		return nil, err
 	}
 	//logs.GetLogger().Info(response)
-	carFileHash := utils.GetFieldStrFromJson(response, "Hash")
+	fileHash := utils.GetFieldStrFromJson(response, "Hash")
 	//logs.GetLogger().Info(carFileHash)
 
-	if carFileHash == constants.EMPTY_STRING {
+	if fileHash == constants.EMPTY_STRING {
 		err := fmt.Errorf("cannot get file hash from response:%s", response)
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
-	return &carFileHash, nil
+	return &fileHash, nil
 }
 
 func IpfsCreateCarFile(apiUrl, srcFilesPath string) error {

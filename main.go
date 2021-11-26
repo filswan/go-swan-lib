@@ -14,7 +14,21 @@ import (
 )
 
 func main() {
+	testIpfs()
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
+
+}
+
+func testIpfs() {
+	hash, err := client.IpfsUploadFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go/src/go-swan-lib_DoraNebula/go.mod")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+	logs.GetLogger().Info(*hash)
+}
+
+func test() {
 	randVal := utils.GetRandInRange(1, 1000)
 	logs.GetLogger().Info(randVal)
 	err := client.IpfsCreateCarFile("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true&wrap-with-directory=true", "/Users/dorachen/work/srcFiles")
@@ -129,7 +143,7 @@ func testGenerateUploadFile() {
 			return
 		}
 
-		carFileHash, err := client.IpfsUploadCarFileByWebApi(apiUrl, filefullpath)
+		carFileHash, err := client.IpfsUploadFileByWebApi(apiUrl, filefullpath)
 		if err != nil {
 			logs.GetLogger().Error(err)
 			return
@@ -196,10 +210,6 @@ func testTask() {
 	}
 
 	utils.DecodeJwtToken("")
-}
-
-func testIpfs() {
-	client.IpfsUploadCarFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go-workspace/src/testGo/go.mod")
 }
 
 func testLevelDb() {
