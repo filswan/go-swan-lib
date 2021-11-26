@@ -16,13 +16,13 @@ import (
 func IpfsUploadFileByWebApi(apiUrl, filefullpath string) (*string, error) {
 	response, err := client.HttpUploadFileByStream(apiUrl, filefullpath)
 	if err != nil {
-		logs.GetLogger().Error(err)
+		//logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if response == constants.EMPTY_STRING {
 		err := fmt.Errorf("no response from %s", apiUrl)
-		logs.GetLogger().Error(err)
+		//logs.GetLogger().Error(err)
 		return nil, err
 	}
 	//logs.GetLogger().Info(response)
@@ -31,7 +31,7 @@ func IpfsUploadFileByWebApi(apiUrl, filefullpath string) (*string, error) {
 
 	if fileHash == constants.EMPTY_STRING {
 		err := fmt.Errorf("cannot get file hash from response:%s", response)
-		logs.GetLogger().Error(err)
+		//logs.GetLogger().Error(err)
 		return nil, err
 	}
 

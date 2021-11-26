@@ -15,9 +15,20 @@ import (
 )
 
 func main() {
-	testIpfs()
-	price := utils.ConvertPrice2AttoFil("1 fil")
+	price := utils.ConvertPrice2AttoFil("0.0001 FIL")
 	logs.GetLogger().Info(price)
+	price = utils.ConvertPrice2AttoFil("1 fil")
+	logs.GetLogger().Info(price)
+
+	cids := []string{
+		"QmaLTsfGTynrnbFeG5CmPRqdbYa1E4jbD9GjzkXXugTPfx",
+		"QmdTf7TiBpYYv6sf7E9nbQdjLRDZLBvhSNwpGFf1B6zFtz",
+	}
+	err := ipfs.MergeFiles2CarFile(cids, "http://127.0.0.1:5001")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
 
 }

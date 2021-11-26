@@ -302,8 +302,8 @@ func (lotusClient *LotusClient) LotusGetMinerConfig(minerFid string) (*decimal.D
 		return nil, nil, nil, nil
 	}
 
-	minerPrice := minerConfig.Price.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
-	minerVerifiedPrice := minerConfig.VerifiedPrice.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
+	minerPrice := minerConfig.Price.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
+	minerVerifiedPrice := minerConfig.VerifiedPrice.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
 
 	return &minerPrice, &minerVerifiedPrice, &minerConfig.MaxPieceSize, &minerConfig.MinPieceSize
 }
@@ -522,7 +522,7 @@ type ClientStartDeal struct {
 }
 
 func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {
-	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE))
+	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
 	startEpoch := dealConfig.StartEpoch - relativeEpoch
 
 	if !dealConfig.SkipConfirmation {
