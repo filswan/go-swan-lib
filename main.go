@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/ipfs"
 	"github.com/filswan/go-swan-lib/client/lotus"
 	"github.com/filswan/go-swan-lib/client/swan"
 	"github.com/filswan/go-swan-lib/constants"
@@ -14,9 +15,30 @@ import (
 )
 
 func main() {
+	testIpfs()
+	price := utils.ConvertPrice2AttoFil("1 fil")
+	logs.GetLogger().Info(price)
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
+
+}
+
+func testIpfs() {
+	hash, err := ipfs.IpfsUploadFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go/src/go-swan-lib_DoraNebula/go.mod")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+	logs.GetLogger().Info(*hash)
+}
+
+func test() {
 	randVal := utils.GetRandInRange(1, 1000)
 	logs.GetLogger().Info(randVal)
+	err := ipfs.IpfsCreateCarFile("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true&wrap-with-directory=true", "/Users/dorachen/work/srcFiles")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
 }
 
 func testLotusAuthVerify(apiUrl, token string) {
@@ -124,7 +146,7 @@ func testGenerateUploadFile() {
 			return
 		}
 
-		carFileHash, err := client.IpfsUploadCarFileByWebApi(apiUrl, filefullpath)
+		carFileHash, err := ipfs.IpfsUploadFileByWebApi(apiUrl, filefullpath)
 		if err != nil {
 			logs.GetLogger().Error(err)
 			return
@@ -191,10 +213,6 @@ func testTask() {
 	}
 
 	utils.DecodeJwtToken("")
-}
-
-func testIpfs() {
-	client.IpfsUploadCarFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go-workspace/src/testGo/go.mod")
 }
 
 func testLevelDb() {
