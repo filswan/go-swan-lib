@@ -15,6 +15,12 @@ import (
 )
 
 func main() {
+	testLotusClientDealInfo()
+	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
+
+}
+
+func testMergeFile() {
 	price := utils.ConvertPrice2AttoFil("0.0001 FIL")
 	logs.GetLogger().Info(price)
 	price = utils.ConvertPrice2AttoFil("1 fil")
@@ -29,8 +35,6 @@ func main() {
 		logs.GetLogger().Error(err)
 		return
 	}
-	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
-
 }
 
 func testIpfs() {
@@ -89,7 +93,7 @@ func testLotusClientDealInfo() {
 		logs.GetLogger().Error(err)
 		return
 	}
-	costStatus, err := lotusClient.LotusClientGetDealInfo("bafyreifrrcveyjcc3vnpvahuus2whngqhndt3a6qnqel2zpyykdk6xtspm")
+	costStatus, err := lotusClient.LotusClientGetDealInfo("bafyreihacunihjlocvxxwgumj5ugqlfry6xpwiwmovqqfmsz475rv7icei")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return

@@ -98,6 +98,8 @@ type ClientDealResult struct {
 	DealStages    ClientDealStages
 	PricePerEpoch string
 	Duration      int
+	DealID        int64
+	Verified      bool
 }
 
 type ClientDealStages struct {
@@ -122,6 +124,8 @@ type ClientDealCostStatus struct {
 	ReserveClientFunds   string
 	DealProposalAccepted string
 	Status               string
+	DealId               int64
+	Verified             bool
 }
 
 func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientDealCostStatus, error) {
@@ -184,9 +188,23 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientD
 	}
 
 	clientDealCostStatus.Status = lotusClient.LotusGetDealStatus(clientDealInfo.Result.State)
+	clientDealCostStatus.DealId = clientDealInfo.Result.DealID
+	clientDealCostStatus.Verified = clientDealInfo.Result.Verified
 
 	//logs.GetLogger().Info(clientDealCost)
 	return &clientDealCostStatus, nil
+}
+
+func GetDealCost(dealCost ClientDealCostStatus) string {
+	if dealCost.DealProposalAccepted != "" {
+		return dealCost.DealProposalAccepted
+	}
+
+	if dealCost.ReserveClientFunds != "" {
+		return dealCost.ReserveClientFunds
+	}
+
+	return dealCost.CostComputed
 }
 
 func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, error) {
