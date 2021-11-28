@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -15,9 +19,30 @@ import (
 )
 
 func main() {
-	testLotusClientDealInfo()
+	GetDeal()
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
 
+}
+
+func GetDeal() {
+	httpposturl := "https://eaehi1usrl.execute-api.us-east-1.amazonaws.com/test/link"
+	fmt.Println("HTTP JSON POST URL:", httpposturl)
+
+	var jsonData = []byte(`{"id":0,"data":{"deal":58172} }`)
+	request, error := http.NewRequest("POST", httpposturl, bytes.NewBuffer(jsonData))
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	client := &http.Client{}
+	response, error := client.Do(request)
+	if error != nil {
+		panic(error)
+	}
+	defer response.Body.Close()
+
+	fmt.Println("response Status:", response.Status)
+	fmt.Println("response Headers:", response.Header)
+	body, _ := ioutil.ReadAll(response.Body)
+	fmt.Println("response Body:", string(body))
 }
 
 func testMergeFile() {
