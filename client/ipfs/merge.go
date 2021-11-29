@@ -33,12 +33,12 @@ type opts struct {
 	ShowProgress       bool   `getopt:"--show-progress        Print progress on STDERR, default when a TTY"`
 }
 
-func MergeFiles2CarFile(cidStrs []string, ipfsApi string) error {
+func MergeFiles2CarFile(apiUrl string, cidStrs []string) error {
 	opts := &opts{
 		ShowProgress:       isatty.IsTerminal(os.Stderr.Fd()),
 		IpfsAPIMaxWorkers:  8,
 		IpfsAPITimeoutSecs: 300,
-		IpfsAPI:            ipfsApi,
+		IpfsAPI:            apiUrl,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())

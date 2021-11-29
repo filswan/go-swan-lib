@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/model"
@@ -22,7 +22,7 @@ type MinerResponse struct {
 func (swanClient *SwanClient) GetMiner(minerFid string) (*MinerResponse, error) {
 	apiUrl := swanClient.ApiUrl + "/miner/info/" + minerFid
 
-	response := client.HttpGetNoToken(apiUrl, "")
+	response := web.HttpGetNoToken(apiUrl, "")
 	if response == "" {
 		err := fmt.Errorf("no response from %s", apiUrl)
 		logs.GetLogger().Error(err)
@@ -84,7 +84,7 @@ func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner mode
 	params.Add("start_epoch", strconv.Itoa(confMiner.StartEpoch))
 	params.Add("auto_bid_task_per_day", strconv.Itoa(confMiner.AutoBidTaskPerDay))
 
-	response := client.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	response := web.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
 
 	minerResponse = &MinerResponse{}
 	err = json.Unmarshal([]byte(response), minerResponse)

@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"math"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -15,9 +19,30 @@ import (
 )
 
 func main() {
-	testLotusClientDealInfo()
+	ipfs.Export2CarFile("http://127.0.0.1:5001", "bafybeidfgsocfmsd5vkjj6kqxaoj4n63npjrzwnbns5pto343lvfohpsxy", "/Users/dorachen/work/srcFiles/duration.car")
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
 
+}
+
+func GetDeal() {
+	httpposturl := "https://eaehi1usrl.execute-api.us-east-1.amazonaws.com/test/link"
+	fmt.Println("HTTP JSON POST URL:", httpposturl)
+
+	var jsonData = []byte(`{"id":0,"data":{"deal":58172} }`)
+	request, error := http.NewRequest("POST", httpposturl, bytes.NewBuffer(jsonData))
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	client := &http.Client{}
+	response, error := client.Do(request)
+	if error != nil {
+		panic(error)
+	}
+	defer response.Body.Close()
+
+	fmt.Println("response Status:", response.Status)
+	fmt.Println("response Headers:", response.Header)
+	body, _ := ioutil.ReadAll(response.Body)
+	fmt.Println("response Body:", string(body))
 }
 
 func testMergeFile() {
@@ -30,7 +55,7 @@ func testMergeFile() {
 		"QmaLTsfGTynrnbFeG5CmPRqdbYa1E4jbD9GjzkXXugTPfx",
 		"QmdTf7TiBpYYv6sf7E9nbQdjLRDZLBvhSNwpGFf1B6zFtz",
 	}
-	err := ipfs.MergeFiles2CarFile(cids, "http://127.0.0.1:5001")
+	err := ipfs.MergeFiles2CarFile("http://127.0.0.1:5001", cids)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
@@ -44,16 +69,6 @@ func testIpfs() {
 		return
 	}
 	logs.GetLogger().Info(*hash)
-}
-
-func test() {
-	randVal := utils.GetRandInRange(1, 1000)
-	logs.GetLogger().Info(randVal)
-	err := ipfs.IpfsCreateCarFile("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true&wrap-with-directory=true", "/Users/dorachen/work/srcFiles")
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return
-	}
 }
 
 func testLotusAuthVerify(apiUrl, token string) {

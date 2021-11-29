@@ -143,8 +143,8 @@ func CopyFile(srcFilePath, destFilePath string) (int64, error) {
 	return nBytes, err
 }
 
-func CreateFileWithContents(filepath string, lines []string) (int, error) {
-	f, err := os.Create(filepath)
+func CreateFileWithContents(filefullpath string, lines []string) (int, error) {
+	f, err := os.Create(filefullpath)
 
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -168,7 +168,27 @@ func CreateFileWithContents(filepath string, lines []string) (int, error) {
 		return 0, nil
 	}
 
-	logs.GetLogger().Info(filepath, " generated.")
+	logs.GetLogger().Info(filefullpath, " generated.")
+	return bytesWritten, nil
+}
+
+func CreateFileWithByteContents(filefullpath string, contents []byte) (int, error) {
+	f, err := os.Create(filefullpath)
+
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return 0, nil
+	}
+
+	defer f.Close()
+
+	bytesWritten, err := f.Write(contents)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return 0, nil
+	}
+
+	logs.GetLogger().Info(filefullpath, " generated.")
 	return bytesWritten, nil
 }
 

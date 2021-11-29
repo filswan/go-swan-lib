@@ -1,4 +1,4 @@
-package client
+package web
 
 import (
 	"bytes"
@@ -21,36 +21,60 @@ const HTTP_CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
 const HTTP_CONTENT_TYPE_JSON = "application/json; charset=utf-8"
 
 func HttpPostNoToken(uri string, params interface{}) string {
-	response := httpRequest(http.MethodPost, uri, "", params)
-	return response
+	response, err := HttpRequest(http.MethodPost, uri, "", params)
+	if err != nil {
+		logs.GetLogger().Error()
+		return ""
+	}
+	return string(response)
 }
 
 func HttpPost(uri, tokenString string, params interface{}) string {
-	response := httpRequest(http.MethodPost, uri, tokenString, params)
-	return response
+	response, err := HttpRequest(http.MethodPost, uri, tokenString, params)
+	if err != nil {
+		logs.GetLogger().Error()
+		return ""
+	}
+	return string(response)
 }
 
 func HttpGetNoToken(uri string, params interface{}) string {
-	response := httpRequest(http.MethodGet, uri, "", params)
-	return response
+	response, err := HttpRequest(http.MethodGet, uri, "", params)
+	if err != nil {
+		logs.GetLogger().Error()
+		return ""
+	}
+	return string(response)
 }
 
 func HttpGet(uri, tokenString string, params interface{}) string {
-	response := httpRequest(http.MethodGet, uri, tokenString, params)
-	return response
+	response, err := HttpRequest(http.MethodGet, uri, tokenString, params)
+	if err != nil {
+		logs.GetLogger().Error()
+		return ""
+	}
+	return string(response)
 }
 
 func HttpPut(uri, tokenString string, params interface{}) string {
-	response := httpRequest(http.MethodPut, uri, tokenString, params)
-	return response
+	response, err := HttpRequest(http.MethodPut, uri, tokenString, params)
+	if err != nil {
+		logs.GetLogger().Error()
+		return ""
+	}
+	return string(response)
 }
 
 func HttpDelete(uri, tokenString string, params interface{}) string {
-	response := httpRequest(http.MethodDelete, uri, tokenString, params)
-	return response
+	response, err := HttpRequest(http.MethodDelete, uri, tokenString, params)
+	if err != nil {
+		logs.GetLogger().Error()
+		return ""
+	}
+	return string(response)
 }
 
-func httpRequest(httpMethod, uri, tokenString string, params interface{}) string {
+func HttpRequest(httpMethod, uri, tokenString string, params interface{}) ([]byte, error) {
 	var request *http.Request
 	var err error
 
@@ -59,20 +83,20 @@ func httpRequest(httpMethod, uri, tokenString string, params interface{}) string
 		request, err = http.NewRequest(httpMethod, uri, params)
 		if err != nil {
 			logs.GetLogger().Error(err)
-			return ""
+			return nil, err
 		}
 		request.Header.Set("Content-Type", HTTP_CONTENT_TYPE_FORM)
 	default:
 		jsonReq, errJson := json.Marshal(params)
 		if errJson != nil {
 			logs.GetLogger().Error(errJson)
-			return ""
+			return nil, errJson
 		}
 
 		request, err = http.NewRequest(httpMethod, uri, bytes.NewBuffer(jsonReq))
 		if err != nil {
 			logs.GetLogger().Error(err)
-			return ""
+			return nil, err
 		}
 		request.Header.Set("Content-Type", HTTP_CONTENT_TYPE_JSON)
 	}
@@ -86,29 +110,30 @@ func httpRequest(httpMethod, uri, tokenString string, params interface{}) string
 
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return ""
+		return nil, err
 	}
 
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		logs.GetLogger().Error("http status: ", response.Status, ", code: ", response.StatusCode, ", url:", uri)
+		err := fmt.Errorf("http status: %s, code:%d, url:%s", response.Status, response.StatusCode, uri)
+		logs.GetLogger().Error(err)
 		switch response.StatusCode {
 		case http.StatusNotFound:
 			logs.GetLogger().Error("please check your url:", uri)
 		case http.StatusUnauthorized:
 			logs.GetLogger().Error("Please check your token:", tokenString)
 		}
-		return ""
+		return nil, err
 	}
 
 	responseBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return ""
+		return nil, err
 	}
 
-	return string(responseBody)
+	return responseBody, nil
 }
 
 func HttpPutFile(url string, tokenString string, paramTexts map[string]string, paramFilename, paramFilepath string) (string, error) {

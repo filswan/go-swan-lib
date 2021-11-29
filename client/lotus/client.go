@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/model"
@@ -140,7 +141,7 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientD
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
 
 	clientDealInfo := &ClientDealInfo{}
 	err := json.Unmarshal([]byte(response), clientDealInfo)
@@ -220,7 +221,7 @@ func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, 
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
 
 	clientMinerQuery := &ClientMinerQuery{}
 	err := json.Unmarshal([]byte(response), clientMinerQuery)
@@ -276,7 +277,7 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
 
 	clientQueryAsk := &ClientQueryAsk{}
 	err = json.Unmarshal([]byte(response), clientQueryAsk)
@@ -336,7 +337,7 @@ func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response := web.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
 
 	//logs.GetLogger().Info(response)
 
@@ -368,7 +369,7 @@ func (lotusClient *LotusClient) LotusGetDealStatus(state int) string {
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response := web.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
 
 	//logs.GetLogger().Info(response)
 
@@ -393,7 +394,7 @@ func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) *string {
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpPost(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	response := web.HttpPost(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
 		logs.GetLogger().Error("no response from:", lotusClient.ApiUrl)
 		return nil
@@ -444,7 +445,7 @@ func (lotusClient *LotusClient) LotusClientImport(filepath string, isCar bool) (
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	response := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
 		err := fmt.Errorf("lotus import file %s failed, no response from %s", filepath, lotusClient.ApiUrl)
 		logs.GetLogger().Error(err)
@@ -492,7 +493,7 @@ func (lotusClient *LotusClient) LotusClientGenCar(srcFilePath, destCarFilePath s
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	response := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
 		err := fmt.Errorf("failed to generate car, no response")
 		logs.GetLogger().Error(err)
@@ -594,7 +595,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	response := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
 		err := fmt.Errorf("failed to send deal for %s, no response", carFile.CarFileName)
 		logs.GetLogger().Error(err)
