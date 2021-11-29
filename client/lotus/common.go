@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
@@ -64,7 +64,7 @@ func LotusVersion(apiUrl string) (*string, error) {
 	}
 
 	//here the api url should be miner's api url, need to change later on
-	response := client.HttpGetNoToken(apiUrl, jsonRpcParams)
+	response := web.HttpGetNoToken(apiUrl, jsonRpcParams)
 	if response == "" {
 		err := errors.New("no response from api")
 		logs.GetLogger().Error(err)

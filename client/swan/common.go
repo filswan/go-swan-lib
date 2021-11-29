@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
@@ -49,7 +49,7 @@ func (swanClient *SwanClient) SwanGetJwtToken() error {
 
 	apiUrl := swanClient.ApiUrl + "/user/api_keys/jwt"
 
-	response := client.HttpPostNoToken(apiUrl, data)
+	response := web.HttpPostNoToken(apiUrl, data)
 
 	if len(response) == 0 {
 		err := fmt.Errorf("no response from swan platform:%s", apiUrl)
@@ -158,7 +158,7 @@ func (swanClient *SwanClient) SendHeartbeatRequest(minerFid string) error {
 	params := url.Values{}
 	params.Add("miner_id", minerFid)
 
-	response := client.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	response := web.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
 
 	if strings.Contains(response, "fail") {
 		err := fmt.Errorf("failed to send heartbeat")

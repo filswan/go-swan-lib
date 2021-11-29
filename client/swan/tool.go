@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
@@ -15,7 +15,7 @@ func (swanClient *SwanClient) CheckDatacap(wallet string) (bool, error) {
 	apiUrl := swanClient.ApiUrl + "/tools/check_datacap?address=" + wallet
 	params := url.Values{}
 
-	response := client.HttpGetNoToken(apiUrl, strings.NewReader(params.Encode()))
+	response := web.HttpGetNoToken(apiUrl, strings.NewReader(params.Encode()))
 
 	if response == "" {
 		err := fmt.Errorf("no response from:%s", apiUrl)

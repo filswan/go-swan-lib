@@ -1,20 +1,15 @@
 package ipfs
 
 import (
-	"context"
 	"fmt"
-	"os"
 
-	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
-	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
-	files "github.com/ipfs/go-ipfs-files"
-	ipfsClient "github.com/ipfs/go-ipfs-http-client"
 )
 
 func IpfsUploadFileByWebApi(apiUrl, filefullpath string) (*string, error) {
-	response, err := client.HttpUploadFileByStream(apiUrl, filefullpath)
+	response, err := web.HttpUploadFileByStream(apiUrl, filefullpath)
 	if err != nil {
 		//logs.GetLogger().Error(err)
 		return nil, err
@@ -38,35 +33,8 @@ func IpfsUploadFileByWebApi(apiUrl, filefullpath string) (*string, error) {
 	return &fileHash, nil
 }
 
-func IpfsCreateCarFile(apiUrl, srcFilesPath string) error {
-	/*api, err := ipfsClient.NewPathApi(apiUrl)
-	if err != nil {
-		return err
-	}*/
-	api, err := ipfsClient.NewLocalApi()
-	if err != nil {
-		return err
-	}
+func Export2CarFile(apiUrl, fileHash string, carFileFullPath string) {
+	apiUrlFull := utils.UrlJoin(apiUrl, "api/v0/dag/export")
+	apiUrlFull = apiUrlFull + "?arg=" + fileHash
 
-	stat, err := os.Stat(srcFilesPath)
-	if err != nil {
-		return err
-	}
-	// This walks the filesystem at /tmp/example/ and create a list of the files / directories we have.
-	node, err := files.NewSerialFile(srcFilesPath, true, stat)
-	if err != nil {
-		return err
-	}
-
-	// Add the files / directory to IPFS
-	path, err := api.Unixfs().Add(context.Background(), node)
-	if err != nil {
-		return err
-	}
-
-	logs.GetLogger().Info("path CID:", path.Cid())
-	// Output the resulting CID
-	logs.GetLogger().Info("result CID:", path.Root().String())
-
-	return nil
 }

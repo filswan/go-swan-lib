@@ -5,6 +5,7 @@ import (
 
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/client/swan"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
 )
@@ -64,20 +65,20 @@ type Todo struct {
 }
 
 func TestRestApiClient() {
-	response := client.HttpGet("https://jsonplaceholder.typicode.com/todos/1", "", "")
+	response := web.HttpGet("https://jsonplaceholder.typicode.com/todos/1", "", "")
 	logs.GetLogger().Info(response)
 
 	todo := Todo{1, 2, "lorem ipsum dolor sit amet", true}
-	response = client.HttpPostNoToken("https://jsonplaceholder.typicode.com/todos", todo)
+	response = web.HttpPostNoToken("https://jsonplaceholder.typicode.com/todos", todo)
 	logs.GetLogger().Info(response)
 
-	response = client.HttpPut("https://jsonplaceholder.typicode.com/todos/1", "", todo)
+	response = web.HttpPut("https://jsonplaceholder.typicode.com/todos/1", "", todo)
 	logs.GetLogger().Info(response)
 
 	title := utils.GetFieldFromJson(response, "title")
 	logs.GetLogger().Info(title)
 
-	response = client.HttpDelete("https://jsonplaceholder.typicode.com/todos/1", "", todo)
+	response = web.HttpDelete("https://jsonplaceholder.typicode.com/todos/1", "", todo)
 	logs.GetLogger().Info(response)
 }
 

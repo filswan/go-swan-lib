@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
@@ -53,7 +53,7 @@ func LotusAuthVerify(apiUrl, token string) ([]string, error) {
 	}
 
 	//here the api url should be miner's api url, need to change later on
-	response := client.HttpGetNoToken(apiUrl, jsonRpcParams)
+	response := web.HttpGetNoToken(apiUrl, jsonRpcParams)
 	if response == "" {
 		err := fmt.Errorf("no response from:%s", apiUrl)
 		//logs.GetLogger().Error(err)

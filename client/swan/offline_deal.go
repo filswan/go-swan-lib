@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/model"
@@ -47,7 +47,7 @@ func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, limit
 	}
 
 	urlStr := swanClient.ApiUrl + "/offline_deals/" + minerFid + "?deal_status=" + status + "&limit=" + rowLimit + "&offset=0"
-	response := client.HttpGet(urlStr, swanClient.SwanToken, "")
+	response := web.HttpGet(urlStr, swanClient.SwanToken, "")
 	getOfflineDealResponse := GetOfflineDealResponse{}
 	err = json.Unmarshal([]byte(response), &getOfflineDealResponse)
 	if err != nil {
@@ -96,7 +96,7 @@ func (swanClient *SwanClient) SwanUpdateOfflineDealStatus(dealId int, status str
 		params.Add("cost", statusInfo[3])
 	}
 
-	response := client.HttpPut(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	response := web.HttpPut(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
 
 	updateOfflineDealResponse := &UpdateOfflineDealResponse{}
 	err = json.Unmarshal([]byte(response), updateOfflineDealResponse)

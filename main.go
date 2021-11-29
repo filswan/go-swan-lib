@@ -55,7 +55,7 @@ func testMergeFile() {
 		"QmaLTsfGTynrnbFeG5CmPRqdbYa1E4jbD9GjzkXXugTPfx",
 		"QmdTf7TiBpYYv6sf7E9nbQdjLRDZLBvhSNwpGFf1B6zFtz",
 	}
-	err := ipfs.MergeFiles2CarFile(cids, "http://127.0.0.1:5001")
+	err := ipfs.MergeFiles2CarFile("http://127.0.0.1:5001", cids)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
@@ -69,16 +69,6 @@ func testIpfs() {
 		return
 	}
 	logs.GetLogger().Info(*hash)
-}
-
-func test() {
-	randVal := utils.GetRandInRange(1, 1000)
-	logs.GetLogger().Info(randVal)
-	err := ipfs.IpfsCreateCarFile("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true&wrap-with-directory=true", "/Users/dorachen/work/srcFiles")
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return
-	}
 }
 
 func testLotusAuthVerify(apiUrl, token string) {

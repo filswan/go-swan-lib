@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
@@ -125,7 +126,7 @@ func (aria2Client *Aria2Client) GenPayload4Download(method string, uri string, o
 func (aria2Client *Aria2Client) DownloadFile(uri string, outDir, outFilename string) *Aria2Download {
 	payload := aria2Client.GenPayload4Download(ADD_URI, uri, outDir, outFilename)
 
-	response := HttpPostNoToken(aria2Client.serverUrl, payload)
+	response := web.HttpPostNoToken(aria2Client.serverUrl, payload)
 	aria2Download := &Aria2Download{}
 	err := json.Unmarshal([]byte(response), aria2Download)
 	if err != nil {
@@ -152,7 +153,7 @@ func (aria2Client *Aria2Client) GenPayload4Status(gid string) Aria2Payload {
 
 func (aria2Client *Aria2Client) GetDownloadStatus(gid string) *Aria2Status {
 	payload := aria2Client.GenPayload4Status(gid)
-	response := HttpPostNoToken(aria2Client.serverUrl, payload)
+	response := web.HttpPostNoToken(aria2Client.serverUrl, payload)
 	//logs.GetLogger().Info(gid, " download status:", response)
 
 	aria2Status := &Aria2Status{}

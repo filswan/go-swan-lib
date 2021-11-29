@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
 )
@@ -69,7 +69,7 @@ func (lotusMarket *LotusMarket) LotusMarketGetAsk() *MarketGetAskResultAsk {
 	}
 
 	//here the api url should be miner's api url, need to change later on
-	response := client.HttpGetNoToken(lotusMarket.ApiUrl, jsonRpcParams)
+	response := web.HttpGetNoToken(lotusMarket.ApiUrl, jsonRpcParams)
 	if response == "" {
 		return nil
 	}
@@ -115,7 +115,7 @@ func (lotusMarket *LotusMarket) LotusGetDeals() []Deal {
 	}
 
 	//logs.GetLogger().Info("Get deal list from ", lotusMarket.ApiUrl)
-	response := client.HttpGet(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
+	response := web.HttpGet(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
 	//logs.GetLogger().Info("Got deal list from ", lotusMarket.ApiUrl)
 	deals := &MarketListIncompleteDeals{}
 	err := json.Unmarshal([]byte(response), deals)
@@ -177,7 +177,7 @@ func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string)
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := client.HttpPost(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
+	response := web.HttpPost(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
 	if response == "" {
 		err := fmt.Errorf("no response, please check your market api url:%s and access token", lotusMarket.ApiUrl)
 		logs.GetLogger().Error(err)
