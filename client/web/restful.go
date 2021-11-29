@@ -21,7 +21,7 @@ const HTTP_CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
 const HTTP_CONTENT_TYPE_JSON = "application/json; charset=utf-8"
 
 func HttpPostNoToken(uri string, params interface{}) string {
-	response, err := httpRequest(http.MethodPost, uri, "", params)
+	response, err := HttpRequest(http.MethodPost, uri, "", params)
 	if err != nil {
 		logs.GetLogger().Error()
 		return ""
@@ -30,7 +30,7 @@ func HttpPostNoToken(uri string, params interface{}) string {
 }
 
 func HttpPost(uri, tokenString string, params interface{}) string {
-	response, err := httpRequest(http.MethodPost, uri, tokenString, params)
+	response, err := HttpRequest(http.MethodPost, uri, tokenString, params)
 	if err != nil {
 		logs.GetLogger().Error()
 		return ""
@@ -39,7 +39,7 @@ func HttpPost(uri, tokenString string, params interface{}) string {
 }
 
 func HttpGetNoToken(uri string, params interface{}) string {
-	response, err := httpRequest(http.MethodGet, uri, "", params)
+	response, err := HttpRequest(http.MethodGet, uri, "", params)
 	if err != nil {
 		logs.GetLogger().Error()
 		return ""
@@ -48,7 +48,7 @@ func HttpGetNoToken(uri string, params interface{}) string {
 }
 
 func HttpGet(uri, tokenString string, params interface{}) string {
-	response, err := httpRequest(http.MethodGet, uri, tokenString, params)
+	response, err := HttpRequest(http.MethodGet, uri, tokenString, params)
 	if err != nil {
 		logs.GetLogger().Error()
 		return ""
@@ -57,7 +57,7 @@ func HttpGet(uri, tokenString string, params interface{}) string {
 }
 
 func HttpPut(uri, tokenString string, params interface{}) string {
-	response, err := httpRequest(http.MethodPut, uri, tokenString, params)
+	response, err := HttpRequest(http.MethodPut, uri, tokenString, params)
 	if err != nil {
 		logs.GetLogger().Error()
 		return ""
@@ -66,7 +66,7 @@ func HttpPut(uri, tokenString string, params interface{}) string {
 }
 
 func HttpDelete(uri, tokenString string, params interface{}) string {
-	response, err := httpRequest(http.MethodDelete, uri, tokenString, params)
+	response, err := HttpRequest(http.MethodDelete, uri, tokenString, params)
 	if err != nil {
 		logs.GetLogger().Error()
 		return ""
@@ -74,7 +74,7 @@ func HttpDelete(uri, tokenString string, params interface{}) string {
 	return string(response)
 }
 
-func httpRequest(httpMethod, uri, tokenString string, params interface{}) ([]byte, error) {
+func HttpRequest(httpMethod, uri, tokenString string, params interface{}) ([]byte, error) {
 	var request *http.Request
 	var err error
 

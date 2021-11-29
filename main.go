@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	GetDeal()
+	ipfs.Export2CarFile("http://127.0.0.1:5001", "bafybeidfgsocfmsd5vkjj6kqxaoj4n63npjrzwnbns5pto343lvfohpsxy", "/Users/dorachen/work/srcFiles/duration.car")
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
 
 }
