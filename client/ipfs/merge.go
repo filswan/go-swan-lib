@@ -33,7 +33,7 @@ type opts struct {
 	ShowProgress       bool   `getopt:"--show-progress        Print progress on STDERR, default when a TTY"`
 }
 
-func MergeFiles2CarFile(apiUrl string, cidStrs []string) error {
+func MergeFiles2CarFile(apiUrl string, cidStrs []string) (*string, error) {
 	opts := &opts{
 		ShowProgress:       isatty.IsTerminal(os.Stderr.Fd()),
 		IpfsAPIMaxWorkers:  8,
@@ -63,7 +63,7 @@ func MergeFiles2CarFile(apiUrl string, cidStrs []string) error {
 		c, err := cid.Parse(cs)
 		if err != nil {
 			logs.GetLogger().Error("unable to parse '%s': %s", cs, err)
-			return err
+			return nil, err
 		}
 		if cset.Visit(c) {
 			toAgg = append(toAgg, dagaggregator.AggregateDagEntry{RootCid: c})
@@ -75,17 +75,18 @@ func MergeFiles2CarFile(apiUrl string, cidStrs []string) error {
 	root, entries, err := dagaggregator.Aggregate(ctx, ramDs, toAgg)
 	if err != nil {
 		logs.GetLogger().Error("aggregation failed: %s", err)
-		return err
+		return nil, err
 	}
 
 	if err := writeoutBlocks(ctx, opts, ramBs); err != nil {
 		logs.GetLogger().Error("writing newly created dag to IPFS API failed: %s", err)
-		return err
+		return nil, err
 	}
 
 	akc, _ := ramBs.AllKeysChan(ctx)
-	logs.GetLogger().Info("aggregation finished, aggregateRoot: ", root, ", totalManifestEntries: ", len(entries), ", newIntermediateBlocks: ", len(akc))
-	return nil
+	dataCid := root.String()
+	logs.GetLogger().Info("aggregation finished, aggregateRoot: ", root, ", data cid:", dataCid, ", totalManifestEntries: ", len(entries), ", newIntermediateBlocks: ", len(akc))
+	return &dataCid, nil
 }
 
 func statSources(externalCtx context.Context, opts *opts, toAgg []dagaggregator.AggregateDagEntry) error {

@@ -19,9 +19,35 @@ import (
 )
 
 func main() {
-	ipfs.Export2CarFile("http://127.0.0.1:5001", "bafybeidfgsocfmsd5vkjj6kqxaoj4n63npjrzwnbns5pto343lvfohpsxy", "/Users/dorachen/work/srcFiles/duration.car")
+	getCarFile()
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
 
+}
+
+func getCarFile() {
+	fileHash, err := ipfs.IpfsUploadFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/home/peware/swan_dora/srcFiles/gnomad.genomes.v3.1.1.sites.chr22.vcf.bgz_02.car")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+
+	logs.GetLogger().Info("source file hash:", *fileHash)
+
+	cids := []string{
+		*fileHash,
+	}
+	dataCid, err := ipfs.MergeFiles2CarFile("http://192.168.88.41:5001", cids)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+
+	logs.GetLogger().Info("data CID:", *dataCid)
+	err = ipfs.Export2CarFile("http://192.168.88.41:5001", *dataCid, "/home/peware/swan_dora/srcFiles/"+*dataCid+".car")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
 }
 
 func GetDeal() {
@@ -55,11 +81,12 @@ func testMergeFile() {
 		"QmaLTsfGTynrnbFeG5CmPRqdbYa1E4jbD9GjzkXXugTPfx",
 		"QmdTf7TiBpYYv6sf7E9nbQdjLRDZLBvhSNwpGFf1B6zFtz",
 	}
-	err := ipfs.MergeFiles2CarFile("http://127.0.0.1:5001", cids)
+	dataCid, err := ipfs.MergeFiles2CarFile("http://127.0.0.1:5001", cids)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
 	}
+	logs.GetLogger().Info(*dataCid)
 }
 
 func testIpfs() {
