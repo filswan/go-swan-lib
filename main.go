@@ -43,7 +43,7 @@ func getCarFile() {
 	}
 
 	logs.GetLogger().Info("data CID:", *dataCid)
-	err = ipfs.Export2CarFile("http://192.168.88.41:5001", *dataCid, "/home/peware/swan_dora/srcFiles/"+*dataCid)
+	err = ipfs.Export2CarFile("http://192.168.88.41:5001", *dataCid, "/home/peware/swan_dora/srcFiles/"+*dataCid+".car")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
