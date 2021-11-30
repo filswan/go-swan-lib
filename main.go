@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	testMergeFile()
+	getCarFile()
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
 
 }
@@ -31,6 +31,8 @@ func getCarFile() {
 		return
 	}
 
+	logs.GetLogger().Info("source file hash:", *fileHash)
+
 	cids := []string{
 		*fileHash,
 	}
@@ -40,7 +42,8 @@ func getCarFile() {
 		return
 	}
 
-	err = ipfs.Export2CarFile("http://127.0.0.1:5001", *dataCid, "/home/peware/swan_dora/carFiles/test.car")
+	logs.GetLogger().Info("data CID:", dataCid)
+	err = ipfs.Export2CarFile("http://127.0.0.1:5001", *dataCid, "/home/peware/swan_dora/carFiles/"+*dataCid)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
