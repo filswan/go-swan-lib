@@ -67,4 +67,6 @@ const (
 	LOTUS_AUTH_WRITE = "write"
 	LOTUS_AUTH_SIGN  = "sign"
 	LOTUS_AUTH_ADMIN = "admin"
+
+	LOTUS_TRANSFER_TYPE_MANUAL = "manual"
 )

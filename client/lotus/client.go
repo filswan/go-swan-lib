@@ -563,7 +563,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 	}
 
 	clientStartDealParamData := ClientStartDealParamData{
-		TransferType: "string value",
+		TransferType: constants.LOTUS_TRANSFER_TYPE_MANUAL,
 		Root: Cid{
 			Cid: carFile.DataCid,
 		},
