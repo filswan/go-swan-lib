@@ -19,7 +19,12 @@ import (
 )
 
 func main() {
-	getCarFile()
+	//getCarFile()
+	a1, a2 := utils.CalculatePieceSize(65)
+	logs.GetLogger().Info(a1, " ", a2)
+
+	price := 254708147000000000 / 1e18 / 135261728 / 518400
+	logs.GetLogger().Info(price)
 	//testLotusAuthVerify("http://192.168.88.41:2345/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiXX0.bCPM5A8soTyRs6LR3rz1Q22x7T6AbKdJCiFj4Wzrg7M")
 
 }
