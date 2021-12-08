@@ -11,7 +11,7 @@ type Task struct {
 	UserId            int              `json:"user_id"`
 	Status            string           `json:"status"`
 	Tags              string           `json:"tags"`
-	MinerFid          string           `json:"miner_id"`
+	MinerFid          string           `json:"miner_fid"`
 	Type              string           `json:"type"`
 	IsPublic          *int             `json:"is_public"`
 	MinPrice          *decimal.Decimal `json:"min_price"`

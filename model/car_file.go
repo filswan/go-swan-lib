@@ -11,12 +11,11 @@ type FileDesc struct {
 	CarFileMd5     string
 	CarFileUrl     string
 	CarFileSize    int64
-	//CarFileAddress string
-	DealCid    string
-	DataCid    string
-	PieceCid   string
-	MinerFid   string
-	StartEpoch *int
-	SourceId   *int
-	Cost       string
+	DealCid        string
+	DataCid        string
+	PieceCid       string
+	MinerFid       string
+	StartEpoch     *int
+	SourceId       *int
+	Cost           string
 }
