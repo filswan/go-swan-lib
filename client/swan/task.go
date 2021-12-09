@@ -9,6 +9,7 @@ import (
 
 	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
+	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/model"
 	"github.com/filswan/go-swan-lib/utils"
 )
@@ -35,11 +36,13 @@ func (swanClient *SwanClient) SwanCreateTask(task model.Task, carFiles []*model.
 	swanServerResponse := &SwanServerResponse{}
 	err := json.Unmarshal([]byte(response), swanServerResponse)
 	if err != nil {
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if !strings.EqualFold(swanServerResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s,%s", swanServerResponse.Status, swanServerResponse.Message)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
@@ -57,17 +60,20 @@ func (swanClient *SwanClient) SwanUpdateTaskByUuid(task model.Task, carFiles []*
 
 	if response == "" {
 		err := fmt.Errorf("no response from:%s", apiUrl)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	swanServerResponse := &SwanServerResponse{}
 	err := json.Unmarshal([]byte(response), swanServerResponse)
 	if err != nil {
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if !strings.EqualFold(swanServerResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s,%s", swanServerResponse.Status, swanServerResponse.Message)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
@@ -80,18 +86,19 @@ type GetTaskByUuidResult struct {
 }
 type GetTaskByUuidResultData struct {
 	//AverageBid       string              `json:"average_bid"`
-	Task             model.Task          `json:"task"`
-	Miner            model.Miner         `json:"miner"`
-	Deal             []model.OfflineDeal `json:"deal"`
-	TotalItems       int                 `json:"total_items"`
-	TotalTaskCount   int                 `json:"total_task_count"`
-	BidCount         int                 `json:"bid_count"`
-	DealCompleteRate string              `json:"deal_complete_rate"`
+	Task             model.Task           `json:"task"`
+	Miner            model.Miner          `json:"miner"`
+	Deal             []*model.OfflineDeal `json:"deal"`
+	TotalItems       int                  `json:"total_items"`
+	TotalTaskCount   int                  `json:"total_task_count"`
+	BidCount         int                  `json:"bid_count"`
+	DealCompleteRate string               `json:"deal_complete_rate"`
 }
 
 func (swanClient *SwanClient) SwanGetTaskByUuid(taskUuid string) (*GetTaskByUuidResult, error) {
 	if len(taskUuid) == 0 {
 		err := fmt.Errorf("please provide task uuid")
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks", taskUuid)
@@ -100,17 +107,20 @@ func (swanClient *SwanClient) SwanGetTaskByUuid(taskUuid string) (*GetTaskByUuid
 
 	if response == "" {
 		err := fmt.Errorf("no response from:%s", apiUrl)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	getTaskByUuidResult := &GetTaskByUuidResult{}
 	err := json.Unmarshal([]byte(response), getTaskByUuidResult)
 	if err != nil {
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if !strings.EqualFold(getTaskByUuidResult.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s", getTaskByUuidResult.Status)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
@@ -150,17 +160,20 @@ func (swanClient *SwanClient) SwanGetTasks(limit *int, status *string) (*GetTask
 
 	if response == "" {
 		err := errors.New("failed to get tasks from swan")
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	getTaskResult := &GetTaskResult{}
 	err := json.Unmarshal([]byte(response), getTaskResult)
 	if err != nil {
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if !strings.EqualFold(getTaskResult.Status, constants.SWAN_API_STATUS_SUCCESS) {
 		err := fmt.Errorf("error:%s", getTaskResult.Status)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
@@ -179,6 +192,7 @@ func (swanClient *SwanClient) SwanGetAllTasks(status string) ([]model.Task, erro
 
 	getTaskResult, err = swanClient.SwanGetTasks(&getTaskResult.Data.TotalTaskCount, &status)
 	if err != nil {
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
