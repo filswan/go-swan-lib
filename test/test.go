@@ -50,7 +50,7 @@ func TestCreateTask() {
 		CarFileName:    "bafybeie6mpsur5hul7ejcetnsfghisb4fnc7hewykilhul5aycyl23mlde.car",
 		CarFilePath:    "",
 		CarFileMd5:     "",
-		CarFileUrl:     "http://192.168.88.41:5050/ipfs/QmS2dz1D6auP6viubUgfA4k7FFykb9ekefurRh1rSVS9hP",
+		CarFileUrl:     "http:///ipfs/QmS2dz1D6auP6viubUgfA4k7FFykb9ekefurRh1rSVS9hP",
 		CarFileSize:    26666,
 		DealCid:        "bafyreihdzwblxxuafpzn7olws62lxpqjc2u37zrer22gawxi3z7zrytrma",
 		DataCid:        "bafybeie6mpsur5hul7ejcetnsfghisb4fnc7hewykilhul5aycyl23mlde",
@@ -80,10 +80,10 @@ func TestCreateTask() {
 		"task":      task,
 		"car_files": carFiles,
 	}
-	response := web.HttpPost("http://127.0.0.1:8886/tasks/create_task", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NzA1MTQzMjIsImlhdCI6MTYzODk3ODMyMiwic3ViIjoyNjF9.ZdKyTntKRwzYAbdhshJSNFYFpEr1I8HVTyDMtnFN6GM", params)
+	response := web.HttpPost("http://127.0.0.1:/tasks/create_task", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NzA1MTQzMjIsImlhdCI6MTYzODk3ODMyMiwic3ViIjoyNjF9.ZdKyTntKRwzYAbdhshJSNFYFpEr1I8HVTyDMtnFN6GM", params)
 	logs.GetLogger().Info(response)
 
-	response = web.HttpPut("http://127.0.0.1:8886/tasks/update_task_by_uuid", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NzA1MTQzMjIsImlhdCI6MTYzODk3ODMyMiwic3ViIjoyNjF9.ZdKyTntKRwzYAbdhshJSNFYFpEr1I8HVTyDMtnFN6GM", params)
+	response = web.HttpPut("http://127.0.0.1:/tasks/update_task_by_uuid", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NzA1MTQzMjIsImlhdCI6MTYzODk3ODMyMiwic3ViIjoyNjF9.ZdKyTntKRwzYAbdhshJSNFYFpEr1I8HVTyDMtnFN6GM", params)
 	logs.GetLogger().Info(response)
 	//params
 }
@@ -176,7 +176,7 @@ func TestDecodeJwtToken() {
 }
 
 func TestGetCarFile() {
-	fileHash, err := ipfs.IpfsUploadFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/home/peware/swan_dora/srcFiles/gnomad.genomes.v3.1.1.sites.chr22.vcf.bgz_02.car")
+	fileHash, err := ipfs.IpfsUploadFileByWebApi("http:///api/v0/add?stream-channels=true&pin=true", "/home/peware/swan_dora/srcFiles/gnomad.genomes.v3.1.1.sites.chr22.vcf.bgz_02.car")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
@@ -187,14 +187,14 @@ func TestGetCarFile() {
 	cids := []string{
 		*fileHash,
 	}
-	dataCid, err := ipfs.MergeFiles2CarFile("http://192.168.88.41:5001", cids)
+	dataCid, err := ipfs.MergeFiles2CarFile("http://", cids)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
 	}
 
 	logs.GetLogger().Info("data CID:", *dataCid)
-	err = ipfs.Export2CarFile("http://192.168.88.41:5001", *dataCid, "/home/peware/swan_dora/srcFiles/"+*dataCid+".car")
+	err = ipfs.Export2CarFile("http://", *dataCid, "/home/peware/swan_dora/srcFiles/"+*dataCid+".car")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
@@ -244,7 +244,7 @@ func TestMergeFile() {
 }
 
 func TestIpfs() {
-	hash, err := ipfs.IpfsUploadFileByWebApi("http://192.168.88.41:5001/api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go/src/go-swan-lib_DoraNebula/go.mod")
+	hash, err := ipfs.IpfsUploadFileByWebApi("http:///api/v0/add?stream-channels=true&pin=true", "/Users/dorachen/go/src/go-swan-lib_DoraNebula/go.mod")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
@@ -285,7 +285,7 @@ func Test2Title() {
 func TestLotusClientDealInfo() {
 	equal := 1e18 == math.Pow10(18)
 	logs.GetLogger().Info(equal)
-	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.-Y4pF34RGOten6YXoau-sEMOWOEeiHwGh9u2lsl4cv8")
+	lotusClient, err := lotus.LotusGetClient("http:///rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.-Y4pF34RGOten6YXoau-sEMOWOEeiHwGh9u2lsl4cv8")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
@@ -299,7 +299,7 @@ func TestLotusClientDealInfo() {
 }
 
 func TestLotusClientCalcCommP() {
-	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.-Y4pF34RGOten6YXoau-sEMOWOEeiHwGh9u2lsl4cv8")
+	lotusClient, err := lotus.LotusGetClient("http:///rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.-Y4pF34RGOten6YXoau-sEMOWOEeiHwGh9u2lsl4cv8")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
@@ -313,7 +313,7 @@ func TestLotusClientCalcCommP() {
 }
 
 func TestDataCap() {
-	swanClient, _ := swan.SwanGetClient("http://192.168.88.41:5002", "yr0wUW37PEm1ZUtes-0NVg", "878da9defc1841dd5ab9f4dcef1ec9af", "")
+	swanClient, _ := swan.SwanGetClient("http://", "yr0wUW37PEm1ZUtes-0NVg", "878da9defc1841dd5ab9f4dcef1ec9af", "")
 	isV, _ := swanClient.CheckDatacap("t3u7pumush376xbytsgs5wabkhtadjzfydxxda2vzyasg7cimkcphswrq66j4dubbhwpnojqd3jie6ermpwvvq")
 	logs.GetLogger().Info(isV)
 }
@@ -373,7 +373,7 @@ func TestGenerateUploadFile() {
 func TestLotusClientQeryAsk() {
 	logs.GetLogger().Info(1e18 == math.Pow10(18))
 	minerFid := "t03354"
-	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "")
+	lotusClient, err := lotus.LotusGetClient("http://:/rpc/v0", "")
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
