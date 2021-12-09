@@ -31,20 +31,6 @@ const (
 	PATH_TYPE_DIR       = 2 //directory
 	PATH_TYPE_UNKNOWN   = 3 //unknown path type
 
-	JSON_FILE_NAME_BY_CAR    = "car.json"
-	JSON_FILE_NAME_BY_GOCAR  = "car.json"
-	JSON_FILE_NAME_BY_UPLOAD = "car.json"
-	JSON_FILE_NAME_BY_TASK   = "-metadata.json"
-	JSON_FILE_NAME_BY_DEAL   = "-deals.json"
-	JSON_FILE_NAME_BY_AUTO   = "car.json"
-
-	CSV_FILE_NAME_BY_CAR    = "car.csv"
-	CSV_FILE_NAME_BY_GOCAR  = "car.csv"
-	CSV_FILE_NAME_BY_UPLOAD = "car.csv"
-	CSV_FILE_NAME_BY_TASK   = "-metadata.csv"
-	CSV_FILE_NAME_BY_DEAL   = "-deals.csv"
-	CSV_FILE_NAME_BY_AUTO   = "car.csv"
-
 	AuthorizationHeaderKey = "Authorization"
 
 	TASK_SOURCE_ID_DEFAULT      = 0
