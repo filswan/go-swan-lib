@@ -207,12 +207,15 @@ func TestGetDeal() {
 
 	var jsonData = []byte(`{"id":0,"data":{"deal":58172} }`)
 	request, error := http.NewRequest("POST", httpposturl, bytes.NewBuffer(jsonData))
+	if error != nil {
+		logs.GetLogger().Fatal(error)
+	}
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 	client := &http.Client{}
 	response, error := client.Do(request)
 	if error != nil {
-		panic(error)
+		logs.GetLogger().Fatal(error)
 	}
 	defer response.Body.Close()
 
@@ -280,7 +283,8 @@ func Test2Title() {
 }
 
 func TestLotusClientDealInfo() {
-	logs.GetLogger().Info(1e18 == math.Pow10(18))
+	equal := 1e18 == math.Pow10(18)
+	logs.GetLogger().Info(equal)
 	lotusClient, err := lotus.LotusGetClient("http://192.168.88.41:1234/rpc/v0", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.-Y4pF34RGOten6YXoau-sEMOWOEeiHwGh9u2lsl4cv8")
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -410,7 +414,7 @@ func TestTask() {
 		return
 	}
 
-	tasks, err := swanClient.SwanGetAssignedTasks()
+	tasks, err := swanClient.SwanGetAllTasks(constants.TASK_STATUS_ASSIGNED)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
