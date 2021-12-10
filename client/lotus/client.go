@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
-	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
@@ -339,8 +337,6 @@ func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
 
 	response := web.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
 
-	//logs.GetLogger().Info(response)
-
 	result := utils.GetFieldMapFromJson(response, "result")
 	if result == nil {
 		logs.GetLogger().Error("Failed to get result from:", lotusClient.ApiUrl)
@@ -371,11 +367,9 @@ func (lotusClient *LotusClient) LotusGetDealStatus(state int) string {
 
 	response := web.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
 
-	//logs.GetLogger().Info(response)
-
 	result := utils.GetFieldStrFromJson(response, "result")
 	if result == "" {
-		logs.GetLogger().Error("Failed to get result from:", lotusClient.ApiUrl)
+		logs.GetLogger().Error("no response from:", lotusClient.ApiUrl)
 		return ""
 	}
 
@@ -565,7 +559,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 	clientStartDealParamData := ClientStartDealParamData{
 		TransferType: constants.LOTUS_TRANSFER_TYPE_MANUAL,
 		Root: Cid{
-			Cid: carFile.DataCid,
+			Cid: carFile.PayloadCid,
 		},
 		PieceCid: Cid{
 			Cid: carFile.PieceCid,
@@ -617,60 +611,4 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 
 	logs.GetLogger().Info("deal CID:", clientStartDeal.Result.Cid)
 	return &clientStartDeal.Result.Cid, &startEpoch, nil
-}
-
-func LotusProposeOfflineDeal(carFile model.FileDesc, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {
-	fastRetrieval := strings.ToLower(strconv.FormatBool(dealConfig.FastRetrieval))
-	verifiedDeal := strings.ToLower(strconv.FormatBool(dealConfig.VerifiedDeal))
-	costFloat, _ := cost.Float64()
-	costStr := fmt.Sprintf("%.18f", costFloat)
-	startEpoch := dealConfig.StartEpoch - relativeEpoch
-
-	logs.GetLogger().Info("wallet:", dealConfig.SenderWallet)
-	logs.GetLogger().Info("miner:", dealConfig.MinerFid)
-	logs.GetLogger().Info("start epoch:", startEpoch)
-	logs.GetLogger().Info("price:", dealConfig.MinerPrice)
-	logs.GetLogger().Info("total cost:", costStr)
-	logs.GetLogger().Info("fast-retrieval:", fastRetrieval)
-	logs.GetLogger().Info("verified-deal:", verifiedDeal)
-	logs.GetLogger().Info("duration:", dealConfig.Duration)
-
-	cmd := "lotus client deal --from " + dealConfig.SenderWallet
-	cmd = cmd + " --start-epoch " + strconv.Itoa(startEpoch)
-	cmd = cmd + " --fast-retrieval=" + fastRetrieval + " --verified-deal=" + verifiedDeal
-	cmd = cmd + " --manual-piece-cid " + carFile.PieceCid + " --manual-piece-size " + strconv.FormatInt(pieceSize, 10)
-	cmd = cmd + " " + carFile.DataCid + " " + dealConfig.MinerFid + " " + costStr + " " + strconv.Itoa(dealConfig.Duration)
-	logs.GetLogger().Info(cmd)
-
-	if !dealConfig.SkipConfirmation {
-		logs.GetLogger().Info("Do you confirm to submit the deal?")
-		logs.GetLogger().Info("Press Y/y to continue, other key to quit")
-		reader := bufio.NewReader(os.Stdin)
-		response, err := reader.ReadString('\n')
-		if err != nil {
-			logs.GetLogger().Error(err)
-			return nil, nil, err
-		}
-
-		response = strings.TrimRight(response, "\n")
-
-		if strings.ToUpper(response) != "Y" {
-			logs.GetLogger().Info("Your input is ", response, ". Now give up submit the deal.")
-			return nil, nil, nil
-		}
-	}
-
-	result, err := client.ExecOsCmd(cmd, true)
-
-	if err != nil {
-		logs.GetLogger().Error("Failed to submit the deal.")
-		logs.GetLogger().Error(err)
-		return nil, nil, err
-	}
-	result = strings.Trim(result, "\n")
-	logs.GetLogger().Info(result)
-
-	dealCid := result
-
-	return &dealCid, &startEpoch, nil
 }
