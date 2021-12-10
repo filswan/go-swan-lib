@@ -1,5 +1,9 @@
 package model
 
+type DealInfo struct {
+	MinerFid string
+	DealCid  string
+}
 type FileDesc struct {
 	Uuid           string
 	SourceFileName string
@@ -11,10 +15,9 @@ type FileDesc struct {
 	CarFileMd5     string
 	CarFileUrl     string
 	CarFileSize    int64
-	DealCids       []string
-	DataCid        string
+	PayloadCid     string
 	PieceCid       string
-	MinerFids      []string
 	StartEpoch     *int
 	SourceId       *int
+	Deals          []DealInfo
 }
