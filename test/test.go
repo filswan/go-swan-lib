@@ -41,6 +41,8 @@ func TestCreateTask() {
 	carFiles := []*model.FileDesc{}
 	sourceId := 2
 	startEpoch := 8888
+	miners := []string{}
+	miners = append(miners, "t024557")
 	carFile := model.FileDesc{
 		Uuid:           "",
 		SourceFileName: "",
@@ -55,7 +57,7 @@ func TestCreateTask() {
 		DealCid:        "bafyreihdzwblxxuafpzn7olws62lxpqjc2u37zrer22gawxi3z7zrytrma",
 		DataCid:        "bafybeie6mpsur5hul7ejcetnsfghisb4fnc7hewykilhul5aycyl23mlde",
 		PieceCid:       "baga6ea4seaqorozvmj4b6lvruspz26gwubg37uesjuuyou5ictv4vhu5sdzliiy",
-		MinerFid:       "t024557",
+		MinerFid:       miners,
 		StartEpoch:     &startEpoch,
 		SourceId:       &sourceId,
 		Cost:           "131781500000000",
