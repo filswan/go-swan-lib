@@ -14,7 +14,7 @@ type FileDesc struct {
 	DealCid        string
 	DataCid        string
 	PieceCid       string
-	MinerFid       []string
+	MinerFids      []string
 	StartEpoch     *int
 	SourceId       *int
 	Cost           string
