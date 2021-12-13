@@ -1,8 +1,9 @@
 package model
 
 type DealInfo struct {
-	MinerFid string
-	DealCid  string
+	DealCid    string
+	MinerFid   string
+	StartEpoch int
 }
 type FileDesc struct {
 	Uuid           string
