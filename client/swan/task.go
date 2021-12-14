@@ -80,53 +80,6 @@ func (swanClient *SwanClient) SwanUpdateTaskByUuid(task model.Task, carFiles []*
 	return swanServerResponse, nil
 }
 
-type GetTaskByUuidResult struct {
-	Data   GetTaskByUuidResultData `json:"data"`
-	Status string                  `json:"status"`
-}
-type GetTaskByUuidResultData struct {
-	//AverageBid       string              `json:"average_bid"`
-	Task             model.Task           `json:"task"`
-	Miner            model.Miner          `json:"miner"`
-	Deal             []*model.OfflineDeal `json:"deal"`
-	TotalItems       int                  `json:"total_items"`
-	TotalTaskCount   int                  `json:"total_task_count"`
-	BidCount         int                  `json:"bid_count"`
-	DealCompleteRate string               `json:"deal_complete_rate"`
-}
-
-func (swanClient *SwanClient) SwanGetTaskByUuid(taskUuid string) (*GetTaskByUuidResult, error) {
-	if len(taskUuid) == 0 {
-		err := fmt.Errorf("please provide task uuid")
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks", taskUuid)
-
-	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
-
-	if response == "" {
-		err := fmt.Errorf("no response from:%s", apiUrl)
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
-	getTaskByUuidResult := &GetTaskByUuidResult{}
-	err := json.Unmarshal([]byte(response), getTaskByUuidResult)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
-	if !strings.EqualFold(getTaskByUuidResult.Status, constants.SWAN_API_STATUS_SUCCESS) {
-		err := fmt.Errorf("error:%s", getTaskByUuidResult.Status)
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
-	return getTaskByUuidResult, nil
-}
-
 type GetTaskResult struct {
 	Data   GetTaskResultData `json:"data"`
 	Status string            `json:"status"`
@@ -181,32 +134,109 @@ func (swanClient *SwanClient) SwanGetTasks(limit *int, status *string) (*GetTask
 }
 
 func (swanClient *SwanClient) SwanGetAllTasks(status string) ([]model.Task, error) {
-	getTaskResult, err := swanClient.SwanGetTasks(nil, &status)
+	limit := -1
+	getTaskResult, err := swanClient.SwanGetTasks(&limit, &status)
 	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+	return getTaskResult.Data.Task, err
+}
+
+type GetTaskByUuidResult struct {
+	Data   GetTaskByUuidResultData `json:"data"`
+	Status string                  `json:"status"`
+}
+type GetTaskByUuidResultData struct {
+	//AverageBid       string              `json:"average_bid"`
+	Task             model.Task           `json:"task"`
+	CarFiles         []model.CarFile      `json:"car_file"`
+	Miner            model.Miner          `json:"miner"`
+	Deal             []*model.OfflineDeal `json:"deal"`
+	TotalItems       int                  `json:"total_items"`
+	TotalTaskCount   int                  `json:"total_task_count"`
+	BidCount         int                  `json:"bid_count"`
+	DealCompleteRate string               `json:"deal_complete_rate"`
+}
+
+func (swanClient *SwanClient) SwanGetTaskByUuid(taskUuid string) (*GetTaskByUuidResult, error) {
+	if len(taskUuid) == 0 {
+		err := fmt.Errorf("please provide task uuid")
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks", taskUuid)
+
+	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
+
+	if response == "" {
+		err := fmt.Errorf("no response from:%s", apiUrl)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
-	if len(getTaskResult.Data.Task) == 0 {
-		return nil, nil
-	}
-
-	getTaskResult, err = swanClient.SwanGetTasks(&getTaskResult.Data.TotalTaskCount, &status)
+	getTaskByUuidResult := &GetTaskByUuidResult{}
+	err := json.Unmarshal([]byte(response), getTaskByUuidResult)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
-	if len(getTaskResult.Data.Task) == 0 {
-		return nil, nil
+	if !strings.EqualFold(getTaskByUuidResult.Status, constants.SWAN_API_STATUS_SUCCESS) {
+		err := fmt.Errorf("error:%s", getTaskByUuidResult.Status)
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
 
-	result := []model.Task{}
+	return getTaskByUuidResult, nil
+}
 
-	for _, task := range getTaskResult.Data.Task {
-		if task.Status == constants.TASK_STATUS_ASSIGNED && task.MinerFid != "" {
-			result = append(result, task)
-		}
+type SwanOfflineDeals4CarFileResult struct {
+	Data   SwanOfflineDeals4CarFileResultData `json:"data"`
+	Status string                             `json:"status"`
+}
+type SwanOfflineDeals4CarFileResultData struct {
+	CarFile          model.CarFile        `json:"car_file"`
+	OfflineDeals     []*model.OfflineDeal `json:"deal"`
+	TotalItems       int                  `json:"total_items"`
+	TotalTaskCount   int                  `json:"total_task_count"`
+	BidCount         int                  `json:"bid_count"`
+	DealCompleteRate string               `json:"deal_complete_rate"`
+}
+
+func (swanClient *SwanClient) SwanOfflineDeals4CarFile(taskUuid, carFileUrl string) (*SwanOfflineDeals4CarFileResultData, error) {
+	if len(taskUuid) == 0 {
+		err := fmt.Errorf("please provide task uuid")
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+	if len(carFileUrl) == 0 {
+		err := fmt.Errorf("please provide car file url")
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+	apiUrl := fmt.Sprintf("%s?task_uuid=%s&&car_file_url=%s", swanClient.ApiUrl, taskUuid, carFileUrl)
+
+	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
+
+	if response == "" {
+		err := fmt.Errorf("no response from:%s", apiUrl)
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
 
-	return result, nil
+	swanOfflineDeals4CarFileResult := &SwanOfflineDeals4CarFileResult{}
+	err := json.Unmarshal([]byte(response), swanOfflineDeals4CarFileResult)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if !strings.EqualFold(swanOfflineDeals4CarFileResult.Status, constants.SWAN_API_STATUS_SUCCESS) {
+		err := fmt.Errorf("error:%s", swanOfflineDeals4CarFileResult.Status)
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return &swanOfflineDeals4CarFileResult.Data, nil
 }
