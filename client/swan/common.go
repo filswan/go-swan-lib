@@ -17,6 +17,7 @@ type TokenAccessInfo struct {
 }
 
 type SwanClient struct {
+	ApiUrlToken string
 	ApiUrl      string
 	SwanToken   string
 	ApiKey      string
@@ -29,7 +30,7 @@ func (swanClient *SwanClient) SwanGetJwtToken() error {
 		AccessToken: swanClient.AccessToken,
 	}
 
-	if len(swanClient.ApiUrl) == 0 {
+	if len(swanClient.ApiUrlToken) == 0 {
 		err := fmt.Errorf("api url is required")
 		logs.GetLogger().Error(err)
 		return err
@@ -47,7 +48,7 @@ func (swanClient *SwanClient) SwanGetJwtToken() error {
 		return err
 	}
 
-	apiUrl := swanClient.ApiUrl + "/user/api_keys/jwt"
+	apiUrl := swanClient.ApiUrlToken + "/user/api_keys/jwt"
 
 	response := web.HttpPostNoToken(apiUrl, data)
 
@@ -88,7 +89,7 @@ func (swanClient *SwanClient) SwanGetJwtToken() error {
 	return nil
 }
 
-func SwanGetClient(apiUrl, apiKey, accessToken, swanToken string) (*SwanClient, error) {
+func SwanGetClient(apiUrlToken, apiUrl, apiKey, accessToken, swanToken string) (*SwanClient, error) {
 	if len(apiUrl) == 0 {
 		err := fmt.Errorf("api url is required")
 		logs.GetLogger().Error(err)
@@ -96,6 +97,7 @@ func SwanGetClient(apiUrl, apiKey, accessToken, swanToken string) (*SwanClient, 
 	}
 
 	swanClient := &SwanClient{
+		ApiUrlToken: apiUrlToken,
 		ApiUrl:      apiUrl,
 		ApiKey:      apiKey,
 		AccessToken: accessToken,
@@ -111,6 +113,12 @@ func SwanGetClient(apiUrl, apiKey, accessToken, swanToken string) (*SwanClient, 
 }
 
 func (swanClient *SwanClient) SwanGetJwtTokenUp3Times() error {
+	if len(swanClient.ApiUrlToken) == 0 {
+		err := fmt.Errorf("api url for token is required")
+		logs.GetLogger().Error(err)
+		return err
+	}
+
 	if len(swanClient.ApiUrl) == 0 {
 		err := fmt.Errorf("api url is required")
 		logs.GetLogger().Error(err)
