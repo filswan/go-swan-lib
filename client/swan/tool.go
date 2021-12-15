@@ -12,7 +12,7 @@ import (
 )
 
 func (swanClient *SwanClient) CheckDatacap(wallet string) (bool, error) {
-	apiUrl := swanClient.ApiUrl + "/tools/check_datacap?address=" + wallet
+	apiUrl := swanClient.ApiUrlToken + "/tools/check_datacap?address=" + wallet
 	params := url.Values{}
 
 	response := web.HttpGetNoToken(apiUrl, strings.NewReader(params.Encode()))
