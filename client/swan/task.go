@@ -19,11 +19,11 @@ type SwanServerResponse struct {
 	Message string `json:"message"`
 }
 
-func (swanClient *SwanClient) SwanCreateTask(task model.Task, carFiles []*model.FileDesc) (*SwanServerResponse, error) {
+func (swanClient *SwanClient) SwanCreateTask(task model.Task, fileDescs []*model.FileDesc) (*SwanServerResponse, error) {
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/create_task")
 	params := map[string]interface{}{
 		"task":      task,
-		"car_files": carFiles,
+		"file_desc": fileDescs,
 	}
 
 	response := web.HttpPost(apiUrl, swanClient.SwanToken, params)
