@@ -364,3 +364,21 @@ func GetPriceFormat(price string) string {
 
 	return result
 }
+
+func GetStr(val interface{}) string {
+	switch val := val.(type) {
+	case float64:
+		return strconv.FormatFloat(val, 'e', -1, 64)
+	case float32:
+		strconv.FormatFloat(float64(val), 'e', -1, 64)
+	case string:
+		return val
+	case int:
+		return strconv.Itoa(val)
+	case int64:
+		return strconv.FormatInt(val, 10)
+	default:
+		return ""
+	}
+	return ""
+}
