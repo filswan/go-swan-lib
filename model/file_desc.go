@@ -18,7 +18,7 @@ type FileDesc struct {
 	CarFileSize    int64
 	PayloadCid     string
 	PieceCid       string
-	StartEpoch     *int
+	StartEpoch     *int64
 	SourceId       *int
 	Deals          []DealInfo
 }
