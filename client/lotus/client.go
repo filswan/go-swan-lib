@@ -247,14 +247,14 @@ type ClientQueryAsk struct {
 type ClientQueryAskResult struct {
 	Price         string
 	VerifiedPrice string
-	MinPieceSize  int
-	MaxPieceSize  int
+	MinPieceSize  int64
+	MaxPieceSize  int64
 }
 type MinerConfig struct {
 	Price         decimal.Decimal
 	VerifiedPrice decimal.Decimal
-	MinPieceSize  int
-	MaxPieceSize  int
+	MinPieceSize  int64
+	MaxPieceSize  int64
 }
 
 func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConfig, error) {
@@ -310,19 +310,6 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 	}
 
 	return minerConfig, nil
-}
-
-func (lotusClient *LotusClient) LotusGetMinerConfig(minerFid string) (*decimal.Decimal, *decimal.Decimal, *int, *int) {
-	minerConfig, err := lotusClient.LotusClientQueryAsk(minerFid)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil, nil, nil, nil
-	}
-
-	minerPrice := minerConfig.Price.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
-	minerVerifiedPrice := minerConfig.VerifiedPrice.Div(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
-
-	return &minerPrice, &minerVerifiedPrice, &minerConfig.MaxPieceSize, &minerConfig.MinPieceSize
 }
 
 func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
