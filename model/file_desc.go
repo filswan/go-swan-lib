@@ -20,5 +20,5 @@ type FileDesc struct {
 	PieceCid       string
 	StartEpoch     *int64
 	SourceId       *int
-	Deals          []DealInfo
+	Deals          []*DealInfo
 }
