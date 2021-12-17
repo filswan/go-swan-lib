@@ -23,4 +23,5 @@ type OfflineDeal struct {
 	PieceCid             string `json:"piece_cid"`
 	DownloadedAt         string `json:"downloaded_at"`
 	Cost                 string `json:"cost"`
+	MinerFid             string `json:"miner_fid"`
 }
