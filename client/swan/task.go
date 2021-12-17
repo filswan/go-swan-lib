@@ -197,7 +197,7 @@ type SwanOfflineDeals4CarFileResult struct {
 }
 type SwanOfflineDeals4CarFileResultData struct {
 	CarFile          model.CarFile        `json:"car_file"`
-	OfflineDeals     []*model.OfflineDeal `json:"deal"`
+	OfflineDeals     []*model.OfflineDeal `json:"offline_deals"`
 	TotalItems       int                  `json:"total_items"`
 	TotalTaskCount   int                  `json:"total_task_count"`
 	BidCount         int                  `json:"bid_count"`
