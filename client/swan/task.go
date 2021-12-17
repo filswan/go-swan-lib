@@ -215,7 +215,7 @@ func (swanClient *SwanClient) SwanOfflineDeals4CarFile(taskUuid, carFileUrl stri
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
-	apiUrl := fmt.Sprintf("%s?task_uuid=%s&&car_file_url=%s", swanClient.ApiUrl, taskUuid, carFileUrl)
+	apiUrl := fmt.Sprintf("%s?task_uuid=%s&car_file_url=%s", swanClient.ApiUrl, taskUuid, carFileUrl)
 
 	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
 
