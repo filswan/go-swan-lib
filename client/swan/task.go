@@ -22,8 +22,8 @@ type SwanServerResponse struct {
 func (swanClient *SwanClient) SwanCreateTask(task model.Task, fileDescs []*model.FileDesc) (*SwanServerResponse, error) {
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/create_task")
 	params := map[string]interface{}{
-		"task":      task,
-		"file_desc": fileDescs,
+		"task":       task,
+		"file_descs": fileDescs,
 	}
 
 	response := web.HttpPost(apiUrl, swanClient.SwanToken, params)
@@ -52,11 +52,11 @@ func (swanClient *SwanClient) SwanCreateTask(task model.Task, fileDescs []*model
 func (swanClient *SwanClient) SwanUpdateTaskByUuid(task model.Task, carFiles []*model.FileDesc) (*SwanServerResponse, error) {
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/update_task_after_sending_deal")
 	params := map[string]interface{}{
-		"task":      task,
-		"car_files": carFiles,
+		"task":       task,
+		"file_descs": carFiles,
 	}
 
-	response := web.HttpPost(apiUrl, swanClient.SwanToken, params)
+	response := web.HttpPut(apiUrl, swanClient.SwanToken, params)
 
 	if response == "" {
 		err := fmt.Errorf("no response from:%s", apiUrl)
