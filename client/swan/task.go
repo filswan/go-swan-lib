@@ -50,7 +50,7 @@ func (swanClient *SwanClient) SwanCreateTask(task model.Task, fileDescs []*model
 }
 
 func (swanClient *SwanClient) SwanUpdateTaskByUuid(task model.Task, carFiles []*model.FileDesc) (*SwanServerResponse, error) {
-	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/create_task")
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/update_task_after_sending_deal")
 	params := map[string]interface{}{
 		"task":      task,
 		"car_files": carFiles,
