@@ -24,7 +24,7 @@ type SwanClient struct {
 	AccessToken string
 }
 
-func (swanClient *SwanClient) SwanGetJwtToken() error {
+func (swanClient *SwanClient) GetJwtToken() error {
 	data := TokenAccessInfo{
 		ApiKey:      swanClient.ApiKey,
 		AccessToken: swanClient.AccessToken,
@@ -89,7 +89,7 @@ func (swanClient *SwanClient) SwanGetJwtToken() error {
 	return nil
 }
 
-func SwanGetClient(apiUrlToken, apiUrl, apiKey, accessToken, swanToken string) (*SwanClient, error) {
+func GetClient(apiUrlToken, apiUrl, apiKey, accessToken, swanToken string) (*SwanClient, error) {
 	if len(apiUrl) == 0 {
 		err := fmt.Errorf("api url is required")
 		logs.GetLogger().Error(err)
@@ -105,14 +105,14 @@ func SwanGetClient(apiUrlToken, apiUrl, apiKey, accessToken, swanToken string) (
 	}
 
 	if swanToken == constants.EMPTY_STRING {
-		err := swanClient.SwanGetJwtTokenUp3Times()
+		err := swanClient.GetJwtTokenUp3Times()
 		return swanClient, err
 	}
 
 	return swanClient, nil
 }
 
-func (swanClient *SwanClient) SwanGetJwtTokenUp3Times() error {
+func (swanClient *SwanClient) GetJwtTokenUp3Times() error {
 	if len(swanClient.ApiUrlToken) == 0 {
 		err := fmt.Errorf("api url for token is required")
 		logs.GetLogger().Error(err)
@@ -139,7 +139,7 @@ func (swanClient *SwanClient) SwanGetJwtTokenUp3Times() error {
 
 	var err error
 	for i := 0; i < 3; i++ {
-		err = swanClient.SwanGetJwtToken()
+		err = swanClient.GetJwtToken()
 		if err == nil {
 			break
 		}
@@ -156,7 +156,7 @@ func (swanClient *SwanClient) SwanGetJwtTokenUp3Times() error {
 }
 
 func (swanClient *SwanClient) SendHeartbeatRequest(minerFid string) error {
-	err := swanClient.SwanGetJwtTokenUp3Times()
+	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err

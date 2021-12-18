@@ -34,8 +34,8 @@ type UpdateOfflineDealData struct {
 	Message string            `json:"message"`
 }
 
-func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, limit ...string) []model.OfflineDeal {
-	err := swanClient.SwanGetJwtTokenUp3Times()
+func (swanClient *SwanClient) GetOfflineDeals(minerFid, status string, limit ...string) []model.OfflineDeal {
+	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil
@@ -63,8 +63,8 @@ func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, limit
 	return getOfflineDealResponse.Data.Deal
 }
 
-func (swanClient *SwanClient) SwanUpdateOfflineDealStatus(dealId int, status string, statusInfo ...string) bool {
-	err := swanClient.SwanGetJwtTokenUp3Times()
+func (swanClient *SwanClient) UpdateOfflineDealStatus(dealId int, status string, statusInfo ...string) bool {
+	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return false

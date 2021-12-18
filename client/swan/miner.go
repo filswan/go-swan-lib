@@ -47,7 +47,7 @@ func (swanClient *SwanClient) GetMiner(minerFid string) (*MinerResponse, error) 
 }
 
 func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner model.Miner) {
-	err := swanClient.SwanGetJwtTokenUp3Times()
+	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return
