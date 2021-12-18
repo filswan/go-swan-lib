@@ -77,7 +77,7 @@ type GetAutoBidCarFilesByStatusResultData struct {
 func (swanClient *SwanClient) GetAutoBidCarFilesByStatus(carFileStatus string) (*GetAutoBidCarFilesByStatusResultData, error) {
 	carFileStatus = strings.Trim(carFileStatus, " ")
 	if len(carFileStatus) == 0 {
-		err := fmt.Errorf("please provide task uuid")
+		err := fmt.Errorf("please provide car file status")
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
