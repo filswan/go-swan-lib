@@ -30,11 +30,13 @@ func (swanClient *SwanClient) GetCarFileByUuidUrl(taskUuid, carFileUrl string) (
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
+
 	if len(carFileUrl) == 0 {
 		err := fmt.Errorf("please provide car file url")
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
+
 	apiUrl := fmt.Sprintf("%s/car_files/car_file?task_uuid=%s&car_file_url=%s", swanClient.ApiUrl, taskUuid, carFileUrl)
 
 	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
