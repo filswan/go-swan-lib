@@ -84,7 +84,7 @@ func (swanClient *SwanClient) GetAutoBidCarFilesByStatus(carFileStatus string) (
 		return nil, err
 	}
 
-	apiUrl := fmt.Sprintf("%s/car_files/auto_bid?car_file_status=%s", swanClient.ApiUrl, carFileStatus)
+	apiUrl := fmt.Sprintf("%s/car_files/auto_bid/get_by_status?car_file_status=%s", swanClient.ApiUrl, carFileStatus)
 
 	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
 
