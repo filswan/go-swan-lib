@@ -11,18 +11,10 @@ import (
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/model"
+	"github.com/filswan/go-swan-lib/utils"
 )
 
 const GET_OFFLINEDEAL_LIMIT_DEFAULT = 50
-
-type GetOfflineDealResponse struct {
-	Data   GetOfflineDealData `json:"data"`
-	Status string             `json:"status"`
-}
-
-type GetOfflineDealData struct {
-	Deal []model.OfflineDeal `json:"deal"`
-}
 
 type UpdateOfflineDealResponse struct {
 	Data   UpdateOfflineDealData `json:"data"`
@@ -34,20 +26,31 @@ type UpdateOfflineDealData struct {
 	Message string            `json:"message"`
 }
 
-func (swanClient *SwanClient) GetOfflineDeals(minerFid, status string, limit ...string) []model.OfflineDeal {
+type GetOfflineDealsByStatusParams struct {
+	DealStatus string  `json:"status"`
+	MinerFid   *string `json:"miner_fid"`
+	PageNum    *int    `json:"page_num"`
+	PageSize   *int    `json:"page_size"`
+}
+
+type GetOfflineDealResponse struct {
+	Data   GetOfflineDealData `json:"data"`
+	Status string             `json:"status"`
+}
+
+type GetOfflineDealData struct {
+	Deal []model.OfflineDeal `json:"deal"`
+}
+
+func (swanClient *SwanClient) GetOfflineDealsByStatus(minerFid, params GetOfflineDealsByStatusParams) []model.OfflineDeal {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil
 	}
 
-	rowLimit := strconv.Itoa(GET_OFFLINEDEAL_LIMIT_DEFAULT)
-	if len(limit) > 0 {
-		rowLimit = limit[0]
-	}
-
-	urlStr := swanClient.ApiUrl + "/offline_deals/" + minerFid + "?deal_status=" + status + "&limit=" + rowLimit + "&offset=0"
-	response := web.HttpGet(urlStr, swanClient.SwanToken, "")
+	urlStr := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/get_by_status")
+	response := web.HttpGet(urlStr, swanClient.SwanToken, params)
 	getOfflineDealResponse := GetOfflineDealResponse{}
 	err = json.Unmarshal([]byte(response), &getOfflineDealResponse)
 	if err != nil {
@@ -56,7 +59,7 @@ func (swanClient *SwanClient) GetOfflineDeals(minerFid, status string, limit ...
 	}
 
 	if !strings.EqualFold(getOfflineDealResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
-		logs.GetLogger().Error("Get offline deal with status ", status, " failed")
+		logs.GetLogger().Error("Get offline deal with status ", params.DealStatus, " failed")
 		return nil
 	}
 
