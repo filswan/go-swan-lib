@@ -37,7 +37,7 @@ type GetOfflineDealResponse struct {
 }
 
 type GetOfflineDealData struct {
-	Deal []model.OfflineDeal `json:"deal"`
+	OfflineDeals []model.OfflineDeal `json:"offline_deals"`
 }
 
 func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsByStatusParams) ([]model.OfflineDeal, error) {
@@ -62,7 +62,7 @@ func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsBySt
 		return nil, err
 	}
 
-	return getOfflineDealResponse.Data.Deal, nil
+	return getOfflineDealResponse.Data.OfflineDeals, nil
 }
 
 type UpdateOfflineDealParams struct {
