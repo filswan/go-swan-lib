@@ -25,6 +25,12 @@ const (
 
 	TASK_IS_PUBLIC = 1
 
+	CAR_FILE_STATUS_CREATED  = "Created"
+	CAR_FILE_STATUS_ASSIGNED = "Assigned"
+
+	OFFLINE_DEAL_STATUS_ASSIGNED = "Assigned"
+	OFFLINE_DEAL_STATUS_CREATED  = "Created"
+
 	EPOCH_PER_HOUR = 120
 
 	PATH_TYPE_NOT_EXIST = 0 //this path not exists
