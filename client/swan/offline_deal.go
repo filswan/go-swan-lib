@@ -3,8 +3,6 @@ package swan
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/filswan/go-swan-lib/client/web"
@@ -67,40 +65,30 @@ func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsBySt
 	return getOfflineDealResponse.Data.Deal, nil
 }
 
-func (swanClient *SwanClient) UpdateOfflineDealStatus(dealId int, status string, statusInfo ...string) bool {
+type UpdateOfflineDealParams struct {
+	Id         int     `json:"id"`
+	DealCid    *string `json:"deal_cid"`
+	FilePath   *string `json:"file_path"`
+	Status     string  `json:"status"`
+	StartEpoch *int    `json:"start_epoch"`
+	Note       *string `json:"note"`
+}
+
+func (swanClient *SwanClient) UpdateOfflineDeal(dealId int, params UpdateOfflineDealParams) bool {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return false
 	}
 
-	if len(status) == 0 {
+	if len(params.Status) == 0 {
 		logs.GetLogger().Error("Please provide status")
 		return false
 	}
 
-	apiUrl := swanClient.ApiUrl + "/my_miner/deals/" + strconv.Itoa(dealId)
+	apiUrl := swanClient.ApiUrl + "offline_deals/update"
 
-	params := url.Values{}
-	params.Add("status", status)
-
-	if len(statusInfo) > 0 && len(statusInfo[0]) > 0 {
-		params.Add("note", statusInfo[0])
-	}
-
-	if len(statusInfo) > 1 && len(statusInfo[1]) > 0 {
-		params.Add("file_path", statusInfo[1])
-	}
-
-	if len(statusInfo) > 2 && len(statusInfo[2]) > 0 {
-		params.Add("file_size", statusInfo[2])
-	}
-
-	if len(statusInfo) > 3 && len(statusInfo[3]) > 0 {
-		params.Add("cost", statusInfo[3])
-	}
-
-	response := web.HttpPut(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	response := web.HttpPut(apiUrl, swanClient.SwanToken, params)
 
 	updateOfflineDealResponse := &UpdateOfflineDealResponse{}
 	err = json.Unmarshal([]byte(response), updateOfflineDealResponse)
@@ -110,7 +98,7 @@ func (swanClient *SwanClient) UpdateOfflineDealStatus(dealId int, status string,
 	}
 
 	if !strings.EqualFold(updateOfflineDealResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
-		err := fmt.Errorf("deal(id=%d),failed to update offline deal status to %s,%s", dealId, status, updateOfflineDealResponse.Data.Message)
+		err := fmt.Errorf("deal(id=%d),failed to update offline deal status to %s,%s", dealId, params.Status, updateOfflineDealResponse.Data.Message)
 		logs.GetLogger().Error(err)
 		return false
 	}
