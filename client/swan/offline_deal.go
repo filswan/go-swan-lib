@@ -37,10 +37,10 @@ type GetOfflineDealResponse struct {
 }
 
 type GetOfflineDealData struct {
-	OfflineDeals []model.OfflineDeal `json:"offline_deals"`
+	OfflineDeals []*model.OfflineDeal `json:"offline_deals"`
 }
 
-func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsByStatusParams) ([]model.OfflineDeal, error) {
+func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsByStatusParams) ([]*model.OfflineDeal, error) {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
