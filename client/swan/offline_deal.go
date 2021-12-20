@@ -93,7 +93,7 @@ func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) 
 		return err
 	}
 
-	apiUrl := swanClient.ApiUrl + "offline_deals/update"
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/update")
 
 	response := web.HttpPut(apiUrl, swanClient.SwanToken, params)
 
