@@ -42,11 +42,11 @@ type GetOfflineDealData struct {
 	Deal []model.OfflineDeal `json:"deal"`
 }
 
-func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsByStatusParams) []model.OfflineDeal {
+func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsByStatusParams) ([]model.OfflineDeal, error) {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil
+		return nil, err
 	}
 
 	urlStr := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/get_by_status")
@@ -55,15 +55,16 @@ func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsBySt
 	err = json.Unmarshal([]byte(response), &getOfflineDealResponse)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil
+		return nil, err
 	}
 
 	if !strings.EqualFold(getOfflineDealResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
-		logs.GetLogger().Error("Get offline deal with status ", params.DealStatus, " failed")
-		return nil
+		err := fmt.Errorf("get offline deal with status:%s failed", params.DealStatus)
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
 
-	return getOfflineDealResponse.Data.Deal
+	return getOfflineDealResponse.Data.Deal, nil
 }
 
 func (swanClient *SwanClient) UpdateOfflineDealStatus(dealId int, status string, statusInfo ...string) bool {
