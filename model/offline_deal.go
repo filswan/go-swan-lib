@@ -24,4 +24,10 @@ type OfflineDeal struct {
 	DownloadedAt         string `json:"downloaded_at"`
 	Cost                 string `json:"cost"`
 	MinerFid             string `json:"miner_fid"`
+	TaskUuid             string `json:"task_uuid"`
+	TaskType             string `json:"task_type"`
+	FastRetrieval        string `json:"fast_retrieval"`
+	MaxPrice             string `json:"max_price"`
+	Duration             string `json:"duration"`
+	SourceId             int    `json:"source_id"`
 }
