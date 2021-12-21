@@ -22,6 +22,7 @@ type UpdateOfflineDealResponse struct {
 type GetOfflineDealsByStatusParams struct {
 	DealStatus string  `json:"status"`
 	MinerFid   *string `json:"miner_fid"`
+	SourceId   *int    `json:"source_id"`
 	PageNum    *int    `json:"page_num"`
 	PageSize   *int    `json:"page_size"`
 }
@@ -35,13 +36,19 @@ type GetOfflineDealData struct {
 	OfflineDeals []*model.OfflineDeal `json:"offline_deals"`
 }
 
-func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsByStatusParams) ([]*model.OfflineDeal, error) {
+func (swanClient *SwanClient) GetOfflineDealsByStatus(dealStatus string, minerFid *string, sourceId, pageNum, pageSize *int) ([]*model.OfflineDeal, error) {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
-
+	params := GetOfflineDealsByStatusParams{
+		DealStatus: dealStatus,
+		MinerFid:   minerFid,
+		SourceId:   sourceId,
+		PageNum:    pageNum,
+		PageSize:   pageSize,
+	}
 	urlStr := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/get_by_status")
 	response := web.HttpGet(urlStr, swanClient.SwanToken, params)
 	getOfflineDealResponse := GetOfflineDealResponse{}
