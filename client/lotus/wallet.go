@@ -21,6 +21,11 @@ func IsWalletVerified(wallet string) (bool, error) {
 	result, err := client.ExecOsCmd(cmd, true)
 	if err != nil {
 		logs.GetLogger().Error(err)
+
+		if strings.Contains(err.Error(), "is not a verified client") {
+			return false, nil
+		}
+
 		return false, err
 	}
 

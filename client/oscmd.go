@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/filswan/go-swan-lib/logs"
 )
@@ -38,13 +39,11 @@ func ExecOsCmdBase(cmdStr string, out2Screen bool, checkStdErr bool) (string, er
 
 	err := cmd.Run()
 	if err != nil || len(stderrBuf.String()) != 0 {
-		errMsg := cmdStr
-		if len(stderrBuf.String()) != 0 {
-			errMsg = errMsg + "," + stderrBuf.String()
-		}
-		if err != nil {
-			errMsg = errMsg + "," + err.Error()
-		}
+		errs := []string{}
+		errs = append(errs, stderrBuf.String())
+		errs = append(errs, err.Error())
+		errMsg := strings.Join(errs, ",")
+
 		outErr := errors.New(errMsg)
 		logs.GetLogger().Error(outErr)
 		return "", outErr
