@@ -15,13 +15,8 @@ import (
 const GET_OFFLINEDEAL_LIMIT_DEFAULT = 50
 
 type UpdateOfflineDealResponse struct {
-	Data   UpdateOfflineDealData `json:"data"`
-	Status string                `json:"status"`
-}
-
-type UpdateOfflineDealData struct {
-	Deal    model.OfflineDeal `json:"deal"`
-	Message string            `json:"message"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }
 
 type GetOfflineDealsByStatusParams struct {
@@ -105,7 +100,7 @@ func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) 
 	}
 
 	if !strings.EqualFold(updateOfflineDealResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
-		err := fmt.Errorf("deal(id=%d),failed to update offline deal status to %s,%s", params.DealId, params.Status, updateOfflineDealResponse.Data.Message)
+		err := fmt.Errorf("deal(id=%d),failed to update offline deal status to %s,%s", params.DealId, params.Status, updateOfflineDealResponse.Message)
 		logs.GetLogger().Error(err)
 		return err
 	}
