@@ -20,4 +20,3 @@ logs/info.log
 logs/error.log
 build/swan-lib
 build/swan-lib_unix
-main.go
