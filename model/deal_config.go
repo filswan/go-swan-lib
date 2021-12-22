@@ -13,19 +13,8 @@ type DealConfig struct {
 	MinerFid         string
 	SenderWallet     string
 	Duration         int
-}
-
-func GetDealConfig(verifiedDeal, fastRetrieval, skipConfirmation bool, minerPrice decimal.Decimal, startEpoch, duration int, minerFid, senderWallet string) *DealConfig {
-	dealConfig := &DealConfig{
-		VerifiedDeal:     verifiedDeal,
-		FastRetrieval:    fastRetrieval,
-		SkipConfirmation: skipConfirmation,
-		MinerPrice:       minerPrice,
-		StartEpoch:       startEpoch,
-		MinerFid:         minerFid,
-		SenderWallet:     senderWallet,
-		Duration:         duration,
-	}
-
-	return dealConfig
+	TransferType     string
+	PayloadCid       string
+	PieceCid         string
+	FileSize         int64
 }
