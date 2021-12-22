@@ -13,6 +13,7 @@ type DealConfig struct {
 	MinerFid         string
 	SenderWallet     string
 	Duration         int
+	TransferType     string
 }
 
 func GetDealConfig(verifiedDeal, fastRetrieval, skipConfirmation bool, minerPrice decimal.Decimal, startEpoch, duration int, minerFid, senderWallet string) *DealConfig {
