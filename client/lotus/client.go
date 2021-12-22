@@ -520,7 +520,7 @@ func (lotusClient *LotusClient) LotusClientGenCar(srcFilePath, destCarFilePath s
 type ClientStartDealParamData struct {
 	TransferType string
 	Root         Cid
-	PieceCid     Cid
+	PieceCid     *Cid
 	PieceSize    int
 }
 
@@ -568,10 +568,15 @@ func (lotusClient *LotusClient) LotusClientStartDeal(carFile model.FileDesc, cos
 		Root: Cid{
 			Cid: carFile.DataCid,
 		},
-		PieceCid: Cid{
-			Cid: carFile.PieceCid,
-		},
+		PieceCid:  nil,
 		PieceSize: int(pieceSize),
+	}
+
+	carFile.PieceCid = strings.Trim(carFile.PieceCid, " ")
+	if carFile.PieceCid != "" {
+		clientStartDealParamData.PieceCid = &Cid{
+			Cid: carFile.PieceCid,
+		}
 	}
 
 	clientStartDealParam := ClientStartDealParam{
