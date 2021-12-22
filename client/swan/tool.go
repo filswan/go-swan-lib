@@ -24,17 +24,16 @@ func (swanClient *SwanClient) CheckDatacap(wallet string) (bool, error) {
 	}
 
 	status := utils.GetFieldStrFromJson(response, "status")
-	message := utils.GetFieldStrFromJson(response, "message")
 
-	if strings.EqualFold(status, constants.SWAN_API_STATUS_SUCCESS) {
-		return true, nil
+	if !strings.EqualFold(status, constants.SWAN_API_STATUS_SUCCESS) {
+		message := utils.GetFieldStrFromJson(response, "message")
+		err := fmt.Errorf("error:%s,%s", status, message)
+		logs.GetLogger().Error(err)
+		return false, err
 	}
 
-	if strings.EqualFold(message, constants.WALLET_NON_VERIFIED_MESSAGE) {
-		return false, nil
-	}
+	data := utils.GetFieldMapFromJson(response, "data")
+	isVerified := data["is_verified"].(bool)
 
-	err := fmt.Errorf("status:%s,message:%s", status, message)
-	logs.GetLogger().Error(err)
-	return false, err
+	return isVerified, nil
 }
