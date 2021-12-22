@@ -16,7 +16,7 @@ type DealConfig struct {
 	TransferType     string
 }
 
-func GetDealConfig(verifiedDeal, fastRetrieval, skipConfirmation bool, minerPrice decimal.Decimal, startEpoch, duration int, minerFid, senderWallet string) *DealConfig {
+func GetDealConfig(verifiedDeal, fastRetrieval, skipConfirmation bool, minerPrice decimal.Decimal, startEpoch, duration int, minerFid, senderWallet, transferType string) *DealConfig {
 	dealConfig := &DealConfig{
 		VerifiedDeal:     verifiedDeal,
 		FastRetrieval:    fastRetrieval,
@@ -26,6 +26,7 @@ func GetDealConfig(verifiedDeal, fastRetrieval, skipConfirmation bool, minerPric
 		MinerFid:         minerFid,
 		SenderWallet:     senderWallet,
 		Duration:         duration,
+		TransferType:     transferType,
 	}
 
 	return dealConfig
