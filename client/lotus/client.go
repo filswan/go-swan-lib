@@ -145,20 +145,20 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientD
 	err := json.Unmarshal([]byte(response), clientDealInfo)
 	if err != nil {
 		err := fmt.Errorf("deal:%s,%s", dealCid, err.Error())
-		//logs.GetLogger().Error(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if clientDealInfo.Error != nil {
 		err := fmt.Errorf("deal:%s,code:%d,message:%s", dealCid, clientDealInfo.Error.Code, clientDealInfo.Error.Message)
-		//logs.GetLogger().Error(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	pricePerEpoch, err := decimal.NewFromString(clientDealInfo.Result.PricePerEpoch)
 	if err != nil {
 		err := fmt.Errorf("deal:%s,%s", dealCid, err.Error())
-		//logs.GetLogger().Error(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 	duration := decimal.NewFromInt(int64(clientDealInfo.Result.Duration))
