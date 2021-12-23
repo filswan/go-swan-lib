@@ -145,20 +145,20 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientD
 	err := json.Unmarshal([]byte(response), clientDealInfo)
 	if err != nil {
 		err := fmt.Errorf("deal:%s,%s", dealCid, err.Error())
-		//logs.GetLogger().Error(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if clientDealInfo.Error != nil {
 		err := fmt.Errorf("deal:%s,code:%d,message:%s", dealCid, clientDealInfo.Error.Code, clientDealInfo.Error.Message)
-		//logs.GetLogger().Error(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	pricePerEpoch, err := decimal.NewFromString(clientDealInfo.Result.PricePerEpoch)
 	if err != nil {
 		err := fmt.Errorf("deal:%s,%s", dealCid, err.Error())
-		//logs.GetLogger().Error(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 	duration := decimal.NewFromInt(int64(clientDealInfo.Result.Duration))
@@ -501,7 +501,7 @@ func (lotusClient *LotusClient) LotusClientGenCar(srcFilePath, destCarFilePath s
 type ClientStartDealParamData struct {
 	TransferType string
 	Root         Cid
-	PieceCid     Cid
+	PieceCid     *Cid
 	PieceSize    int
 }
 
@@ -521,7 +521,10 @@ type ClientStartDeal struct {
 	Result Cid `json:"result"`
 }
 
-func (lotusClient *LotusClient) LotusClientStartDeal(payloadCid, pieceCid string, cost decimal.Decimal, pieceSize int64, dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {
+func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {
+	pieceSize, sectorSize := utils.CalculatePieceSize(dealConfig.FileSize)
+	cost := utils.CalculateRealCost(sectorSize, dealConfig.MinerPrice)
+
 	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
 	startEpoch := dealConfig.StartEpoch - relativeEpoch
 
@@ -544,14 +547,19 @@ func (lotusClient *LotusClient) LotusClientStartDeal(payloadCid, pieceCid string
 	}
 
 	clientStartDealParamData := ClientStartDealParamData{
-		TransferType: constants.LOTUS_TRANSFER_TYPE_MANUAL,
+		TransferType: dealConfig.TransferType, //constants.LOTUS_TRANSFER_TYPE_MANUAL,
 		Root: Cid{
-			Cid: payloadCid,
+			Cid: dealConfig.PayloadCid,
 		},
-		PieceCid: Cid{
-			Cid: pieceCid,
-		},
+		PieceCid:  nil,
 		PieceSize: int(pieceSize),
+	}
+
+	dealConfig.PieceCid = strings.Trim(dealConfig.PieceCid, " ")
+	if dealConfig.PieceCid != "" {
+		clientStartDealParamData.PieceCid = &Cid{
+			Cid: dealConfig.PieceCid,
+		}
 	}
 
 	clientStartDealParam := ClientStartDealParam{
@@ -578,7 +586,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(payloadCid, pieceCid string
 
 	response := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if response == "" {
-		err := fmt.Errorf("failed to send deal for %s, no response", payloadCid)
+		err := fmt.Errorf("failed to send deal for %s, no response", dealConfig.PayloadCid)
 		logs.GetLogger().Error(err)
 		return nil, nil, err
 	}
