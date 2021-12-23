@@ -62,4 +62,6 @@ const (
 	LOTUS_AUTH_ADMIN = "admin"
 
 	LOTUS_TRANSFER_TYPE_MANUAL = "manual"
+
+	MAX_AUTO_BID_COPY_NUMBER = 8
 )
