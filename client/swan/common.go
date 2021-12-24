@@ -13,6 +13,10 @@ type SwanClient struct {
 	ApiKey      string
 	AccessToken string
 }
+type SwanServerResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
 
 func GetClient(apiUrl, apiKey, accessToken, swanToken string) (*SwanClient, error) {
 	if len(apiUrl) == 0 {

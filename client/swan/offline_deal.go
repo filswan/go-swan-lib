@@ -76,6 +76,7 @@ type UpdateOfflineDealParams struct {
 	Note       *string `json:"note"`
 }
 
+//for public and auto-bid task
 func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) error {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
@@ -95,7 +96,7 @@ func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) 
 		return err
 	}
 
-	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/update")
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/update_offline_deal")
 
 	response := web.HttpPut(apiUrl, swanClient.SwanToken, params)
 
@@ -113,4 +114,31 @@ func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) 
 	}
 
 	return nil
+}
+
+//for public and non auto-bid task
+func (swanClient *SwanClient) CreateOfflineDeals(fileDescs []*model.FileDesc) (*SwanServerResponse, error) {
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/create_offline_deals")
+	response := web.HttpPut(apiUrl, swanClient.SwanToken, fileDescs)
+
+	if response == "" {
+		err := fmt.Errorf("no response from:%s", apiUrl)
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	swanServerResponse := &SwanServerResponse{}
+	err := json.Unmarshal([]byte(response), swanServerResponse)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if !strings.EqualFold(swanServerResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
+		err := fmt.Errorf("error:%s,%s", swanServerResponse.Status, swanServerResponse.Message)
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return swanServerResponse, nil
 }
