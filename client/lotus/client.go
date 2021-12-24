@@ -312,7 +312,7 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 	return minerConfig, nil
 }
 
-func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
+func (lotusClient *LotusClient) LotusGetCurrentEpoch() int64 {
 	var params []interface{}
 
 	jsonRpcParams := LotusJsonRpcParams{
@@ -337,7 +337,7 @@ func (lotusClient *LotusClient) LotusGetCurrentEpoch() int {
 	}
 
 	heightFloat := height.(float64)
-	return int(heightFloat)
+	return int64(heightFloat)
 }
 
 //"lotus-miner storage-deals list -v | grep -a " + dealCid
@@ -511,7 +511,7 @@ type ClientStartDealParam struct {
 	Miner             string
 	EpochPrice        string
 	MinBlocksDuration int
-	DealStartEpoch    int
+	DealStartEpoch    int64
 	FastRetrieval     bool
 	VerifiedDeal      bool
 }
@@ -521,12 +521,87 @@ type ClientStartDeal struct {
 	Result Cid `json:"result"`
 }
 
-func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig model.DealConfig, relativeEpoch int) (*string, *int, error) {
+func (lotusClient *LotusClient) CheckDuration(duration int, startEpoch int64) error {
+	if duration < constants.DURATION_MIN || duration > constants.DURATION_MAX {
+		err := fmt.Errorf("deal duration out of bounds (min, max, provided): %d, %d, %d", constants.DURATION_MIN, constants.DURATION_MAX, duration)
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	currentEpoch := lotusClient.LotusGetCurrentEpoch()
+	endEpoch := startEpoch + (int64)(duration)
+
+	epoch2EndfromNow := endEpoch - currentEpoch
+	if epoch2EndfromNow >= constants.DURATION_MAX {
+		err := fmt.Errorf("invalid deal end epoch %d: cannot be more than %d past current epoch %d", endEpoch, constants.DURATION_MAX, currentEpoch)
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (lotusClient *LotusClient) CheckDealConfig(dealConfig *model.DealConfig) (*decimal.Decimal, error) {
+	if dealConfig == nil {
+		err := fmt.Errorf("parameter dealConfig is nil")
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if dealConfig.SenderWallet == "" {
+		err := fmt.Errorf("wallet should be set")
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	minerConfig, err := lotusClient.LotusClientQueryAsk(dealConfig.MinerFid)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	var e18 decimal.Decimal = decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18)
+
+	var minerPrice decimal.Decimal
+	if dealConfig.VerifiedDeal {
+		minerPrice = minerConfig.VerifiedPrice.Div(e18)
+	} else {
+		minerPrice = minerConfig.Price.Div(e18)
+	}
+	logs.GetLogger().Info("miner:", dealConfig.MinerFid, ",price:", minerPrice)
+
+	priceCmp := dealConfig.MaxPrice.Cmp(minerPrice)
+	if priceCmp < 0 {
+		err := fmt.Errorf("miner price:%s > deal max price:%s", minerPrice.String(), dealConfig.MaxPrice.String())
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if dealConfig.Duration == 0 {
+		dealConfig.Duration = constants.DURATION_DEFAULT
+	}
+
+	err = lotusClient.CheckDuration(dealConfig.Duration, dealConfig.StartEpoch)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return &minerPrice, nil
+}
+
+func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfig, relativeEpoch int) (*string, *int64, error) {
+	minerPrice, err := lotusClient.CheckDealConfig(dealConfig)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, nil, err
+	}
+
 	pieceSize, sectorSize := utils.CalculatePieceSize(dealConfig.FileSize)
-	cost := utils.CalculateRealCost(sectorSize, dealConfig.MinerPrice)
+	cost := utils.CalculateRealCost(sectorSize, *minerPrice)
 
 	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
-	startEpoch := dealConfig.StartEpoch - relativeEpoch
+	startEpoch := dealConfig.StartEpoch - (int64)(relativeEpoch)
 
 	if !dealConfig.SkipConfirmation {
 		logs.GetLogger().Info("Do you confirm to submit the deal?")
@@ -592,7 +667,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig model.DealConfig
 	}
 
 	clientStartDeal := &ClientStartDeal{}
-	err := json.Unmarshal([]byte(response), clientStartDeal)
+	err = json.Unmarshal([]byte(response), clientStartDeal)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, nil, err

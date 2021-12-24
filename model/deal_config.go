@@ -5,12 +5,12 @@ import (
 )
 
 type DealConfig struct {
+	SkipConfirmation bool
 	VerifiedDeal     bool
 	FastRetrieval    bool
-	SkipConfirmation bool
-	MinerPrice       decimal.Decimal
-	StartEpoch       int
+	StartEpoch       int64
 	MinerFid         string
+	MaxPrice         decimal.Decimal
 	SenderWallet     string
 	Duration         int
 	TransferType     string
