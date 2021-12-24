@@ -21,8 +21,8 @@ type OfflineDeal struct {
 	TaskId int    `json:"task_id"`
 	//IsPublic             int              `json:"is_public"`
 	//FileSize             string           `json:"file_size"`
-	//PayloadCid           string           `json:"payload_cid"`
-	//PieceCid             string           `json:"piece_cid"`
+	PayloadCid string `json:"payload_cid"`
+	PieceCid   string `json:"piece_cid"`
 	//DownloadedAt         string           `json:"downloaded_at"`
 	//Cost                 string           `json:"cost"`
 	CarFileId     int              `json:"car_file_id"`
