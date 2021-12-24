@@ -14,11 +14,6 @@ import (
 	"github.com/filswan/go-swan-lib/utils"
 )
 
-type SwanServerResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}
-
 func (swanClient *SwanClient) CreateTask(task model.Task, fileDescs []*model.FileDesc) (*SwanServerResponse, error) {
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/create_task")
 	params := map[string]interface{}{
@@ -30,37 +25,6 @@ func (swanClient *SwanClient) CreateTask(task model.Task, fileDescs []*model.Fil
 
 	if response == "" {
 		err := fmt.Errorf("no response from:%s", apiUrl)
-		return nil, err
-	}
-
-	swanServerResponse := &SwanServerResponse{}
-	err := json.Unmarshal([]byte(response), swanServerResponse)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
-	if !strings.EqualFold(swanServerResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
-		err := fmt.Errorf("error:%s,%s", swanServerResponse.Status, swanServerResponse.Message)
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
-	return swanServerResponse, nil
-}
-
-func (swanClient *SwanClient) UpdateTaskAfterSendDealByUuid(task model.Task, carFiles []*model.FileDesc) (*SwanServerResponse, error) {
-	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/update_task_after_sending_deal")
-	params := map[string]interface{}{
-		"task":       task,
-		"file_descs": carFiles,
-	}
-
-	response := web.HttpPut(apiUrl, swanClient.SwanToken, params)
-
-	if response == "" {
-		err := fmt.Errorf("no response from:%s", apiUrl)
-		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
