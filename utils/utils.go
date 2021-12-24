@@ -382,3 +382,10 @@ func GetStr(val interface{}) string {
 	}
 	return ""
 }
+
+func GetDefaultTaskName() string {
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+	randStr := RandStringRunes(letterRunes, 6)
+	taskName := "swan-task-" + randStr
+	return taskName
+}
