@@ -590,18 +590,17 @@ func (lotusClient *LotusClient) CheckDealConfig(dealConfig *model.DealConfig) (*
 	return &minerPrice, nil
 }
 
-func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfig, relativeEpoch int) (*string, *int64, error) {
+func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfig) (*string, error) {
 	minerPrice, err := lotusClient.CheckDealConfig(dealConfig)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil, nil, err
+		return nil, err
 	}
 
 	pieceSize, sectorSize := utils.CalculatePieceSize(dealConfig.FileSize)
 	cost := utils.CalculateRealCost(sectorSize, *minerPrice)
 
 	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
-	startEpoch := dealConfig.StartEpoch - (int64)(relativeEpoch)
 
 	if !dealConfig.SkipConfirmation {
 		logs.GetLogger().Info("Do you confirm to submit the deal?")
@@ -610,14 +609,14 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 		response, err := reader.ReadString('\n')
 		if err != nil {
 			logs.GetLogger().Error(err)
-			return nil, nil, err
+			return nil, err
 		}
 
 		response = strings.TrimRight(response, "\n")
 
 		if !strings.EqualFold(response, "Y") {
 			logs.GetLogger().Info("Your input is ", response, ". Now give up submit the deal.")
-			return nil, nil, nil
+			return nil, nil
 		}
 	}
 
@@ -643,14 +642,14 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 		Miner:             dealConfig.MinerFid,
 		EpochPrice:        epochPrice.BigInt().String(),
 		MinBlocksDuration: dealConfig.Duration,
-		DealStartEpoch:    startEpoch,
+		DealStartEpoch:    dealConfig.StartEpoch,
 		FastRetrieval:     dealConfig.FastRetrieval,
 		VerifiedDeal:      dealConfig.VerifiedDeal,
 	}
 
 	var params []interface{}
 	params = append(params, clientStartDealParam)
-	logs.GetLogger().Info(utils.ToJson(params))
+	//logs.GetLogger().Info(utils.ToJson(params))
 
 	jsonRpcParams := LotusJsonRpcParams{
 		JsonRpc: LOTUS_JSON_RPC_VERSION,
@@ -663,22 +662,22 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 	if response == "" {
 		err := fmt.Errorf("failed to send deal for %s, no response", dealConfig.PayloadCid)
 		logs.GetLogger().Error(err)
-		return nil, nil, err
+		return nil, err
 	}
 
 	clientStartDeal := &ClientStartDeal{}
 	err = json.Unmarshal([]byte(response), clientStartDeal)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil, nil, err
+		return nil, err
 	}
 
 	if clientStartDeal.Error != nil {
 		err := fmt.Errorf("error, code:%d, message:%s", clientStartDeal.Error.Code, clientStartDeal.Error.Message)
 		logs.GetLogger().Error(err)
-		return nil, nil, err
+		return nil, err
 	}
 
 	logs.GetLogger().Info("deal CID:", clientStartDeal.Result.Cid)
-	return &clientStartDeal.Result.Cid, &startEpoch, nil
+	return &clientStartDeal.Result.Cid, nil
 }
