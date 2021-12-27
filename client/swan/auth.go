@@ -45,15 +45,13 @@ func (swanClient *SwanClient) GetJwtTokenByApiKey() error {
 
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "user/login_by_apikey")
 
-	response := web.HttpPostNoToken(apiUrl, data)
-
-	if len(response) == 0 {
-		err := fmt.Errorf("no response from swan platform:%s", apiUrl)
+	response, err := web.HttpPostNoToken(apiUrl, data)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
 	}
 
-	if strings.Contains(response, "fail") {
+	if strings.Contains(string(response), "fail") {
 		message := utils.GetFieldStrFromJson(response, "message")
 		status := utils.GetFieldStrFromJson(response, "status")
 		err := fmt.Errorf("status:%s, message:%s", status, message)

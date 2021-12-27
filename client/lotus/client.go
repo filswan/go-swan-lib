@@ -41,20 +41,18 @@ type LotusClient struct {
 
 type ClientCalcCommP struct {
 	LotusJsonRpcResult
-	Result *ClientCalcCommPResult `json:"result"`
+	Result *struct {
+		Root Cid
+		Size int
+	} `json:"result"`
 }
 
-type ClientCalcCommPResult struct {
-	Root Cid
-	Size int
-}
 type ClientImport struct {
 	LotusJsonRpcResult
-	Result *ClientImportResult `json:"result"`
-}
-type ClientImportResult struct {
-	Root     Cid
-	ImportID int64
+	Result *struct {
+		Root     Cid
+		ImportID int64
+	} `json:"result"`
 }
 
 func LotusGetClient(apiUrl, accessToken string) (*LotusClient, error) {
@@ -74,48 +72,37 @@ func LotusGetClient(apiUrl, accessToken string) (*LotusClient, error) {
 
 type ClientMinerQuery struct {
 	LotusJsonRpcResult
-	Result ClientMinerQueryResult `json:"result"`
-}
-
-type ClientMinerQueryResult struct {
-	MinerPeer ClientMinerQueryResultPeer
-}
-
-type ClientMinerQueryResultPeer struct {
-	Address string
-	ID      string
+	Result struct {
+		MinerPeer struct {
+			Address string
+			ID      string
+		}
+	} `json:"result"`
 }
 
 type ClientDealInfo struct {
 	LotusJsonRpcResult
-	Result ClientDealResult `json:"result"`
-}
-
-type ClientDealResult struct {
-	State         int
-	Message       string
-	DealStages    ClientDealStages
-	PricePerEpoch string
-	Duration      int
-	DealID        int64
-	Verified      bool
-}
-
-type ClientDealStages struct {
-	Stages []ClientDealStage
-}
-type ClientDealStage struct {
-	Name             string
-	Description      string
-	ExpectedDuration string
-	CreatedTime      string
-	UpdatedTime      string
-	Logs             []ClientDealStageLog
-}
-
-type ClientDealStageLog struct {
-	Log         string
-	UpdatedTime string
+	Result struct {
+		State      int
+		Message    string
+		DealStages struct {
+			Stages []struct {
+				Name             string
+				Description      string
+				ExpectedDuration string
+				CreatedTime      string
+				UpdatedTime      string
+				Logs             []struct {
+					Log         string
+					UpdatedTime string
+				}
+			}
+		}
+		PricePerEpoch string
+		Duration      int
+		DealID        int64
+		Verified      bool
+	} `json:"result"`
 }
 
 type ClientDealCostStatus struct {
@@ -139,12 +126,15 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientD
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response, err := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
 
 	clientDealInfo := &ClientDealInfo{}
-	err := json.Unmarshal([]byte(response), clientDealInfo)
+	err = json.Unmarshal(response, clientDealInfo)
 	if err != nil {
-		err := fmt.Errorf("deal:%s,%s", dealCid, err.Error())
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
@@ -186,11 +176,16 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientD
 		}
 	}
 
-	clientDealCostStatus.Status = lotusClient.LotusGetDealStatus(clientDealInfo.Result.State)
+	dealStatus, err := lotusClient.LotusGetDealStatus(clientDealInfo.Result.State)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	clientDealCostStatus.Status = *dealStatus
 	clientDealCostStatus.DealId = clientDealInfo.Result.DealID
 	clientDealCostStatus.Verified = clientDealInfo.Result.Verified
 
-	//logs.GetLogger().Info(clientDealCost)
 	return &clientDealCostStatus, nil
 }
 
@@ -206,7 +201,7 @@ func GetDealCost(dealCost ClientDealCostStatus) string {
 	return dealCost.CostComputed
 }
 
-func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, error) {
+func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (*string, error) {
 	var params []interface{}
 	params = append(params, minerFid)
 	params = append(params, nil)
@@ -219,37 +214,40 @@ func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, 
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response, err := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
 
 	clientMinerQuery := &ClientMinerQuery{}
-	err := json.Unmarshal([]byte(response), clientMinerQuery)
+	err = json.Unmarshal(response, clientMinerQuery)
 	if err != nil {
 		err := fmt.Errorf("miner:%s,%s", minerFid, err.Error())
 		logs.GetLogger().Error(err)
-		return "", err
+		return nil, err
 	}
 
 	if clientMinerQuery.Error != nil {
 		err := fmt.Errorf("miner:%s,code:%d,message:%s", minerFid, clientMinerQuery.Error.Code, clientMinerQuery.Error.Message)
 		logs.GetLogger().Error(err)
-		return "", err
+		return nil, err
 	}
 
 	minerPeerId := clientMinerQuery.Result.MinerPeer.ID
-	return minerPeerId, nil
+	return &minerPeerId, nil
 }
 
 type ClientQueryAsk struct {
 	LotusJsonRpcResult
-	Result ClientQueryAskResult `json:"result"`
+	Result struct {
+		Price         string
+		VerifiedPrice string
+		MinPieceSize  int64
+		MaxPieceSize  int64
+	} `json:"result"`
 }
 
-type ClientQueryAskResult struct {
-	Price         string
-	VerifiedPrice string
-	MinPieceSize  int64
-	MaxPieceSize  int64
-}
 type MinerConfig struct {
 	Price         decimal.Decimal
 	VerifiedPrice decimal.Decimal
@@ -275,10 +273,14 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response, err := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
 
 	clientQueryAsk := &ClientQueryAsk{}
-	err = json.Unmarshal([]byte(response), clientQueryAsk)
+	err = json.Unmarshal(response, clientQueryAsk)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -312,7 +314,7 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 	return minerConfig, nil
 }
 
-func (lotusClient *LotusClient) LotusGetCurrentEpoch() int64 {
+func (lotusClient *LotusClient) LotusGetCurrentEpoch() (*int64, error) {
 	var params []interface{}
 
 	jsonRpcParams := LotusJsonRpcParams{
@@ -322,26 +324,33 @@ func (lotusClient *LotusClient) LotusGetCurrentEpoch() int64 {
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response, err := web.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
 
 	result := utils.GetFieldMapFromJson(response, "result")
 	if result == nil {
-		logs.GetLogger().Error("Failed to get result from:", lotusClient.ApiUrl)
-		return -1
+		err := fmt.Errorf("failed to get result from:%s", lotusClient.ApiUrl)
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
 
 	height := result["Height"]
 	if height == nil {
-		logs.GetLogger().Error("Failed to get height from:", lotusClient.ApiUrl)
-		return -1
+		err := fmt.Errorf("failed to get height from:%s", lotusClient.ApiUrl)
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
 
 	heightFloat := height.(float64)
-	return int64(heightFloat)
+	heightInt64 := int64(heightFloat)
+	return &heightInt64, nil
 }
 
 //"lotus-miner storage-deals list -v | grep -a " + dealCid
-func (lotusClient *LotusClient) LotusGetDealStatus(state int) string {
+func (lotusClient *LotusClient) LotusGetDealStatus(state int) (*string, error) {
 	var params []interface{}
 	params = append(params, state)
 
@@ -352,19 +361,23 @@ func (lotusClient *LotusClient) LotusGetDealStatus(state int) string {
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	response, err := web.HttpPostNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
 
 	result := utils.GetFieldStrFromJson(response, "result")
 	if result == "" {
 		logs.GetLogger().Error("no response from:", lotusClient.ApiUrl)
-		return ""
+		return nil, err
 	}
 
-	return result
+	return &result, nil
 }
 
 //"lotus client commP " + carFilePath
-func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) *string {
+func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) (*string, error) {
 	var params []interface{}
 	params = append(params, filepath)
 
@@ -375,34 +388,33 @@ func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) *string {
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpPost(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
-	if response == "" {
-		logs.GetLogger().Error("no response from:", lotusClient.ApiUrl)
-		return nil
-	}
-
-	//logs.GetLogger().Info(response)
-
-	clientCalcCommP := &ClientCalcCommP{}
-	err := json.Unmarshal([]byte(response), clientCalcCommP)
+	response, err := web.HttpPost(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil
+		return nil, err
+	}
+
+	clientCalcCommP := &ClientCalcCommP{}
+	err = json.Unmarshal(response, clientCalcCommP)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
 
 	if clientCalcCommP.Error != nil {
 		err := fmt.Errorf("get piece CID failed for:%s, error code:%d, message:%s", filepath, clientCalcCommP.Error.Code, clientCalcCommP.Error.Message)
 		logs.GetLogger().Error(err)
-		return nil
+		return nil, err
 	}
 
 	if clientCalcCommP.Result == nil {
-		logs.GetLogger().Error("no result from:", lotusClient.ApiUrl)
-		return nil
+		err := fmt.Errorf("no result from:%s", lotusClient.ApiUrl)
+		logs.GetLogger().Error()
+		return nil, err
 	}
 
 	pieceCid := clientCalcCommP.Result.Root.Cid
-	return &pieceCid
+	return &pieceCid, nil
 }
 
 type ClientFileParam struct {
@@ -426,15 +438,14 @@ func (lotusClient *LotusClient) LotusClientImport(filepath string, isCar bool) (
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
-	if response == "" {
-		err := fmt.Errorf("lotus import file %s failed, no response from %s", filepath, lotusClient.ApiUrl)
+	response, err := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	clientImport := &ClientImport{}
-	err := json.Unmarshal([]byte(response), clientImport)
+	err = json.Unmarshal(response, clientImport)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -474,16 +485,15 @@ func (lotusClient *LotusClient) LotusClientGenCar(srcFilePath, destCarFilePath s
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
-	if response == "" {
-		err := fmt.Errorf("failed to generate car, no response")
+	response, err := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
 	}
 
 	//logs.GetLogger().Info(response)
 	lotusJsonRpcResult := &LotusJsonRpcResult{}
-	err := json.Unmarshal([]byte(response), lotusJsonRpcResult)
+	err = json.Unmarshal(response, lotusJsonRpcResult)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
@@ -528,10 +538,14 @@ func (lotusClient *LotusClient) CheckDuration(duration int, startEpoch int64) er
 		return err
 	}
 
-	currentEpoch := lotusClient.LotusGetCurrentEpoch()
+	currentEpoch, err := lotusClient.LotusGetCurrentEpoch()
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
 	endEpoch := startEpoch + (int64)(duration)
 
-	epoch2EndfromNow := endEpoch - currentEpoch
+	epoch2EndfromNow := endEpoch - *currentEpoch
 	if epoch2EndfromNow >= constants.DURATION_MAX {
 		err := fmt.Errorf("invalid deal end epoch %d: cannot be more than %d past current epoch %d", endEpoch, constants.DURATION_MAX, currentEpoch)
 		logs.GetLogger().Error(err)
@@ -649,7 +663,6 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 
 	var params []interface{}
 	params = append(params, clientStartDealParam)
-	//logs.GetLogger().Info(utils.ToJson(params))
 
 	jsonRpcParams := LotusJsonRpcParams{
 		JsonRpc: LOTUS_JSON_RPC_VERSION,
@@ -658,9 +671,8 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
-	if response == "" {
-		err := fmt.Errorf("failed to send deal for %s, no response", dealConfig.PayloadCid)
+	response, err := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
@@ -678,6 +690,5 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 		return nil, err
 	}
 
-	logs.GetLogger().Info("deal CID:", clientStartDeal.Result.Cid)
 	return &clientStartDeal.Result.Cid, nil
 }

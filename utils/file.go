@@ -299,9 +299,9 @@ func GenerateFile(filepath, filename string, filesize int64) {
 	logs.GetLogger().Info("file:", filefullpath, " generated, size:", filesize, "GB")
 }
 
-func CreateDirIfNotExists(dir string) error {
+func CreateDirIfNotExists(dir, dirName string) error {
 	if IsStrEmpty(&dir) {
-		err := fmt.Errorf("directory path is required")
+		err := fmt.Errorf("%s directory is required", dirName)
 		logs.GetLogger().Info(err)
 		return err
 	}
@@ -312,24 +312,24 @@ func CreateDirIfNotExists(dir string) error {
 
 	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
-		err := fmt.Errorf("failed to create dir:%s,%s", dir, err.Error())
+		err := fmt.Errorf("failed to create %s directory:%s,%s", dirName, dir, err.Error())
 		logs.GetLogger().Error(err)
 		return err
 	}
 
-	logs.GetLogger().Info(dir, " created")
+	logs.GetLogger().Info(dirName, " directory: ", dir, " created")
 	return nil
 }
 
-func CheckDirExists(dir string) error {
+func CheckDirExists(dir, dirName string) error {
 	if IsStrEmpty(&dir) {
-		err := fmt.Errorf("dir is required")
+		err := fmt.Errorf("%s directory is required", dirName)
 		logs.GetLogger().Error(err)
 		return err
 	}
 
 	if !IsDirExists(dir) {
-		err := fmt.Errorf("directory:%s not exists", dir)
+		err := fmt.Errorf("%s directory:%s not exists", dirName, dir)
 		logs.GetLogger().Error(err)
 		return err
 	}

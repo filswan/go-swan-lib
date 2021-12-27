@@ -6,16 +6,16 @@ import (
 	"github.com/filswan/go-swan-lib/logs"
 )
 
-func GetFieldFromJson(jsonStr string, fieldName string) interface{} {
+func GetFieldFromJson(jsonBytes []byte, fieldName string) interface{} {
 	var result map[string]interface{}
-	err := json.Unmarshal([]byte(jsonStr), &result)
+	err := json.Unmarshal(jsonBytes, &result)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil
 	}
 
 	if result == nil {
-		logs.GetLogger().Error("Failed to parse ", jsonStr, " as map[string]interface{}.")
+		logs.GetLogger().Error("Failed to parse ", jsonBytes, " as map[string]interface{}.")
 		return nil
 	}
 
@@ -23,8 +23,8 @@ func GetFieldFromJson(jsonStr string, fieldName string) interface{} {
 	return fieldVal
 }
 
-func GetFieldStrFromJson(jsonStr string, fieldName string) string {
-	fieldVal := GetFieldFromJson(jsonStr, fieldName)
+func GetFieldStrFromJson(jsonBytes []byte, fieldName string) string {
+	fieldVal := GetFieldFromJson(jsonBytes, fieldName)
 	if fieldVal == nil {
 		return ""
 	}
@@ -37,10 +37,10 @@ func GetFieldStrFromJson(jsonStr string, fieldName string) string {
 	}
 }
 
-func GetFieldMapFromJson(jsonStr string, fieldName string) map[string]interface{} {
-	fieldVal := GetFieldFromJson(jsonStr, fieldName)
+func GetFieldMapFromJson(jsonBytes []byte, fieldName string) map[string]interface{} {
+	fieldVal := GetFieldFromJson(jsonBytes, fieldName)
 	if fieldVal == nil {
-		logs.GetLogger().Info("No ", fieldName, " in ", jsonStr)
+		logs.GetLogger().Info("No ", fieldName, " in ", jsonBytes)
 		return nil
 	}
 

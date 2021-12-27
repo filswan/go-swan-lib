@@ -64,15 +64,14 @@ func LotusVersion(apiUrl string) (*string, error) {
 	}
 
 	//here the api url should be miner's api url, need to change later on
-	response := web.HttpGetNoToken(apiUrl, jsonRpcParams)
-	if response == "" {
-		err := errors.New("no response from api")
+	response, err := web.HttpGetNoToken(apiUrl, jsonRpcParams)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	lotusVersionResponse := &LotusVersionResponse{}
-	err := json.Unmarshal([]byte(response), lotusVersionResponse)
+	err = json.Unmarshal(response, lotusVersionResponse)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err

@@ -24,12 +24,11 @@ type LotusMarket struct {
 
 type MarketGetAsk struct {
 	LotusJsonRpcResult
-	Result *MarketGetAskResult `json:"result"`
+	Result *struct {
+		Ask MarketGetAskResultAsk
+	} `json:"result"`
 }
 
-type MarketGetAskResult struct {
-	Ask MarketGetAskResultAsk
-}
 type MarketGetAskResultAsk struct {
 	Price         string
 	VerifiedPrice string
@@ -58,7 +57,7 @@ func GetLotusMarket(apiUrl, accessToken, clientApiUrl string) (*LotusMarket, err
 }
 
 //"lotus client query-ask " + minerFid
-func (lotusMarket *LotusMarket) LotusMarketGetAsk() *MarketGetAskResultAsk {
+func (lotusMarket *LotusMarket) LotusMarketGetAsk() (*MarketGetAskResultAsk, error) {
 	var params []interface{}
 
 	jsonRpcParams := LotusJsonRpcParams{
@@ -69,23 +68,26 @@ func (lotusMarket *LotusMarket) LotusMarketGetAsk() *MarketGetAskResultAsk {
 	}
 
 	//here the api url should be miner's api url, need to change later on
-	response := web.HttpGetNoToken(lotusMarket.ApiUrl, jsonRpcParams)
-	if response == "" {
-		return nil
+	response, err := web.HttpGetNoToken(lotusMarket.ApiUrl, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
 
 	marketGetAsk := &MarketGetAsk{}
-	err := json.Unmarshal([]byte(response), marketGetAsk)
+	err = json.Unmarshal(response, marketGetAsk)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil
+		return nil, err
 	}
 
-	if marketGetAsk.Result == nil {
-		return nil
+	if marketGetAsk.Error != nil {
+		err := fmt.Errorf("%d,%s", marketGetAsk.Error.Code, marketGetAsk.Error.Message)
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
 
-	return &marketGetAsk.Result.Ask
+	return &marketGetAsk.Result.Ask, nil
 }
 
 type DealCid struct {
@@ -105,7 +107,7 @@ type Deal struct {
 	ProposalCid DealCid `json:"ProposalCid"`
 }
 
-func (lotusMarket *LotusMarket) LotusGetDeals() []Deal {
+func (lotusMarket *LotusMarket) LotusGetDeals() ([]Deal, error) {
 	var params []interface{}
 	jsonRpcParams := LotusJsonRpcParams{
 		JsonRpc: LOTUS_JSON_RPC_VERSION,
@@ -114,54 +116,65 @@ func (lotusMarket *LotusMarket) LotusGetDeals() []Deal {
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	//logs.GetLogger().Info("Get deal list from ", lotusMarket.ApiUrl)
-	response := web.HttpGet(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
-	//logs.GetLogger().Info("Got deal list from ", lotusMarket.ApiUrl)
-	deals := &MarketListIncompleteDeals{}
-	err := json.Unmarshal([]byte(response), deals)
+	response, err := web.HttpGet(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil
+		return nil, err
 	}
 
-	return deals.Result
+	deals := &MarketListIncompleteDeals{}
+	err = json.Unmarshal(response, deals)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return deals.Result, nil
 }
 
-func (lotusMarket *LotusMarket) LotusGetDealOnChainStatusFromDeals(deals []Deal, dealCid string) (string, string) {
+func (lotusMarket *LotusMarket) LotusGetDealOnChainStatusFromDeals(deals []Deal, dealCid string) (*string, *string, error) {
 	if len(deals) == 0 {
-		logs.GetLogger().Error("Deal list is empty.")
-		return "", ""
+		err := fmt.Errorf("deal list is empty")
+		logs.GetLogger().Error(err)
+		return nil, nil, err
 	}
 
 	lotusClient, err := LotusGetClient(lotusMarket.ClientApiUrl, "")
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return "", ""
+		return nil, nil, err
 	}
 	for _, deal := range deals {
 		if deal.ProposalCid.DealCid != dealCid {
 			continue
 		}
 
-		status := lotusClient.LotusGetDealStatus(deal.State)
-		//msg := fmt.Sprintf("deal:%s,%s", dealCid, status)
-		//if deal.Message != "" {
-		//	msg = msg + "," + deal.Message
-		//}
-		//logs.GetLogger().Info(msg)
-		return status, deal.Message
+		status, err := lotusClient.LotusGetDealStatus(deal.State)
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return nil, nil, err
+		}
+
+		return status, &deal.Message, nil
 	}
 
-	//logs.GetLogger().Error("Did not find your deal:", dealCid, " in the returned list.")
-
-	return "", ""
+	return nil, nil, nil
 }
 
 //"lotus-miner storage-deals list -v | grep -a " + dealCid
-func (lotusMarket *LotusMarket) LotusGetDealOnChainStatus(dealCid string) (string, string) {
-	deals := lotusMarket.LotusGetDeals()
-	status, message := lotusMarket.LotusGetDealOnChainStatusFromDeals(deals, dealCid)
-	return status, message
+func (lotusMarket *LotusMarket) LotusGetDealOnChainStatus(dealCid string) (*string, *string, error) {
+	deals, err := lotusMarket.LotusGetDeals()
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, nil, err
+	}
+
+	status, message, err := lotusMarket.LotusGetDealOnChainStatusFromDeals(deals, dealCid)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, nil, err
+	}
+	return status, message, nil
 }
 
 func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string) error {
@@ -177,13 +190,11 @@ func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string)
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpPost(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
-	if response == "" {
-		err := fmt.Errorf("no response, please check your market api url:%s and access token", lotusMarket.ApiUrl)
+	response, err := web.HttpPost(lotusMarket.ApiUrl, lotusMarket.AccessToken, jsonRpcParams)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
 	}
-	//logs.GetLogger().Info(response)
 
 	errorInfo := utils.GetFieldMapFromJson(response, "error")
 
@@ -191,12 +202,10 @@ func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string)
 		return nil
 	}
 
-	//logs.GetLogger().Error(errorInfo)
 	errCode := int(errorInfo["code"].(float64))
 	errMsg := errorInfo["message"].(string)
-	err := fmt.Errorf("error code:%d message:%s", errCode, errMsg)
-	//logs.GetLogger().Error(err)
-	if strings.Contains(response, "(need 'write')") {
+	err = fmt.Errorf("error code:%d message:%s", errCode, errMsg)
+	if strings.Contains(string(response), "(need 'write')") {
 		logs.GetLogger().Error("please check your access token, it should have write access")
 		logs.GetLogger().Error(err)
 	}

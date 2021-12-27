@@ -23,15 +23,14 @@ type MinerResponse struct {
 func (swanClient *SwanClient) GetMiner(minerFid string) (*MinerResponse, error) {
 	apiUrl := swanClient.ApiUrl + "/miner/info/" + minerFid
 
-	response := web.HttpGetNoToken(apiUrl, "")
-	if response == "" {
-		err := fmt.Errorf("no response from %s", apiUrl)
+	response, err := web.HttpGetNoToken(apiUrl, "")
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	minerResponse := &MinerResponse{}
-	err := json.Unmarshal([]byte(response), minerResponse)
+	err = json.Unmarshal(response, minerResponse)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -47,22 +46,22 @@ func (swanClient *SwanClient) GetMiner(minerFid string) (*MinerResponse, error) 
 	return minerResponse, nil
 }
 
-func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner model.Miner) {
+func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner model.Miner) error {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return
+		return err
 	}
 
 	minerResponse, err := swanClient.GetMiner(minerFid)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return
+		return err
 	}
 
 	if minerResponse == nil || minerResponse.Status != constants.SWAN_API_STATUS_SUCCESS {
 		logs.GetLogger().Error("Error: Get miner information failed")
-		return
+		return err
 	}
 
 	miner := minerResponse.Data
@@ -72,7 +71,7 @@ func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner mode
 		miner.StartEpoch == confMiner.StartEpoch &&
 		miner.AutoBidTaskPerDay == confMiner.AutoBidTaskPerDay {
 		logs.GetLogger().Info("No changes in bid configuration")
-		return
+		return err
 	}
 
 	logs.GetLogger().Info("Begin updating bid configuration")
@@ -85,21 +84,27 @@ func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner mode
 	params.Add("start_epoch", strconv.Itoa(confMiner.StartEpoch))
 	params.Add("auto_bid_task_per_day", strconv.Itoa(confMiner.AutoBidTaskPerDay))
 
-	response := web.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
 
 	minerResponse = &MinerResponse{}
 	err = json.Unmarshal([]byte(response), minerResponse)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return
+		return err
 	}
 
 	if !strings.EqualFold(minerResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
-		logs.GetLogger().Error("Error: failed to update bid configuration.", minerResponse.Message)
-		return
+		err := fmt.Errorf("%s,%s", minerResponse.Status, minerResponse.Message)
+		logs.GetLogger().Error(err)
+		return err
 	}
 
 	logs.GetLogger().Info("Bid configuration updated.")
+	return nil
 }
 
 func (swanClient *SwanClient) SendHeartbeatRequest(minerFid string) error {
@@ -113,9 +118,13 @@ func (swanClient *SwanClient) SendHeartbeatRequest(minerFid string) error {
 	params := url.Values{}
 	params.Add("miner_id", minerFid)
 
-	response := web.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
 
-	if strings.Contains(response, "fail") {
+	if strings.Contains(string(response), "fail") {
 		err := fmt.Errorf("failed to send heartbeat")
 		logs.GetLogger().Error(err)
 		return err

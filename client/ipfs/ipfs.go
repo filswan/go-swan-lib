@@ -13,16 +13,10 @@ import (
 func IpfsUploadFileByWebApi(apiUrl, filefullpath string) (*string, error) {
 	response, err := web.HttpUploadFileByStream(apiUrl, filefullpath)
 	if err != nil {
-		//logs.GetLogger().Error(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
-	if response == constants.EMPTY_STRING {
-		err := fmt.Errorf("no response from %s", apiUrl)
-		//logs.GetLogger().Error(err)
-		return nil, err
-	}
-	//logs.GetLogger().Info(response)
 	fileHash := utils.GetFieldStrFromJson(response, "Hash")
 	//logs.GetLogger().Info(carFileHash)
 

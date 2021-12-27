@@ -126,9 +126,14 @@ func (aria2Client *Aria2Client) GenPayload4Download(method string, uri string, o
 func (aria2Client *Aria2Client) DownloadFile(uri string, outDir, outFilename string) *Aria2Download {
 	payload := aria2Client.GenPayload4Download(ADD_URI, uri, outDir, outFilename)
 
-	response := web.HttpPostNoToken(aria2Client.serverUrl, payload)
+	response, err := web.HttpPostNoToken(aria2Client.serverUrl, payload)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil
+	}
+
 	aria2Download := &Aria2Download{}
-	err := json.Unmarshal([]byte(response), aria2Download)
+	err = json.Unmarshal(response, aria2Download)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil
@@ -153,11 +158,14 @@ func (aria2Client *Aria2Client) GenPayload4Status(gid string) Aria2Payload {
 
 func (aria2Client *Aria2Client) GetDownloadStatus(gid string) *Aria2Status {
 	payload := aria2Client.GenPayload4Status(gid)
-	response := web.HttpPostNoToken(aria2Client.serverUrl, payload)
-	//logs.GetLogger().Info(gid, " download status:", response)
+	response, err := web.HttpPostNoToken(aria2Client.serverUrl, payload)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil
+	}
 
 	aria2Status := &Aria2Status{}
-	err := json.Unmarshal([]byte(response), aria2Status)
+	err = json.Unmarshal(response, aria2Status)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil
