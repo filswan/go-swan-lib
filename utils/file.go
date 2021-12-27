@@ -239,15 +239,13 @@ func ReadFile(filePath string) (string, []byte, error) {
 }
 
 func IsDirExists(dir string) bool {
-	if len(dir) == 0 {
+	if IsStrEmpty(&dir) {
 		err := fmt.Errorf("dir is not provided")
 		logs.GetLogger().Error(err)
 		return false
 	}
 
 	if GetPathType(dir) != constants.PATH_TYPE_DIR {
-		//err := fmt.Errorf("%s is not a directory", dir)
-		//logs.GetLogger().Error(err)
 		return false
 	}
 
@@ -290,7 +288,6 @@ func GenerateFile(filepath, filename string, filesize int64) {
 			file.Close()
 			return
 		}
-		//fmt.Println(l, "bytes written successfully")
 	}
 
 	err = file.Close()
@@ -300,4 +297,42 @@ func GenerateFile(filepath, filename string, filesize int64) {
 	}
 
 	logs.GetLogger().Info("file:", filefullpath, " generated, size:", filesize, "GB")
+}
+
+func CreateDirIfNotExists(dir string) error {
+	if IsStrEmpty(&dir) {
+		err := fmt.Errorf("directory path is required")
+		logs.GetLogger().Info(err)
+		return err
+	}
+
+	if IsDirExists(dir) {
+		return nil
+	}
+
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		err := fmt.Errorf("failed to create dir:%s,%s", dir, err.Error())
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	logs.GetLogger().Info(dir, " created")
+	return nil
+}
+
+func CheckDirExists(dir string) error {
+	if IsStrEmpty(&dir) {
+		err := fmt.Errorf("dir is required")
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	if !IsDirExists(dir) {
+		err := fmt.Errorf("directory:%s not exists", dir)
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	return nil
 }

@@ -319,10 +319,6 @@ func ConvertPrice2AttoFil(price string) string {
 		priceAttoFil = priceAttoFil.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E6))
 	case "FEMTOFIL":
 		priceAttoFil = priceAttoFil.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E3))
-	case "ATTOFIL":
-		priceAttoFil = priceAttoFil
-	default:
-		priceAttoFil = priceAttoFil
 	}
 
 	priceAttoFilStr := priceAttoFil.BigInt().String()
@@ -353,10 +349,6 @@ func GetPriceFormat(price string) string {
 		priceAttoFil = priceAttoFil * 1e6
 	case "FEMTOFIL":
 		priceAttoFil = priceAttoFil * 1e3
-	case "ATTOFIL":
-		priceAttoFil = priceAttoFil
-	default:
-		priceAttoFil = priceAttoFil
 	}
 
 	result := strconv.FormatInt(priceAttoFil, 10)
