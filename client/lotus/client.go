@@ -41,20 +41,18 @@ type LotusClient struct {
 
 type ClientCalcCommP struct {
 	LotusJsonRpcResult
-	Result *ClientCalcCommPResult `json:"result"`
+	Result *struct {
+		Root Cid
+		Size int
+	} `json:"result"`
 }
 
-type ClientCalcCommPResult struct {
-	Root Cid
-	Size int
-}
 type ClientImport struct {
 	LotusJsonRpcResult
-	Result *ClientImportResult `json:"result"`
-}
-type ClientImportResult struct {
-	Root     Cid
-	ImportID int64
+	Result *struct {
+		Root     Cid
+		ImportID int64
+	} `json:"result"`
 }
 
 func LotusGetClient(apiUrl, accessToken string) (*LotusClient, error) {
@@ -74,48 +72,37 @@ func LotusGetClient(apiUrl, accessToken string) (*LotusClient, error) {
 
 type ClientMinerQuery struct {
 	LotusJsonRpcResult
-	Result ClientMinerQueryResult `json:"result"`
-}
-
-type ClientMinerQueryResult struct {
-	MinerPeer ClientMinerQueryResultPeer
-}
-
-type ClientMinerQueryResultPeer struct {
-	Address string
-	ID      string
+	Result struct {
+		MinerPeer struct {
+			Address string
+			ID      string
+		}
+	} `json:"result"`
 }
 
 type ClientDealInfo struct {
 	LotusJsonRpcResult
-	Result ClientDealResult `json:"result"`
-}
-
-type ClientDealResult struct {
-	State         int
-	Message       string
-	DealStages    ClientDealStages
-	PricePerEpoch string
-	Duration      int
-	DealID        int64
-	Verified      bool
-}
-
-type ClientDealStages struct {
-	Stages []ClientDealStage
-}
-type ClientDealStage struct {
-	Name             string
-	Description      string
-	ExpectedDuration string
-	CreatedTime      string
-	UpdatedTime      string
-	Logs             []ClientDealStageLog
-}
-
-type ClientDealStageLog struct {
-	Log         string
-	UpdatedTime string
+	Result struct {
+		State      int
+		Message    string
+		DealStages struct {
+			Stages []struct {
+				Name             string
+				Description      string
+				ExpectedDuration string
+				CreatedTime      string
+				UpdatedTime      string
+				Logs             []struct {
+					Log         string
+					UpdatedTime string
+				}
+			}
+		}
+		PricePerEpoch string
+		Duration      int
+		DealID        int64
+		Verified      bool
+	} `json:"result"`
 }
 
 type ClientDealCostStatus struct {
@@ -676,7 +663,6 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 
 	var params []interface{}
 	params = append(params, clientStartDealParam)
-	//logs.GetLogger().Info(utils.ToJson(params))
 
 	jsonRpcParams := LotusJsonRpcParams{
 		JsonRpc: LOTUS_JSON_RPC_VERSION,
@@ -704,6 +690,5 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 		return nil, err
 	}
 
-	logs.GetLogger().Info("deal CID:", clientStartDeal.Result.Cid)
 	return &clientStartDeal.Result.Cid, nil
 }

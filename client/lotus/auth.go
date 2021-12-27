@@ -34,11 +34,13 @@ func LotusCheckAuth(apiUrl, token, expectedAuth string) (bool, error) {
 func LotusAuthVerify(apiUrl, token string) ([]string, error) {
 	if len(apiUrl) == 0 {
 		err := fmt.Errorf("api url is required")
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if len(token) == 0 {
 		err := fmt.Errorf("token is required")
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
@@ -62,13 +64,13 @@ func LotusAuthVerify(apiUrl, token string) ([]string, error) {
 	authVerify := &AuthVerify{}
 	err = json.Unmarshal(response, authVerify)
 	if err != nil {
-		//logs.GetLogger().Error(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	if authVerify.Error != nil {
 		err := fmt.Errorf("error, code:%d, message:%s", authVerify.Error.Code, authVerify.Error.Message)
-		//logs.GetLogger().Error(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 

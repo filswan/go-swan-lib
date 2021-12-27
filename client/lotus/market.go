@@ -134,7 +134,7 @@ func (lotusMarket *LotusMarket) LotusGetDeals() ([]Deal, error) {
 
 func (lotusMarket *LotusMarket) LotusGetDealOnChainStatusFromDeals(deals []Deal, dealCid string) (*string, *string, error) {
 	if len(deals) == 0 {
-		err := fmt.Errorf("Deal list is empty.")
+		err := fmt.Errorf("deal list is empty")
 		logs.GetLogger().Error(err)
 		return nil, nil, err
 	}
@@ -202,11 +202,9 @@ func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string)
 		return nil
 	}
 
-	//logs.GetLogger().Error(errorInfo)
 	errCode := int(errorInfo["code"].(float64))
 	errMsg := errorInfo["message"].(string)
 	err = fmt.Errorf("error code:%d message:%s", errCode, errMsg)
-	//logs.GetLogger().Error(err)
 	if strings.Contains(string(response), "(need 'write')") {
 		logs.GetLogger().Error("please check your access token, it should have write access")
 		logs.GetLogger().Error(err)
