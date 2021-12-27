@@ -3,9 +3,9 @@ package model
 import "github.com/shopspring/decimal"
 
 type OfflineDeal struct {
-	Id      int    `json:"id"`
-	DealCid string `json:"deal_cid"`
-	//FilePath             string           `json:"file_path"`
+	Id       int    `json:"id"`
+	DealCid  string `json:"deal_cid"`
+	FilePath string `json:"file_path"` //store file downloaded from server locally
 	//FileName             string           `json:"file_name"`
 	//FileSourceUrl        string           `json:"file_source_url"`
 	//Md5Origin            string           `json:"md5_origin"`
