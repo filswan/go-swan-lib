@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
 )
@@ -20,58 +19,58 @@ import (
 const HTTP_CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
 const HTTP_CONTENT_TYPE_JSON = "application/json; charset=UTF-8"
 
-func HttpPostNoToken(uri string, params interface{}) string {
+func HttpPostNoToken(uri string, params interface{}) ([]byte, error) {
 	response, err := HttpRequest(http.MethodPost, uri, "", params)
 	if err != nil {
-		logs.GetLogger().Error()
-		return ""
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
-	return string(response)
+	return response, nil
 }
 
-func HttpPost(uri, tokenString string, params interface{}) string {
+func HttpPost(uri, tokenString string, params interface{}) ([]byte, error) {
 	response, err := HttpRequest(http.MethodPost, uri, tokenString, params)
 	if err != nil {
-		logs.GetLogger().Error()
-		return ""
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
-	return string(response)
+	return response, nil
 }
 
-func HttpGetNoToken(uri string, params interface{}) string {
+func HttpGetNoToken(uri string, params interface{}) ([]byte, error) {
 	response, err := HttpRequest(http.MethodGet, uri, "", params)
 	if err != nil {
-		logs.GetLogger().Error()
-		return ""
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
-	return string(response)
+	return response, nil
 }
 
-func HttpGet(uri, tokenString string, params interface{}) string {
+func HttpGet(uri, tokenString string, params interface{}) ([]byte, error) {
 	response, err := HttpRequest(http.MethodGet, uri, tokenString, params)
 	if err != nil {
-		logs.GetLogger().Error()
-		return ""
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
-	return string(response)
+	return response, nil
 }
 
-func HttpPut(uri, tokenString string, params interface{}) string {
+func HttpPut(uri, tokenString string, params interface{}) ([]byte, error) {
 	response, err := HttpRequest(http.MethodPut, uri, tokenString, params)
 	if err != nil {
-		logs.GetLogger().Error()
-		return ""
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
-	return string(response)
+	return response, nil
 }
 
-func HttpDelete(uri, tokenString string, params interface{}) string {
+func HttpDelete(uri, tokenString string, params interface{}) ([]byte, error) {
 	response, err := HttpRequest(http.MethodDelete, uri, tokenString, params)
 	if err != nil {
-		logs.GetLogger().Error()
-		return ""
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
-	return string(response)
+	return response, nil
 }
 
 func HttpRequest(httpMethod, uri, tokenString string, params interface{}) ([]byte, error) {
@@ -219,11 +218,11 @@ func HttpRequestFile(httpMethod, url string, tokenString string, paramTexts map[
 	return responseStr, nil
 }
 
-func HttpUploadFileByStream(uri, filefullpath string) (string, error) {
+func HttpUploadFileByStream(uri, filefullpath string) ([]byte, error) {
 	fileReader, err := os.Open(filefullpath)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return constants.EMPTY_STRING, err
+		return nil, err
 	}
 
 	filename := filepath.Base(filefullpath)
@@ -249,7 +248,7 @@ func HttpUploadFileByStream(uri, filefullpath string) (string, error) {
 	response, err := http.Post(uri, contentType, body)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return "", nil
+		return nil, nil
 	}
 
 	defer response.Body.Close()
@@ -261,23 +260,23 @@ func HttpUploadFileByStream(uri, filefullpath string) (string, error) {
 		case http.StatusNotFound:
 			logs.GetLogger().Error("please check your url:", uri)
 		}
-		return constants.EMPTY_STRING, err
+		return nil, err
 	}
 
 	responseBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return constants.EMPTY_STRING, err
+		return nil, err
 	}
 
 	responseStr := string(responseBody)
 	//logs.GetLogger().Info(responseStr)
 	filesInfo := strings.Split(responseStr, "\n")
 	if len(filesInfo) < 4 {
-		err := fmt.Errorf("not enough files infor returned")
+		err := fmt.Errorf("not enough files info returned")
 		logs.GetLogger().Error(err)
-		return constants.EMPTY_STRING, err
+		return nil, err
 	}
 	responseStr = filesInfo[3]
-	return responseStr, nil
+	return []byte(responseStr), nil
 }

@@ -50,7 +50,12 @@ func (swanClient *SwanClient) GetOfflineDealsByStatus(dealStatus string, minerFi
 		PageSize:   pageSize,
 	}
 	urlStr := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/get_by_status")
-	response := web.HttpGet(urlStr, swanClient.SwanToken, params)
+	response, err := web.HttpGet(urlStr, swanClient.SwanToken, params)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
 	getOfflineDealResponse := GetOfflineDealResponse{}
 	err = json.Unmarshal([]byte(response), &getOfflineDealResponse)
 	if err != nil {
@@ -98,7 +103,11 @@ func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) 
 
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/update_offline_deal")
 
-	response := web.HttpPut(apiUrl, swanClient.SwanToken, params)
+	response, err := web.HttpPut(apiUrl, swanClient.SwanToken, params)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
 
 	updateOfflineDealResponse := &UpdateOfflineDealResponse{}
 	err = json.Unmarshal([]byte(response), updateOfflineDealResponse)
@@ -119,16 +128,14 @@ func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) 
 //for public and non auto-bid task
 func (swanClient *SwanClient) CreateOfflineDeals(fileDescs []*model.FileDesc) (*SwanServerResponse, error) {
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/create_offline_deals")
-	response := web.HttpPut(apiUrl, swanClient.SwanToken, fileDescs)
-
-	if response == "" {
-		err := fmt.Errorf("no response from:%s", apiUrl)
+	response, err := web.HttpPut(apiUrl, swanClient.SwanToken, fileDescs)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	swanServerResponse := &SwanServerResponse{}
-	err := json.Unmarshal([]byte(response), swanServerResponse)
+	err = json.Unmarshal(response, swanServerResponse)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err

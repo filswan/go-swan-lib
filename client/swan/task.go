@@ -2,7 +2,6 @@ package swan
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -21,15 +20,14 @@ func (swanClient *SwanClient) CreateTask(task model.Task, fileDescs []*model.Fil
 		"file_descs": fileDescs,
 	}
 
-	response := web.HttpPost(apiUrl, swanClient.SwanToken, params)
-
-	if response == "" {
-		err := fmt.Errorf("no response from:%s", apiUrl)
+	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, params)
+	if err != nil {
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	swanServerResponse := &SwanServerResponse{}
-	err := json.Unmarshal([]byte(response), swanServerResponse)
+	err = json.Unmarshal(response, swanServerResponse)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -73,16 +71,14 @@ func (swanClient *SwanClient) GetTasks(limit *int, status *string) (*GetTaskResu
 
 	apiUrl = apiUrl + filters
 
-	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
-
-	if response == "" {
-		err := errors.New("failed to get tasks from swan")
+	response, err := web.HttpGet(apiUrl, swanClient.SwanToken, "")
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	getTaskResult := &GetTaskResult{}
-	err := json.Unmarshal([]byte(response), getTaskResult)
+	err = json.Unmarshal(response, getTaskResult)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -131,16 +127,14 @@ func (swanClient *SwanClient) GetTaskByUuid(taskUuid string) (*GetTaskByUuidResu
 	}
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks", taskUuid)
 
-	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
-
-	if response == "" {
-		err := fmt.Errorf("no response from:%s", apiUrl)
+	response, err := web.HttpGet(apiUrl, swanClient.SwanToken, "")
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	getTaskByUuidResult := &GetTaskByUuidResult{}
-	err := json.Unmarshal([]byte(response), getTaskByUuidResult)
+	err = json.Unmarshal(response, getTaskByUuidResult)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err

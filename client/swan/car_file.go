@@ -39,16 +39,15 @@ func (swanClient *SwanClient) GetCarFileByUuidUrl(taskUuid, carFileUrl string) (
 
 	apiUrl := fmt.Sprintf("%s/car_files/car_file?task_uuid=%s&car_file_url=%s", swanClient.ApiUrl, taskUuid, carFileUrl)
 
-	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
+	response, err := web.HttpGet(apiUrl, swanClient.SwanToken, "")
 
-	if response == "" {
-		err := fmt.Errorf("no response from:%s", apiUrl)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	getCarFileByUuidUrlResult := &GetCarFileByUuidUrlResult{}
-	err := json.Unmarshal([]byte(response), getCarFileByUuidUrlResult)
+	err = json.Unmarshal(response, getCarFileByUuidUrlResult)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -86,16 +85,14 @@ func (swanClient *SwanClient) GetAutoBidCarFilesByStatus(carFileStatus string) (
 
 	apiUrl := fmt.Sprintf("%s/car_files/auto_bid/get_by_status?car_file_status=%s", swanClient.ApiUrl, carFileStatus)
 
-	response := web.HttpGet(apiUrl, swanClient.SwanToken, "")
-
-	if response == "" {
-		err := fmt.Errorf("no response from:%s", apiUrl)
+	response, err := web.HttpGet(apiUrl, swanClient.SwanToken, "")
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	getAutoBidCarFilesByStatusResult := &GetAutoBidCarFilesByStatusResult{}
-	err := json.Unmarshal([]byte(response), getAutoBidCarFilesByStatusResult)
+	err = json.Unmarshal(response, getAutoBidCarFilesByStatusResult)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err

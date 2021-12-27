@@ -15,10 +15,9 @@ func (swanClient *SwanClient) CheckDatacap(wallet string) (bool, error) {
 	apiUrl := swanClient.ApiUrl + "/tools/check_datacap?address=" + wallet
 	params := url.Values{}
 
-	response := web.HttpGetNoToken(apiUrl, strings.NewReader(params.Encode()))
+	response, err := web.HttpGetNoToken(apiUrl, strings.NewReader(params.Encode()))
 
-	if response == "" {
-		err := fmt.Errorf("no response from:%s", apiUrl)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return false, err
 	}

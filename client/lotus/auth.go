@@ -53,15 +53,14 @@ func LotusAuthVerify(apiUrl, token string) ([]string, error) {
 	}
 
 	//here the api url should be miner's api url, need to change later on
-	response := web.HttpGetNoToken(apiUrl, jsonRpcParams)
-	if response == "" {
-		err := fmt.Errorf("no response from:%s", apiUrl)
-		//logs.GetLogger().Error(err)
+	response, err := web.HttpGetNoToken(apiUrl, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
 	authVerify := &AuthVerify{}
-	err := json.Unmarshal([]byte(response), authVerify)
+	err = json.Unmarshal(response, authVerify)
 	if err != nil {
 		//logs.GetLogger().Error(err)
 		return nil, err
