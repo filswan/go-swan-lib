@@ -3,8 +3,6 @@ package swan
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/filswan/go-swan-lib/client/web"
@@ -15,13 +13,15 @@ import (
 )
 
 type MinerResponse struct {
-	Status  string      `json:"status"`
-	Message string      `json:"message"`
-	Data    model.Miner `json:"data"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Data    struct {
+		Miner model.Miner `json:"miner"`
+	} `json:"data"`
 }
 
 func (swanClient *SwanClient) GetMiner(minerFid string) (*MinerResponse, error) {
-	apiUrl := swanClient.ApiUrl + "/miner/info/" + minerFid
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "miners", minerFid)
 
 	response, err := web.HttpGetNoToken(apiUrl, "")
 	if err != nil {
@@ -46,6 +46,14 @@ func (swanClient *SwanClient) GetMiner(minerFid string) (*MinerResponse, error) 
 	return minerResponse, nil
 }
 
+type UpdateMinerConfigParams struct {
+	MinerFid            string `json:"miner_fid"`
+	BidMode             int    `json:"bid_mode"`
+	ExpectedSealingTime int    `json:"expected_sealing_time"`
+	StartEpoch          int    `json:"start_epoch"`
+	AutoBidDealPerDay   int    `json:"auto_bid_deal_per_day"`
+}
+
 func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner model.Miner) error {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
@@ -64,34 +72,35 @@ func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner mode
 		return err
 	}
 
-	miner := minerResponse.Data
+	miner := minerResponse.Data.Miner
 
 	if miner.BidMode == confMiner.BidMode &&
 		miner.ExpectedSealingTime == confMiner.ExpectedSealingTime &&
 		miner.StartEpoch == confMiner.StartEpoch &&
-		miner.AutoBidTaskPerDay == confMiner.AutoBidTaskPerDay {
+		miner.AutoBidDealPerDay == confMiner.AutoBidDealPerDay {
 		logs.GetLogger().Info("No changes in bid configuration")
 		return err
 	}
 
 	logs.GetLogger().Info("Begin updating bid configuration")
-	apiUrl := swanClient.ApiUrl + "/miner/info"
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "miners/update_miner_config")
 
-	params := url.Values{}
-	params.Add("miner_fid", minerFid)
-	params.Add("bid_mode", strconv.Itoa(confMiner.BidMode))
-	params.Add("expected_sealing_time", strconv.Itoa(confMiner.ExpectedSealingTime))
-	params.Add("start_epoch", strconv.Itoa(confMiner.StartEpoch))
-	params.Add("auto_bid_task_per_day", strconv.Itoa(confMiner.AutoBidTaskPerDay))
+	params := UpdateMinerConfigParams{
+		MinerFid:            minerFid,
+		BidMode:             confMiner.BidMode,
+		ExpectedSealingTime: confMiner.ExpectedSealingTime,
+		StartEpoch:          confMiner.StartEpoch,
+		AutoBidDealPerDay:   confMiner.AutoBidDealPerDay,
+	}
 
-	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, params)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
 	}
 
-	minerResponse = &MinerResponse{}
-	err = json.Unmarshal([]byte(response), minerResponse)
+	swanServerResponse := &SwanServerResponse{}
+	err = json.Unmarshal(response, swanServerResponse)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
