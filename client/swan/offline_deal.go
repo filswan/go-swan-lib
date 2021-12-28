@@ -127,8 +127,8 @@ func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) 
 
 //for public and non auto-bid task
 func (swanClient *SwanClient) CreateOfflineDeals(fileDescs []*model.FileDesc) (*SwanServerResponse, error) {
-	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "tasks/create_offline_deals")
-	response, err := web.HttpPut(apiUrl, swanClient.SwanToken, fileDescs)
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/create_offline_deals")
+	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, fileDescs)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
