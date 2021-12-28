@@ -107,6 +107,10 @@ func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner mode
 	return nil
 }
 
+type SetHeartbeatOnlineParams struct {
+	MinerFid string `json:"miner_fid"`
+}
+
 func (swanClient *SwanClient) SendHeartbeatRequest(minerFid string) error {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
@@ -114,25 +118,31 @@ func (swanClient *SwanClient) SendHeartbeatRequest(minerFid string) error {
 		return err
 	}
 
-	apiUrl := swanClient.ApiUrl + "/heartbeat"
-	params := url.Values{}
-	params.Add("miner_id", minerFid)
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "miners/set_heartbeat_online")
+	params := &SetHeartbeatOnlineParams{
+		MinerFid: minerFid,
+	}
 
-	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, strings.NewReader(params.Encode()))
+	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, params)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
 	}
 
-	if strings.Contains(string(response), "fail") {
-		err := fmt.Errorf("failed to send heartbeat")
+	swanServerResponse := &SwanServerResponse{}
+	err = json.Unmarshal([]byte(response), swanServerResponse)
+	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
 	}
 
-	status := utils.GetFieldStrFromJson(response, "status")
-	message := utils.GetFieldStrFromJson(response, "message")
-	msg := fmt.Sprintf("status:%s, message:%s", status, message)
+	if !strings.EqualFold(swanServerResponse.Status, constants.SWAN_API_STATUS_SUCCESS) {
+		err := fmt.Errorf("%s,%s", swanServerResponse.Status, swanServerResponse.Message)
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	msg := fmt.Sprintf("status:%s, message:%s", swanServerResponse.Status, swanServerResponse.Message)
 	logs.GetLogger().Info(msg)
 	return nil
 }
