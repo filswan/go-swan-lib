@@ -20,8 +20,9 @@ const (
 	TASK_FAST_RETRIEVAL_NO  = 0
 	TASK_FAST_RETRIEVAL_YES = 1
 
-	TASK_BID_MODE_AUTO   = 1
-	TASK_BID_MODE_MANUAL = 0
+	TASK_BID_MODE_MANUAL = 0 // allocate miner manually after creating task
+	TASK_BID_MODE_AUTO   = 1 // allocate miner by market matcher after creating task
+	TASK_BID_MODE_NONE   = 2 // set miner when creating task
 
 	TASK_IS_PUBLIC = 1
 
