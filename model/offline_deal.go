@@ -29,6 +29,7 @@ type OfflineDeal struct {
 	CarFileUrl    string           `json:"car_file_url"`
 	CarFileSize   int64            `json:"car_file_size"`
 	MinerFid      string           `json:"miner_fid"`
+	TaskName      *string          `json:"task_name"`
 	TaskUuid      *string          `json:"task_uuid"`
 	TaskType      *string          `json:"task_type"`
 	FastRetrieval *int             `json:"fast_retrieval"`
