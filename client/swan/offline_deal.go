@@ -16,9 +16,10 @@ const GET_OFFLINEDEAL_LIMIT_DEFAULT = 50
 
 type GetOfflineDealsByStatusParams struct {
 	DealStatus string  `json:"status"`
+	ForMiner   bool    `json:"for_miner"`
 	TaskUuid   *string `json:"task_uuid"`
-	MinerFid   *string `json:"miner_fid"`
 	SourceId   *int    `json:"source_id"`
+	MinerFid   *string `json:"miner_fid"`
 	PageNum    *int    `json:"page_num"`
 	PageSize   *int    `json:"page_size"`
 }
