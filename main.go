@@ -1,14 +1,16 @@
 package main
 
 import (
-	"os"
-
-	"github.com/filswan/go-swan-lib/client/lotus"
+	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
 func main() {
-	wallet := os.Args[1]
-	isVerified, err := lotus.IsWalletVerified(wallet)
-	logs.GetLogger().Info(isVerified, err)
+	response, err := web.HttpGetNoToken("https://calibration-api.filscout.com/api/v1/storagedeal/6666", nil)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+
+	logs.GetLogger().Info(response)
 }

@@ -2,6 +2,7 @@ package web
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -104,7 +105,10 @@ func HttpRequest(httpMethod, uri, tokenString string, params interface{}) ([]byt
 		request.Header.Set("Authorization", "Bearer "+tokenString)
 	}
 
-	client := &http.Client{}
+	customTransport := http.DefaultTransport.(*http.Transport).Clone()
+	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	client := &http.Client{Transport: customTransport}
 	response, err := client.Do(request)
 
 	if err != nil {

@@ -336,3 +336,17 @@ func CheckDirExists(dir, dirName string) error {
 
 	return nil
 }
+
+func GetFilesSize(dir string) (*int64, error) {
+	srcFiles, err := ioutil.ReadDir(dir)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+	srcFilesSize := int64(0)
+	for _, srcFile := range srcFiles {
+		srcFilesSize = srcFilesSize + srcFile.Size()
+	}
+
+	return &srcFilesSize, nil
+}
