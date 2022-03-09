@@ -125,6 +125,7 @@ type ClientDealCostStatus struct {
 	ReserveClientFunds   string
 	DealProposalAccepted string
 	Status               string
+	Message              string
 	DealId               int64
 	Verified             bool
 }
@@ -191,6 +192,7 @@ func (lotusClient *LotusClient) LotusClientGetDealInfo(dealCid string) (*ClientD
 	clientDealCostStatus.Status = lotusClient.LotusGetDealStatus(clientDealInfo.Result.State)
 	clientDealCostStatus.DealId = clientDealInfo.Result.DealID
 	clientDealCostStatus.Verified = clientDealInfo.Result.Verified
+	clientDealCostStatus.Message = clientDealInfo.Result.Message
 
 	//logs.GetLogger().Info(clientDealCost)
 	return &clientDealCostStatus, nil
