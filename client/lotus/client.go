@@ -386,6 +386,7 @@ func (lotusClient *LotusClient) LotusGetDealStatus(state int) string {
 
 //"lotus client commP " + carFilePath
 func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) *string {
+	logs.GetLogger().Info("Generate piece cid for ", filepath, " start")
 	var params []interface{}
 	params = append(params, filepath)
 
@@ -423,6 +424,9 @@ func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) *string {
 	}
 
 	pieceCid := clientCalcCommP.Result.Root.Cid
+
+	logs.GetLogger().Info("Piece cid for ", filepath, " generated:", pieceCid)
+
 	return &pieceCid
 }
 
@@ -433,6 +437,7 @@ type ClientFileParam struct {
 
 //"lotus client import --car " + carFilePath
 func (lotusClient *LotusClient) LotusClientImport(filepath string, isCar bool) (*string, error) {
+	logs.GetLogger().Info("Import file ", filepath, " to lotus client start")
 	var params []interface{}
 	clientFileParam := ClientFileParam{
 		Path:  filepath,
@@ -475,11 +480,14 @@ func (lotusClient *LotusClient) LotusClientImport(filepath string, isCar bool) (
 
 	dataCid := clientImport.Result.Root.Cid
 
+	logs.GetLogger().Info("File ", filepath, " imported to lotus client")
+
 	return &dataCid, nil
 }
 
 //"lotus client generate-car " + srcFilePath + " " + destCarFilePath
 func (lotusClient *LotusClient) LotusClientGenCar(srcFilePath, destCarFilePath string, srcFilePathIsCar bool) error {
+	logs.GetLogger().Info("Create ", srcFilePath, " to ", destCarFilePath, " start")
 	var params []interface{}
 	clientFileParam := ClientFileParam{
 		Path:  srcFilePath,
@@ -516,6 +524,7 @@ func (lotusClient *LotusClient) LotusClientGenCar(srcFilePath, destCarFilePath s
 		return err
 	}
 
+	logs.GetLogger().Info(srcFilePath, " to ", destCarFilePath, " created")
 	return nil
 }
 
