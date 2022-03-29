@@ -524,7 +524,7 @@ func (lotusClient *LotusClient) LotusClientGenCar(srcFilePath, destCarFilePath s
 		return err
 	}
 
-	logs.GetLogger().Info("Create ", srcFilePath, " to ", destCarFilePath, " start")
+	logs.GetLogger().Info(srcFilePath, " to ", destCarFilePath, " created")
 	return nil
 }
 
