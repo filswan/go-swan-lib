@@ -69,4 +69,6 @@ const (
 	LOTUS_AUTH_ADMIN = "admin"
 
 	LOTUS_TRANSFER_TYPE_MANUAL = "manual"
+
+	HTTP_API_TIMEOUT_SECOND = 30
 )
