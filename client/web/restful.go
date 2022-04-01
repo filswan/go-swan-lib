@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
@@ -105,7 +106,7 @@ func HttpRequest(httpMethod, uri, tokenString string, params interface{}) ([]byt
 		request.Header.Set("Authorization", "Bearer "+tokenString)
 	}
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: constants.HTTP_API_TIMEOUT_SECOND * time.Second}
 	response, err := client.Do(request)
 
 	if err != nil {
