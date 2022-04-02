@@ -223,7 +223,8 @@ func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (string, 
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	timeOutSecond := constants.HTTP_API_TIMEOUT_SECOND
+	response := web.HttpGetNoTokenTimeout(lotusClient.ApiUrl, jsonRpcParams, &timeOutSecond)
 
 	clientMinerQuery := &ClientMinerQuery{}
 	err := json.Unmarshal([]byte(response), clientMinerQuery)
@@ -279,7 +280,8 @@ func (lotusClient *LotusClient) LotusClientQueryAsk(minerFid string) (*MinerConf
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	timeOutSecond := constants.HTTP_API_TIMEOUT_SECOND
+	response := web.HttpGetNoTokenTimeout(lotusClient.ApiUrl, jsonRpcParams, &timeOutSecond)
 
 	clientQueryAsk := &ClientQueryAsk{}
 	err = json.Unmarshal([]byte(response), clientQueryAsk)
