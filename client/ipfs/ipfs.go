@@ -38,7 +38,7 @@ func IpfsUploadFileByWebApi(apiUrl, filefullpath string) (*string, error) {
 func Export2CarFile(apiUrl, fileHash string, carFileFullPath string) error {
 	apiUrlFull := utils.UrlJoin(apiUrl, "api/v0/dag/export")
 	apiUrlFull = apiUrlFull + "?arg=" + fileHash + "&progress=false"
-	carFileContent, err := web.HttpRequest(http.MethodPost, apiUrlFull, "", nil)
+	carFileContent, err := web.HttpRequest(http.MethodPost, apiUrlFull, "", nil, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
