@@ -48,13 +48,13 @@ func HttpGetNoToken(uri string, params interface{}) ([]byte, error) {
 	return response, nil
 }
 
-func HttpGetNoTokenTimeout(uri string, params interface{}, timeoutSecond *int) string {
+func HttpGetNoTokenTimeout(uri string, params interface{}, timeoutSecond *int) ([]byte, error) {
 	response, err := HttpRequest(http.MethodGet, uri, "", params, timeoutSecond)
 	if err != nil {
 		logs.GetLogger().Error()
-		return ""
+		return nil, err
 	}
-	return string(response)
+	return response, nil
 }
 
 func HttpGet(uri, tokenString string, params interface{}) ([]byte, error) {
