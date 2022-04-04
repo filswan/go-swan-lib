@@ -214,7 +214,8 @@ func (lotusClient *LotusClient) LotusClientMinerQuery(minerFid string) (*string,
 		Id:      LOTUS_JSON_RPC_ID,
 	}
 
-	response, err := web.HttpGetNoToken(lotusClient.ApiUrl, jsonRpcParams)
+	timeOutSecond := constants.HTTP_API_TIMEOUT_SECOND
+	response, err := web.HttpGetNoTokenTimeout(lotusClient.ApiUrl, jsonRpcParams, &timeOutSecond)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
