@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/filswan/go-swan-lib/logs"
 	"github.com/filswan/go-swan-lib/utils"
@@ -21,7 +22,7 @@ const HTTP_CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
 const HTTP_CONTENT_TYPE_JSON = "application/json; charset=UTF-8"
 
 func HttpPostNoToken(uri string, params interface{}) ([]byte, error) {
-	response, err := HttpRequest(http.MethodPost, uri, "", params)
+	response, err := HttpRequest(http.MethodPost, uri, "", params, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -30,7 +31,7 @@ func HttpPostNoToken(uri string, params interface{}) ([]byte, error) {
 }
 
 func HttpPost(uri, tokenString string, params interface{}) ([]byte, error) {
-	response, err := HttpRequest(http.MethodPost, uri, tokenString, params)
+	response, err := HttpRequest(http.MethodPost, uri, tokenString, params, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -39,7 +40,7 @@ func HttpPost(uri, tokenString string, params interface{}) ([]byte, error) {
 }
 
 func HttpGetNoToken(uri string, params interface{}) ([]byte, error) {
-	response, err := HttpRequest(http.MethodGet, uri, "", params)
+	response, err := HttpRequest(http.MethodGet, uri, "", params, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -47,8 +48,17 @@ func HttpGetNoToken(uri string, params interface{}) ([]byte, error) {
 	return response, nil
 }
 
+func HttpGetNoTokenTimeout(uri string, params interface{}, timeoutSecond *int) ([]byte, error) {
+	response, err := HttpRequest(http.MethodGet, uri, "", params, timeoutSecond)
+	if err != nil {
+		logs.GetLogger().Error()
+		return nil, err
+	}
+	return response, nil
+}
+
 func HttpGet(uri, tokenString string, params interface{}) ([]byte, error) {
-	response, err := HttpRequest(http.MethodGet, uri, tokenString, params)
+	response, err := HttpRequest(http.MethodGet, uri, tokenString, params, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -57,7 +67,7 @@ func HttpGet(uri, tokenString string, params interface{}) ([]byte, error) {
 }
 
 func HttpPut(uri, tokenString string, params interface{}) ([]byte, error) {
-	response, err := HttpRequest(http.MethodPut, uri, tokenString, params)
+	response, err := HttpRequest(http.MethodPut, uri, tokenString, params, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -66,7 +76,7 @@ func HttpPut(uri, tokenString string, params interface{}) ([]byte, error) {
 }
 
 func HttpDelete(uri, tokenString string, params interface{}) ([]byte, error) {
-	response, err := HttpRequest(http.MethodDelete, uri, tokenString, params)
+	response, err := HttpRequest(http.MethodDelete, uri, tokenString, params, nil)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -74,7 +84,7 @@ func HttpDelete(uri, tokenString string, params interface{}) ([]byte, error) {
 	return response, nil
 }
 
-func HttpRequest(httpMethod, uri, tokenString string, params interface{}) ([]byte, error) {
+func HttpRequest(httpMethod, uri, tokenString string, params interface{}, timeoutSecond *int) ([]byte, error) {
 	var request *http.Request
 	var err error
 
@@ -109,6 +119,10 @@ func HttpRequest(httpMethod, uri, tokenString string, params interface{}) ([]byt
 	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	client := &http.Client{Transport: customTransport}
+	if timeoutSecond != nil {
+		client.Timeout = time.Duration(*timeoutSecond) * time.Second
+	}
+
 	response, err := client.Do(request)
 
 	if err != nil {
