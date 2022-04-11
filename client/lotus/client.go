@@ -576,6 +576,12 @@ func (lotusClient *LotusClient) CheckDealConfig(dealConfig *model.DealConfig) (*
 		return nil, err
 	}
 
+	if dealConfig.FileSize < minerConfig.MinPieceSize || dealConfig.FileSize > minerConfig.MaxPieceSize {
+		err := fmt.Errorf("payload cid:%s, file size:%d is outside of miner:%s's range:[%d,%d]", dealConfig.PayloadCid, dealConfig.FileSize, dealConfig.MinerFid, minerConfig.MinPieceSize, minerConfig.MaxPieceSize)
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
 	var e18 decimal.Decimal = decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18)
 
 	var minerPrice decimal.Decimal
