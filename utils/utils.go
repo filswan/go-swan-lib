@@ -17,11 +17,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// GetEpochInMillis get current timestamp
-func GetEpochInMillis() (millis int64) {
+func GetCurrentUtcMilliSecond() (millis int64) {
 	nanos := time.Now().UnixNano()
-	millis = nanos / 1000000
+	millis = nanos / 1e6
 	return
+}
+
+func GetCurrentUtcSecond() int64 {
+	return time.Now().UnixNano() / 1e9
 }
 
 func GetInt64FromStr(numStr string) int64 {
