@@ -34,7 +34,7 @@ type UpdateOfflineDealData struct {
 	Message string            `json:"message"`
 }
 
-func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, limit ...string) []model.OfflineDeal {
+func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, filepathIsNull *bool, limit ...string) []model.OfflineDeal {
 	err := swanClient.SwanGetJwtTokenUp3Times()
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -47,6 +47,10 @@ func (swanClient *SwanClient) SwanGetOfflineDeals(minerFid, status string, limit
 	}
 
 	urlStr := swanClient.ApiUrl + "/offline_deals/" + minerFid + "?deal_status=" + status + "&limit=" + rowLimit + "&offset=0"
+	if filepathIsNull != nil {
+		urlStr = urlStr + "&file_path_null=" + strconv.FormatBool(*filepathIsNull)
+	}
+
 	response := web.HttpGet(urlStr, swanClient.SwanToken, "")
 	getOfflineDealResponse := GetOfflineDealResponse{}
 	err = json.Unmarshal([]byte(response), &getOfflineDealResponse)
