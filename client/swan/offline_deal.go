@@ -88,8 +88,12 @@ func (swanClient *SwanClient) SwanUpdateOfflineDealStatus(dealId int, status str
 		params.Add("note", statusInfo[0])
 	}
 
-	if len(statusInfo) > 1 && len(statusInfo[1]) > 0 {
-		params.Add("file_path", statusInfo[1])
+	if len(statusInfo) > 1 {
+		if status == constants.DEAL_STATUS_COMPLETED || status == constants.DEAL_STATUS_EXPIRED || status == constants.DEAL_STATUS_IMPORT_FAILED {
+			params.Add("file_path", statusInfo[1])
+		} else if len(statusInfo[1]) > 0 {
+			params.Add("file_path", statusInfo[1])
+		}
 	}
 
 	if len(statusInfo) > 2 && len(statusInfo[2]) > 0 {
