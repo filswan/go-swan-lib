@@ -71,4 +71,8 @@ const (
 	LOTUS_TRANSFER_TYPE_MANUAL = "manual"
 
 	HTTP_API_TIMEOUT_SECOND = 30
+
+	DEAL_STATUS_COMPLETED     = "Completed"
+	DEAL_STATUS_EXPIRED       = "DealExpired"
+	DEAL_STATUS_IMPORT_FAILED = "ImportFailed"
 )
