@@ -291,7 +291,7 @@ func HttpUploadFileByStream(uri, filefullpath string) ([]byte, error) {
 	//logs.GetLogger().Info(responseStr)
 	filesInfo := strings.Split(responseStr, "\n")
 	if len(filesInfo) < 4 {
-		err := fmt.Errorf("not enough files info returned")
+		err := fmt.Errorf("not enough files info returned, ipfs response:%s", responseStr)
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
