@@ -10,6 +10,7 @@ import (
 
 const ADD_URI = "aria2.addUri"
 const STATUS = "aria2.tellStatus"
+const CHANGE_GLOBAL_OPTION = "aria2.changeGlobalOption"
 
 type JsonRpcParams struct {
 	JsonRpc string        `json:"jsonrpc"`
@@ -86,6 +87,17 @@ type Aria2StatusResultFile struct {
 type Aria2StatusResultFileUri struct {
 	Status string `json:"status"`
 	Uri    string `json:"uri"`
+}
+
+type ChangeMaxConcurrentDownloads struct {
+	MaxConcurrentDownloads string `json:"max-concurrent-downloads"`
+}
+
+type Aria2ChangeMaxConcurrentDownloads struct {
+	Id      string      `json:"id"`
+	JsonRpc string      `json:"jsonrpc"`
+	Error   *Aria2Error `json:"error"`
+	Result  interface{} `json:"result"`
 }
 
 func GetAria2Client(aria2Host, aria2Secret string, aria2Port int) *Aria2Client {
@@ -172,4 +184,32 @@ func (aria2Client *Aria2Client) GetDownloadStatus(gid string) *Aria2Status {
 	}
 
 	return aria2Status
+}
+
+func (aria2Client *Aria2Client) ChangeMaxConcurrentDownloads(maxConcurrentDownloads string) *Aria2ChangeMaxConcurrentDownloads {
+	var params []interface{}
+	params = append(params, "token:"+aria2Client.token)
+	params = append(params, &ChangeMaxConcurrentDownloads{
+		MaxConcurrentDownloads: maxConcurrentDownloads,
+	})
+	payload := Aria2Payload{
+		JsonRpc: "2.0",
+		Id:      "1",
+		Method:  CHANGE_GLOBAL_OPTION,
+		Params:  params,
+	}
+
+	response, err := web.HttpPostNoToken(aria2Client.serverUrl, payload)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil
+	}
+
+	aria2ChangeMaxConcurrentDownloads := &Aria2ChangeMaxConcurrentDownloads{}
+	err = json.Unmarshal(response, aria2ChangeMaxConcurrentDownloads)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil
+	}
+	return aria2ChangeMaxConcurrentDownloads
 }
