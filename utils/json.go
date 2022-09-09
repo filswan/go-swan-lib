@@ -40,7 +40,7 @@ func GetFieldStrFromJson(jsonBytes []byte, fieldName string) string {
 func GetFieldMapFromJson(jsonBytes []byte, fieldName string) map[string]interface{} {
 	fieldVal := GetFieldFromJson(jsonBytes, fieldName)
 	if fieldVal == nil {
-		logs.GetLogger().Info("No ", fieldName, " in ", jsonBytes)
+		logs.GetLogger().Warn("No fieldName: ", fieldName, " in ", string(jsonBytes))
 		return nil
 	}
 
