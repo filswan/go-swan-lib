@@ -26,6 +26,7 @@ const (
 	LOTUS_CLIENT_IMPORT          = "Filecoin.ClientImport"
 	LOTUS_CLIENT_GEN_CAR         = "Filecoin.ClientGenCar"
 	LOTUS_CLIENT_START_DEAL      = "Filecoin.ClientStartDeal"
+	LOTUS_STATE_STORAGE_DEAL     = "Filecoin.StateMarketStorageDeal"
 
 	STAGE_RESERVE_FUNDS     = "StorageDealReserveClientFunds"
 	STAGE_PROPOSAL_ACCEPTED = "StorageDealProposalAccepted"
@@ -547,7 +548,7 @@ func (lotusClient *LotusClient) CheckDuration(duration int, startEpoch int64) er
 
 	epoch2EndfromNow := endEpoch - *currentEpoch
 	if epoch2EndfromNow >= constants.DURATION_MAX {
-		err := fmt.Errorf("invalid deal end epoch %d: cannot be more than %d past current epoch %d", endEpoch, constants.DURATION_MAX, currentEpoch)
+		err := fmt.Errorf("invalid deal end epoch %d: cannot be more than %d past current epoch %d", endEpoch, constants.DURATION_MAX, *currentEpoch)
 		logs.GetLogger().Error(err)
 		return err
 	}
@@ -691,4 +692,56 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 	}
 
 	return &clientStartDeal.Result.Cid, nil
+}
+
+func (lotusClient *LotusClient) LotusGetDealById(dealId uint64) (*DealInfo, error) {
+	var params []interface{}
+	params = append(params, dealId)
+	params = append(params, []interface{}{})
+	jsonRpcParams := LotusJsonRpcParams{
+		JsonRpc: LOTUS_JSON_RPC_VERSION,
+		Method:  LOTUS_STATE_STORAGE_DEAL,
+		Params:  params,
+		Id:      LOTUS_JSON_RPC_ID,
+	}
+
+	response, err := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	deal := &MarketStorageDeal{}
+	err = json.Unmarshal(response, deal)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return &deal.Result, nil
+}
+
+type MarketStorageDeal struct {
+	Id      int           `json:"id"`
+	JsonRpc string        `json:"jsonrpc"`
+	Result  DealInfo      `json:"result"`
+	Error   *JsonRpcError `json:"error"`
+}
+
+type DealInfo struct {
+	Proposal struct {
+		PieceCID struct {
+			PieceCid string `json:"/"`
+		} `json:"PieceCID"`
+		VerifiedDeal bool   `json:"VerifiedDeal"`
+		Client       string `json:"Client"`
+		Provider     string `json:"Provider"`
+		StartEpoch   int    `json:"StartEpoch"`
+		EndEpoch     int    `json:"EndEpoch"`
+	} `json:"Proposal"`
+	State struct {
+		SectorStartEpoch int `json:"SectorStartEpoch"`
+		LastUpdatedEpoch int `json:"LastUpdatedEpoch"`
+		SlashEpoch       int `json:"SlashEpoch"`
+	} `json:"State"`
 }
