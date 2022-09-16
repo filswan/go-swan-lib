@@ -13,7 +13,7 @@ import (
 const (
 	LOTUS_MARKET_GET_ASK               = "Filecoin.MarketGetAsk"
 	LOTUS_MARKET_IMPORT_DATA           = "Filecoin.MarketImportDealData"
-	LOTUS_MARKET_LIST_INCOMPLETE_DEALS = "Filecoin.z"
+	LOTUS_MARKET_LIST_INCOMPLETE_DEALS = "Filecoin.MarketListIncompleteDeals"
 )
 
 type LotusMarket struct {
