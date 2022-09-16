@@ -74,6 +74,7 @@ type UpdateOfflineDealParams struct {
 	Status     string  `json:"status"`
 	StartEpoch *int    `json:"start_epoch"`
 	Note       *string `json:"note"`
+	Cost       *string `json:"cost"`
 }
 
 //for public and auto-bid task
