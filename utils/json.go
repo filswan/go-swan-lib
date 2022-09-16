@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/filswan/go-swan-lib/logs"
 )
@@ -40,7 +41,10 @@ func GetFieldStrFromJson(jsonBytes []byte, fieldName string) string {
 func GetFieldMapFromJson(jsonBytes []byte, fieldName string) map[string]interface{} {
 	fieldVal := GetFieldFromJson(jsonBytes, fieldName)
 	if fieldVal == nil {
-		logs.GetLogger().Warn("No fieldName: ", fieldName, " in ", string(jsonBytes))
+		if strings.EqualFold(fieldName, "error") {
+			return nil
+		}
+		logs.GetLogger().Info("No", fieldName, " in ", string(jsonBytes))
 		return nil
 	}
 
