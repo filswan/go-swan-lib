@@ -4,6 +4,7 @@ type DealInfo struct {
 	DealCid    string
 	MinerFid   string
 	StartEpoch int
+	Cost       string
 }
 type FileDesc struct {
 	Uuid           string
