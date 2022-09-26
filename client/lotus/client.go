@@ -551,7 +551,7 @@ func (lotusClient *LotusClient) CheckDuration(duration int, startEpoch int64) er
 
 	epoch2EndfromNow := endEpoch - *currentEpoch
 	if epoch2EndfromNow >= constants.DURATION_MAX {
-		err := fmt.Errorf("invalid deal end epoch %d: cannot be more than %d past current epoch %d", endEpoch, constants.DURATION_MAX, currentEpoch)
+		err := fmt.Errorf("invalid deal end epoch %d: cannot be more than %d past current epoch %d", endEpoch, constants.DURATION_MAX, *currentEpoch)
 		logs.GetLogger().Error(err)
 		return err
 	}

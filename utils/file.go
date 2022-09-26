@@ -18,7 +18,7 @@ func IsFileExists(filePath, fileName string) bool {
 	_, err := os.Stat(fileFullPath)
 
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return false
 	}
 
@@ -29,7 +29,7 @@ func IsFileExistsFullPath(fileFullPath string) bool {
 	_, err := os.Stat(fileFullPath)
 
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return false
 	}
 
@@ -40,7 +40,7 @@ func IsPathFile(dirFullPath string) (*bool, error) {
 	fi, err := os.Stat(dirFullPath)
 
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
@@ -62,7 +62,7 @@ func GetPathType(dirFullPath string) int {
 	fi, err := os.Stat(dirFullPath)
 
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return constants.PATH_TYPE_NOT_EXIST
 	}
 
@@ -87,7 +87,7 @@ func RemoveFile(filePath, fileName string) {
 func GetFileSize(fileFullPath string) int64 {
 	fi, err := os.Stat(fileFullPath)
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return -1
 	}
 
@@ -98,7 +98,7 @@ func GetFileSize2(dir, fileName string) int64 {
 	fileFullPath := filepath.Join(dir, fileName)
 	fi, err := os.Stat(fileFullPath)
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return -1
 	}
 
@@ -255,7 +255,7 @@ func IsDirExists(dir string) bool {
 func CreateDir(dir string) error {
 	if len(dir) == 0 {
 		err := fmt.Errorf("dir is not provided")
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return err
 	}
 
@@ -302,7 +302,7 @@ func GenerateFile(filepath, filename string, filesize int64) {
 func CreateDirIfNotExists(dir, dirName string) error {
 	if IsStrEmpty(&dir) {
 		err := fmt.Errorf("%s directory is required", dirName)
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return err
 	}
 
