@@ -1,6 +1,7 @@
 package swan
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -35,4 +36,50 @@ func (swanClient *SwanClient) CheckDatacap(wallet string) (bool, error) {
 	isVerified := data["is_verified"].(bool)
 
 	return isVerified, nil
+}
+
+func (swanClient *SwanClient) StatisticsChainInfo(chainId string) error {
+	chainName, ok := constants.ChainMap[chainId]
+	if !ok {
+		return errors.New(fmt.Sprintf("not support chainId: %s", chainId))
+	}
+	err := swanClient.GetJwtTokenUp3Times()
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	var req struct {
+		ChainName string `json:"chain_name"`
+		UserKey   string `json:"user_key"`
+	}
+	req.UserKey = swanClient.ApiKey
+	req.ChainName = chainName
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "statistics/chain")
+
+	if _, err = web.HttpPost(apiUrl, swanClient.SwanToken, req); err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
+	return nil
+}
+
+func (swanClient *SwanClient) StatisticsNodeStatus() error {
+	err := swanClient.GetJwtTokenUp3Times()
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	var req struct {
+		UserKey string `json:"user_key"`
+	}
+	req.UserKey = swanClient.ApiKey
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "statistics/node")
+
+	if _, err = web.HttpPost(apiUrl, swanClient.SwanToken, req); err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
+	return nil
 }
