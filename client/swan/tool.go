@@ -1,10 +1,14 @@
 package swan
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
@@ -55,10 +59,14 @@ func (swanClient *SwanClient) StatisticsChainInfo(chainId string) error {
 	}
 	req.UserKey = swanClient.ApiKey
 	req.ChainName = chainName
-	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "statistics/chain")
+	reqParam, _ := json.Marshal(req)
+	buffer := bytes.NewBuffer(reqParam)
 
-	if _, err = web.HttpPost(apiUrl, swanClient.SwanToken, req); err != nil {
-		logs.GetLogger().Error(err)
+	client := http.Client{
+		Timeout: 30 * time.Second,
+	}
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "statistics/chain")
+	if _, err := client.Post(apiUrl, "application/json", buffer); err != nil {
 		return err
 	}
 	return nil
@@ -75,10 +83,14 @@ func (swanClient *SwanClient) StatisticsNodeStatus() error {
 		UserKey string `json:"user_key"`
 	}
 	req.UserKey = swanClient.ApiKey
-	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "statistics/node")
+	reqParam, _ := json.Marshal(req)
+	buffer := bytes.NewBuffer(reqParam)
 
-	if _, err = web.HttpPost(apiUrl, swanClient.SwanToken, req); err != nil {
-		logs.GetLogger().Error(err)
+	client := http.Client{
+		Timeout: 30 * time.Second,
+	}
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "statistics/node")
+	if _, err = client.Post(apiUrl, "application/json", buffer); err != nil {
 		return err
 	}
 	return nil
