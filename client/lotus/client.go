@@ -621,7 +621,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 		return nil, err
 	}
 
-	pieceSize, sectorSize := utils.CalculatePieceSize(dealConfig.FileSize)
+	pieceSize, sectorSize := utils.CalculatePieceSize(dealConfig.FileSize, false)
 	cost := utils.CalculateRealCost(sectorSize, *minerPrice)
 
 	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
