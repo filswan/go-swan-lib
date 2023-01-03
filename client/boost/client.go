@@ -203,7 +203,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		return "", err
 	}
 
-	logs.GetLogger().Warn("selected wallet", "wallet", walletAddr)
+	logs.GetLogger().Warn("selected wallet: ", walletAddr)
 
 	maddr, err := address.NewFromString(dealP.Provider)
 	if err != nil {
@@ -215,7 +215,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		return "", err
 	}
 
-	logs.GetLogger().Warn("found storage provider", "id", addrInfo.ID, "multiaddrs", addrInfo.Addrs, "addr", maddr)
+	logs.GetLogger().Warn("found storage provider ", "id:", addrInfo.ID, ", multiaddrs: ", addrInfo.Addrs, ", minerID:", maddr)
 
 	if err := n.Host.Connect(ctx, *addrInfo); err != nil {
 		return "", fmt.Errorf("failed to connect to peer %s: %w", addrInfo.ID, err)
@@ -246,7 +246,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 	payloadCidStr := dealP.PayloadCid
 	rootCid, err := cid.Parse(payloadCidStr)
 	if err != nil {
-		return "", fmt.Errorf("parsing payload cid %s: %w", payloadCidStr, err)
+		return "", fmt.Errorf("dealUuid: %s, parsing payload cid %s: %w", dealUuid.String(), payloadCidStr, err)
 	}
 
 	carFileSize := dealP.CarSize
@@ -264,7 +264,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 	} else {
 		bounds, err := fullNode.StateDealProviderCollateralBounds(ctx, abi.PaddedPieceSize(pieceSize), dealP.Verified, chaintypes.EmptyTSK)
 		if err != nil {
-			return "", fmt.Errorf("node error getting collateral bounds: %w", err)
+			return "", fmt.Errorf("dealUuid: %s, node error getting collateral bounds: %w", dealUuid.String(), err)
 		}
 
 		providerCollateral = big.Div(big.Mul(bounds.Min, big.NewInt(6)), big.NewInt(5)) // add 20%
@@ -287,7 +287,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 	// Create a deal proposal to storage provider using deal protocol v1.2.0 format
 	dealProposal, err := dealProposal(ctx, n, walletAddr, rootCid, abi.PaddedPieceSize(pieceSize), pieceCid, maddr, startEpoch, dealP.Duration, dealP.Verified, providerCollateral, abi.NewTokenAmount(int64(dealP.StoragePrice)))
 	if err != nil {
-		return "", fmt.Errorf("failed to create a deal proposal: %w", err)
+		return "", fmt.Errorf("dealUuid: %s, failed to create a deal proposal: %w", dealUuid.String(), err)
 	}
 
 	dealParams := types.DealParams{
@@ -296,7 +296,6 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		DealDataRoot:       rootCid,
 		IsOffline:          true,
 		Transfer:           transfer,
-		//FastRetrieval:      dealP.FastRetrieval,
 	}
 
 	logs.GetLogger().Debug("about to submit deal proposal", "uuid", dealUuid.String())
@@ -316,7 +315,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		return "", fmt.Errorf("deal proposal rejected: %s", resp.Message)
 	}
 
-	logs.GetLogger().Info("sent deal proposal for offline deal")
+	logs.GetLogger().Infof("dealUuid: %s, The deal proposal has been sent to the storage provider, the deal info is as follows: ", dealUuid.String())
 	out := map[string]interface{}{
 		"dealUuid":           dealUuid.String(),
 		"provider":           maddr.String(),
