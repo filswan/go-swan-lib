@@ -592,7 +592,7 @@ func (lotusClient *LotusClient) CheckDealConfig(dealConfig *model.DealConfig) (*
 	} else {
 		minerPrice = minerConfig.Price.Div(e18)
 	}
-	logs.GetLogger().Info("miner:", dealConfig.MinerFid, ",price:", minerPrice)
+	logs.GetLogger().Info("miner: ", dealConfig.MinerFid, ", price: ", minerPrice)
 
 	priceCmp := dealConfig.MaxPrice.Cmp(minerPrice)
 	if priceCmp < 0 {
