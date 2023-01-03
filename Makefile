@@ -22,7 +22,10 @@ test: ## Run unittests
 	@echo "Done testing."
 .PHONY: test
 
-build: ## Build the binary file
+update-modules:
+	git submodule update --init --recursive
+
+build: update-modules  ## Build the binary file
 	@go mod download
 	@go mod tidy
 	@go build -o $(GOBIN)/$(BINARY_NAME)  main.go
