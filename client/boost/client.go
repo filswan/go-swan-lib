@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
 	clinode "github.com/filecoin-project/boost/cli/node"
 	cliutil "github.com/filecoin-project/boost/cli/util"
 	"github.com/filecoin-project/boost/cmd"
@@ -76,25 +77,44 @@ func GetClient(clientRepo string) *Client {
 	}
 }
 
-func (client *Client) InitRepo(repoPath string) error {
+func (client *Client) InitRepo(repoPath, walletAddress string) error {
 	sdir, err := homedir.Expand(repoPath)
 	if err != nil {
 		return err
 	}
 	os.Mkdir(sdir, 0755) //nolint:errcheck
 
-	n, err := clinode.Setup(repoPath)
+	_, err = clinode.Setup(repoPath)
 	if err != nil {
 		logs.GetLogger().Error("setup node failed: %w", err)
 		return err
 	}
 
-	walletAddr, err := n.Wallet.GetDefault()
-	if err != nil {
-		return err
-	}
-	logs.GetLogger().Infof("default wallet set: %s", walletAddr)
+	fmt.Println(color.YellowString("The current client wallet address is: %s, please use the command <./swan-client wallet import wallet.key> to import the wallet private key.", walletAddress))
+	fmt.Println(color.YellowString("You must add funds to it in order to send deals. please run `lotus wallet market add --from <address> --address <market_address> <amount>"))
 	return nil
+}
+
+func (client *Client) ValidateExistWalletAddress(walletAddress string) bool {
+	ctx := context.Background()
+	n, err := clinode.Setup(client.ClientRepo)
+	if err != nil {
+		logs.GetLogger().Error("setup node failed: %w", err)
+		return false
+	}
+
+	addressList, err := n.Wallet.WalletList(ctx)
+	if err != nil {
+		logs.GetLogger().Error("wallet list failed: %w", err)
+		return false
+	}
+
+	for _, addr := range addressList {
+		if strings.EqualFold(addr.String()[1:], walletAddress[1:]) {
+			return true
+		}
+	}
+	return false
 }
 
 func (client *Client) WalletImport(inputData []byte) error {
@@ -215,7 +235,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		return "", err
 	}
 
-	logs.GetLogger().Warn("found storage provider ", "id:", addrInfo.ID, ", multiaddrs: ", addrInfo.Addrs, ", minerID:", maddr)
+	logs.GetLogger().Warn("found storage provider ", "id: ", addrInfo.ID, ", multiaddrs: ", addrInfo.Addrs, ", minerID:", maddr)
 
 	if err := n.Host.Connect(ctx, *addrInfo); err != nil {
 		return "", fmt.Errorf("failed to connect to peer %s: %w", addrInfo.ID, err)
@@ -315,7 +335,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		return "", fmt.Errorf("deal proposal rejected: %s", resp.Message)
 	}
 
-	logs.GetLogger().Infof("dealUuid: %s, The deal proposal has been sent to the storage provider, the deal info is as follows: ", dealUuid.String())
+	fmt.Println("dealUuid: ", dealUuid.String(), ", the deal proposal has been sent to the storage provider, the deal info is as follows: ")
 	out := map[string]interface{}{
 		"dealUuid":           dealUuid.String(),
 		"provider":           maddr.String(),
