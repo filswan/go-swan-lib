@@ -75,6 +75,9 @@ const (
 	DURATION_MAX = 1555200
 
 	HTTP_API_TIMEOUT_SECOND = 30
+
+	WALLET_TYPE_256 = "secp256k1"
+	WALLET_TYPE_BLS = "bls"
 )
 
 var ChainMap = map[string]string{
