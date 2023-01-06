@@ -3,14 +3,21 @@ package boost
 import (
 	"context"
 	"fmt"
+	"github.com/docker/go-units"
 	boostapi "github.com/filecoin-project/boost/api"
 	"github.com/filecoin-project/boost/storagemarket/types"
 	"github.com/filecoin-project/boost/storagemarket/types/dealcheckpoints"
 	"github.com/filecoin-project/go-jsonrpc"
+	"github.com/filecoin-project/go-state-types/abi"
+	"github.com/filecoin-project/lotus/build"
+	chain_type "github.com/filecoin-project/lotus/chain/types"
 	"github.com/filswan/go-swan-lib/model"
 	"github.com/google/uuid"
+	"github.com/ipfs/go-cid"
 	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 	"net/http"
+	"time"
 )
 
 type Client struct {
@@ -78,6 +85,48 @@ func (pc *Client) OfflineDealWithData(ctx context.Context, dealUuid, filePath st
 		Accepted: offlineDealWithData.Accepted,
 		Reason:   offlineDealWithData.Reason,
 	}, nil
+}
+
+func (pc *Client) OfflineDealWithDataByMarket(ctx context.Context, proposalCid, filePath string) error {
+	propCid, err := cid.Decode(proposalCid)
+	if err != nil {
+		return fmt.Errorf("could not parse '%s' as deal proposal cid", proposalCid)
+	}
+	return pc.stub.MarketImportDealData(ctx, propCid, filePath)
+}
+
+func (pc *Client) MarketSetAsk(ctx context.Context, price, verifiedPrice, minPieceSize, maxPieceSize string) error {
+	pri, err := chain_type.ParseFIL(price)
+	if err != nil {
+		return err
+	}
+
+	vpri, err := chain_type.ParseFIL(verifiedPrice)
+	if err != nil {
+		return err
+	}
+
+	min, err := units.RAMInBytes(minPieceSize)
+	if err != nil {
+		return xerrors.Errorf("cannot parse min-piece-size to quantity of bytes: %w", err)
+	}
+
+	if min < 256 {
+		return xerrors.New("minimum piece size (w/bit-padding) is 256B")
+	}
+
+	max, err := units.RAMInBytes(maxPieceSize)
+	if err != nil {
+		return xerrors.Errorf("cannot parse max-piece-size to quantity of bytes: %w", err)
+	}
+	dur, err := time.ParseDuration("720h0m0s")
+	if err != nil {
+		return xerrors.Errorf("cannot parse duration: %w", err)
+	}
+
+	qty := dur.Seconds() / float64(build.BlockDelaySecs)
+
+	return pc.stub.MarketSetAsk(ctx, chain_type.BigInt(pri), chain_type.BigInt(vpri), abi.ChainEpoch(qty), abi.PaddedPieceSize(min), abi.PaddedPieceSize(max))
 }
 
 func statusMessage(resp *types.DealStatusResponse) string {
