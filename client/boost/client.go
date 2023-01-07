@@ -70,6 +70,18 @@ func (client *Client) WithClient(lotus *lotus.LotusClient) *Client {
 	return client
 }
 
+func (client *Client) WithRepo(clientRepo string) *Client {
+	if len(clientRepo) == 0 {
+		panic("boost repo is required")
+	}
+	_, err := os.Stat(clientRepo)
+	if err != nil {
+		panic(err)
+	}
+	client.ClientRepo = clientRepo
+	return client
+}
+
 func GetClient(clientRepo string) *Client {
 	if len(clientRepo) == 0 {
 		panic("boost repo is required")
