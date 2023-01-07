@@ -74,6 +74,10 @@ func GetClient(clientRepo string) *Client {
 	if len(clientRepo) == 0 {
 		panic("boost repo is required")
 	}
+	_, err := os.Stat(clientRepo)
+	if err != nil {
+		panic(err)
+	}
 	return &Client{
 		ClientRepo: clientRepo,
 	}
@@ -185,7 +189,6 @@ func (client *Client) WalletList() error {
 		logs.GetLogger().Error("wallet list failed: %w", err)
 		return err
 	}
-	def, _ := n.Wallet.GetDefault()
 
 	ainfo := cliutil.ParseApiInfo(client.FullNodeApi)
 	addr, err := ainfo.DialArgs("v1")
@@ -207,7 +210,6 @@ func (client *Client) WalletList() error {
 	marketAvailKey := "Market(Avail)"
 	marketLockedKey := "Market(Locked)"
 	nonceKey := "Nonce"
-	defaultKey := "Default"
 	errorKey := "Error"
 
 	var wallets []map[string]interface{}
@@ -234,9 +236,6 @@ func (client *Client) WalletList() error {
 			nonceKey:   a.Nonce,
 		}
 
-		if addr == def {
-			wallet[defaultKey] = "X"
-		}
 		id, err := fullNodeApi.StateLookupID(ctx, addr, chaintypes.EmptyTSK)
 		if err != nil {
 			wallet[idKey] = "n/a"
@@ -261,7 +260,6 @@ func (client *Client) WalletList() error {
 		tablewriter.Col(marketAvailKey),
 		tablewriter.Col(marketLockedKey),
 		tablewriter.Col(nonceKey),
-		tablewriter.Col(defaultKey),
 		tablewriter.NewLineCol(errorKey))
 	// populate it with content
 	for _, wallet := range wallets {
