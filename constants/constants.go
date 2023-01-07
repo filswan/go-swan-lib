@@ -7,8 +7,8 @@ const (
 	STORAGE_SERVER_TYPE_WEB_SERVER  = "web server"
 	STORAGE_SERVER_TYPE_IPFS_SERVER = "ipfs server"
 
-	MARKET_TYPE_LOTUS = "lotus"
-	MARKET_TYPE_BOOST = "boost"
+	MARKET_VERSION_1 = "1.1"
+	MARKET_VERSION_2 = "1.2"
 
 	SWAN_API_STATUS_SUCCESS = "success"
 	SWAN_API_STATUS_FAIL    = "fail"
@@ -75,6 +75,9 @@ const (
 	DURATION_MAX = 1555200
 
 	HTTP_API_TIMEOUT_SECOND = 30
+
+	WALLET_TYPE_256 = "secp256k1"
+	WALLET_TYPE_BLS = "bls"
 )
 
 var ChainMap = map[string]string{

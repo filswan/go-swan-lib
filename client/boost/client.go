@@ -5,7 +5,9 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/fatih/color"
 	clinode "github.com/filecoin-project/boost/cli/node"
 	cliutil "github.com/filecoin-project/boost/cli/util"
 	"github.com/filecoin-project/boost/cmd"
@@ -18,6 +20,7 @@ import (
 	"github.com/filecoin-project/lotus/api"
 	apiclient "github.com/filecoin-project/lotus/api/client"
 	chaintypes "github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/lotus/lib/tablewriter"
 	"github.com/filswan/go-swan-lib/client/lotus"
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
@@ -67,34 +70,69 @@ func (client *Client) WithClient(lotus *lotus.LotusClient) *Client {
 	return client
 }
 
+func (client *Client) WithRepo(clientRepo string) *Client {
+	if len(clientRepo) == 0 {
+		panic("boost repo is required")
+	}
+	_, err := os.Stat(clientRepo)
+	if err != nil {
+		panic(err)
+	}
+	client.ClientRepo = clientRepo
+	return client
+}
+
 func GetClient(clientRepo string) *Client {
 	if len(clientRepo) == 0 {
 		panic("boost repo is required")
+	}
+	_, err := os.Stat(clientRepo)
+	if err != nil {
+		panic(err)
 	}
 	return &Client{
 		ClientRepo: clientRepo,
 	}
 }
 
-func (client *Client) InitRepo(repoPath string) error {
+func (client *Client) InitRepo(repoPath, walletAddress string) error {
 	sdir, err := homedir.Expand(repoPath)
 	if err != nil {
 		return err
 	}
 	os.Mkdir(sdir, 0755) //nolint:errcheck
 
-	n, err := clinode.Setup(repoPath)
+	_, err = clinode.Setup(repoPath)
 	if err != nil {
 		logs.GetLogger().Error("setup node failed: %w", err)
 		return err
 	}
 
-	walletAddr, err := n.Wallet.GetDefault()
-	if err != nil {
-		return err
-	}
-	logs.GetLogger().Infof("default wallet set: %s", walletAddr)
+	fmt.Println(color.YellowString("The current client wallet address is: %s, please use the command <./swan-client wallet import wallet.key> to import the wallet private key.", walletAddress))
+	fmt.Println(color.YellowString("You must add funds to it in order to send deals. please run `lotus wallet market add --from <address> --address <market_address> <amount>"))
 	return nil
+}
+
+func (client *Client) ValidateExistWalletAddress(walletAddress string) bool {
+	ctx := context.Background()
+	n, err := clinode.Setup(client.ClientRepo)
+	if err != nil {
+		logs.GetLogger().Error("setup node failed: %w", err)
+		return false
+	}
+
+	addressList, err := n.Wallet.WalletList(ctx)
+	if err != nil {
+		logs.GetLogger().Error("wallet list failed: %w", err)
+		return false
+	}
+
+	for _, addr := range addressList {
+		if strings.EqualFold(addr.String()[1:], walletAddress[1:]) {
+			return true
+		}
+	}
+	return false
 }
 
 func (client *Client) WalletImport(inputData []byte) error {
@@ -122,6 +160,170 @@ func (client *Client) WalletImport(inputData []byte) error {
 	}
 	logs.GetLogger().Infof("wallet import successfully")
 	return nil
+}
+
+func (client *Client) WalletNew(walletType string) error {
+	ctx := context.Background()
+
+	n, err := clinode.Setup(client.ClientRepo)
+	if err != nil {
+		return err
+	}
+
+	var t string
+	if walletType == "" {
+		t = constants.WALLET_TYPE_256
+	}
+
+	if walletType != constants.WALLET_TYPE_256 && walletType != constants.WALLET_TYPE_BLS {
+		return errors.New("only support walletType: secp256k1 or bls")
+	}
+
+	nk, err := n.Wallet.WalletNew(ctx, chaintypes.KeyType(t))
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("address: ", nk.String())
+	return nil
+}
+
+func (client *Client) WalletList() error {
+	ctx := context.Background()
+	n, err := clinode.Setup(client.ClientRepo)
+	if err != nil {
+		logs.GetLogger().Error("setup node failed: %w", err)
+		return err
+	}
+
+	addressList, err := n.Wallet.WalletList(ctx)
+	if err != nil {
+		logs.GetLogger().Error("wallet list failed: %w", err)
+		return err
+	}
+
+	ainfo := cliutil.ParseApiInfo(client.FullNodeApi)
+	addr, err := ainfo.DialArgs("v1")
+	if err != nil {
+		logs.GetLogger().Error("parse fullNodeApi failed: %w", err)
+		return err
+	}
+
+	fullNodeApi, closer, err := apiclient.NewFullNodeRPCV1(context.Background(), addr, ainfo.AuthHeader())
+	if err != nil {
+		return fmt.Errorf("cant setup gateway connection: %w", err)
+	}
+	defer closer()
+
+	// Map Keys. Corresponds to the standard tablewriter output
+	addressKey := "Address"
+	idKey := "ID"
+	balanceKey := "Balance"
+	marketAvailKey := "Market(Avail)"
+	marketLockedKey := "Market(Locked)"
+	nonceKey := "Nonce"
+	errorKey := "Error"
+
+	var wallets []map[string]interface{}
+	for _, addr := range addressList {
+		a, err := fullNodeApi.StateGetActor(ctx, addr, chaintypes.EmptyTSK)
+		if err != nil {
+			if !strings.Contains(err.Error(), "actor not found") {
+				wallet := map[string]interface{}{
+					addressKey: addr,
+					errorKey:   err,
+				}
+				wallets = append(wallets, wallet)
+				continue
+			}
+
+			a = &chaintypes.Actor{
+				Balance: big.Zero(),
+			}
+		}
+
+		wallet := map[string]interface{}{
+			addressKey: addr,
+			balanceKey: chaintypes.FIL(a.Balance),
+			nonceKey:   a.Nonce,
+		}
+
+		id, err := fullNodeApi.StateLookupID(ctx, addr, chaintypes.EmptyTSK)
+		if err != nil {
+			wallet[idKey] = "n/a"
+		} else {
+			wallet[idKey] = id
+		}
+
+		mbal, err := fullNodeApi.StateMarketBalance(ctx, addr, chaintypes.EmptyTSK)
+		if err == nil {
+			marketAvailValue := chaintypes.FIL(chaintypes.BigSub(mbal.Escrow, mbal.Locked))
+			marketLockedValue := chaintypes.FIL(mbal.Locked)
+			wallet[marketAvailKey] = marketAvailValue
+			wallet[marketLockedKey] = marketLockedValue
+		}
+		wallets = append(wallets, wallet)
+	}
+
+	tw := tablewriter.New(
+		tablewriter.Col(addressKey),
+		tablewriter.Col(idKey),
+		tablewriter.Col(balanceKey),
+		tablewriter.Col(marketAvailKey),
+		tablewriter.Col(marketLockedKey),
+		tablewriter.Col(nonceKey),
+		tablewriter.NewLineCol(errorKey))
+	// populate it with content
+	for _, wallet := range wallets {
+		for k, v := range wallet {
+			tw.Write(map[string]interface{}{
+				k: v,
+			})
+		}
+	}
+	// return the corresponding string
+	return tw.Flush(os.Stdout)
+}
+
+func (client *Client) WalletExport(walletAddress string) error {
+	ctx := context.Background()
+	n, err := clinode.Setup(client.ClientRepo)
+	if err != nil {
+		logs.GetLogger().Error("setup node failed: %w", err)
+		return err
+	}
+
+	addr, err := address.NewFromString(walletAddress)
+	if err != nil {
+		return err
+	}
+	ki, err := n.Wallet.WalletExport(ctx, addr)
+	if err != nil {
+		return err
+	}
+
+	b, err := json.Marshal(ki)
+	if err != nil {
+		return err
+	}
+	fmt.Println(hex.EncodeToString(b))
+	return nil
+}
+
+func (client *Client) WalletDelete(walletAddress string) error {
+	ctx := context.Background()
+	n, err := clinode.Setup(client.ClientRepo)
+	if err != nil {
+		logs.GetLogger().Error("setup node failed: %w", err)
+		return err
+	}
+
+	addr, err := address.NewFromString(walletAddress)
+	if err != nil {
+		return err
+	}
+
+	return n.Wallet.WalletDelete(ctx, addr)
 }
 
 func (client *Client) StartDeal(dealConfig *model.DealConfig) (string, error) {
@@ -215,7 +417,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		return "", err
 	}
 
-	logs.GetLogger().Warn("found storage provider ", "id:", addrInfo.ID, ", multiaddrs: ", addrInfo.Addrs, ", minerID:", maddr)
+	logs.GetLogger().Warn("found storage provider ", "id: ", addrInfo.ID, ", multiaddrs: ", addrInfo.Addrs, ", minerID:", maddr)
 
 	if err := n.Host.Connect(ctx, *addrInfo); err != nil {
 		return "", fmt.Errorf("failed to connect to peer %s: %w", addrInfo.ID, err)
@@ -315,7 +517,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		return "", fmt.Errorf("deal proposal rejected: %s", resp.Message)
 	}
 
-	logs.GetLogger().Infof("dealUuid: %s, The deal proposal has been sent to the storage provider, the deal info is as follows: ", dealUuid.String())
+	fmt.Println("dealUuid: ", dealUuid.String(), ", the deal proposal has been sent to the storage provider, the deal info is as follows: ")
 	out := map[string]interface{}{
 		"dealUuid":           dealUuid.String(),
 		"provider":           maddr.String(),
