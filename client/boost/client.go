@@ -169,21 +169,20 @@ func (client *Client) WalletNew(walletType string) error {
 	if err != nil {
 		return err
 	}
-
 	var t string
 	if walletType == "" {
 		t = constants.WALLET_TYPE_256
+	} else {
+		t = walletType
 	}
 
 	if walletType != constants.WALLET_TYPE_256 && walletType != constants.WALLET_TYPE_BLS {
 		return errors.New("only support walletType: secp256k1 or bls")
 	}
-
 	nk, err := n.Wallet.WalletNew(ctx, chaintypes.KeyType(t))
 	if err != nil {
 		return err
 	}
-
 	fmt.Println("address: ", nk.String())
 	return nil
 }
@@ -223,6 +222,7 @@ func (client *Client) WalletList() error {
 	marketLockedKey := "Market(Locked)"
 	nonceKey := "Nonce"
 	errorKey := "Error"
+	dataCapKey := "DataCap"
 
 	var wallets []map[string]interface{}
 	for _, addr := range addressList {
@@ -262,9 +262,21 @@ func (client *Client) WalletList() error {
 			wallet[marketAvailKey] = marketAvailValue
 			wallet[marketLockedKey] = marketLockedValue
 		}
+
+		dcap, err := fullNodeApi.StateVerifiedClientStatus(ctx, addr, chaintypes.EmptyTSK)
+		if err == nil {
+			wallet[dataCapKey] = dcap
+			if dcap == nil {
+				wallet[dataCapKey] = "X"
+			}
+		} else {
+			wallet[dataCapKey] = "n/a"
+		}
+
 		wallets = append(wallets, wallet)
 	}
 
+	// Init the tablewriter's columns
 	tw := tablewriter.New(
 		tablewriter.Col(addressKey),
 		tablewriter.Col(idKey),
@@ -275,11 +287,7 @@ func (client *Client) WalletList() error {
 		tablewriter.NewLineCol(errorKey))
 	// populate it with content
 	for _, wallet := range wallets {
-		for k, v := range wallet {
-			tw.Write(map[string]interface{}{
-				k: v,
-			})
-		}
+		tw.Write(wallet)
 	}
 	// return the corresponding string
 	return tw.Flush(os.Stdout)
