@@ -4,11 +4,11 @@ go 1.16
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/filecoin-project/boost v1.5.0
+	github.com/filecoin-project/boost v1.6.0-rc2
 	github.com/filecoin-project/go-address v1.0.0
 	github.com/filecoin-project/go-cbor-util v0.0.1
 	github.com/filecoin-project/go-state-types v0.9.8
-	github.com/filecoin-project/lotus v1.18.0
+	github.com/filecoin-project/lotus v1.20.0-rc1-boost
 	github.com/google/uuid v1.3.0
 	github.com/ipfs/go-cid v0.2.0
 	github.com/libp2p/go-libp2p v0.22.0
