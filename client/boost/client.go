@@ -421,7 +421,7 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		return "", err
 	}
 
-	logs.GetLogger().Warn("found storage provider ", "id: ", addrInfo.ID, ", multiaddrs: ", addrInfo.Addrs, ", minerID:", maddr)
+	logs.GetLogger().Warn("found storage provider, ", "id: ", addrInfo.ID, ", multiaddrs: ", addrInfo.Addrs, ", minerID:", maddr)
 
 	if err := n.Host.Connect(ctx, *addrInfo); err != nil {
 		return "", fmt.Errorf("failed to connect to peer %s: %w", addrInfo.ID, err)
@@ -502,6 +502,8 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		DealDataRoot:       rootCid,
 		IsOffline:          true,
 		Transfer:           transfer,
+		RemoveUnsealedCopy: false,
+		SkipIPNIAnnounce:   false,
 	}
 
 	logs.GetLogger().Debug("about to submit deal proposal", "uuid", dealUuid.String())
