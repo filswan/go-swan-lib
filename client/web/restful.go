@@ -135,6 +135,72 @@ func HttpRequest(httpMethod, uri, tokenString string, params interface{}) ([]byt
 	return responseBody, nil
 }
 
+func HttpRequestWithKey(httpMethod, uri, key, token string, params interface{}) ([]byte, error) {
+	var request *http.Request
+	var err error
+
+	switch params := params.(type) {
+	case io.Reader:
+		request, err = http.NewRequest(httpMethod, uri, params)
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return nil, err
+		}
+		request.Header.Set("Content-Type", HTTP_CONTENT_TYPE_FORM)
+	default:
+		jsonReq, errJson := json.Marshal(params)
+		if errJson != nil {
+			logs.GetLogger().Error(errJson)
+			return nil, errJson
+		}
+
+		request, err = http.NewRequest(httpMethod, uri, bytes.NewBuffer(jsonReq))
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return nil, err
+		}
+		request.Header.Set("Content-Type", HTTP_CONTENT_TYPE_JSON)
+	}
+
+	if len(strings.Trim(key, " ")) > 0 {
+		request.Header.Set("api_key", key)
+	}
+
+	if len(strings.Trim(token, " ")) > 0 {
+		request.Header.Set("api_token", token)
+	}
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		err := fmt.Errorf("http status: %s, code:%d, url:%s", response.Status, response.StatusCode, uri)
+		logs.GetLogger().Error(err)
+		switch response.StatusCode {
+		case http.StatusNotFound:
+			logs.GetLogger().Error("please check your url:", uri)
+		case http.StatusUnauthorized:
+			logs.GetLogger().Error("Please check your key:", key, " and token:", token)
+		}
+		return nil, err
+	}
+
+	responseBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return responseBody, nil
+}
+
 func HttpPutFile(url string, tokenString string, paramTexts map[string]string, paramFilename, paramFilepath string) (string, error) {
 	response, err := HttpRequestFile(http.MethodPut, url, tokenString, paramTexts, paramFilename, paramFilepath)
 	return response, err
