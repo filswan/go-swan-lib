@@ -1,7 +1,9 @@
 package ipfs
 
 import (
+	"context"
 	"fmt"
+	shell "github.com/ipfs/go-ipfs-api"
 	"net/http"
 
 	"github.com/filswan/go-swan-lib/client/web"
@@ -45,4 +47,36 @@ func Export2CarFile(apiUrl, fileHash string, carFileFullPath string) error {
 	}
 	logs.GetLogger().Info(bytesWritten, " bytes have been written to:", carFileFullPath)
 	return nil
+}
+
+func UploadDirToIpfs(sh *shell.Shell, dirName string) (string, error) {
+
+	dataCid, err := sh.AddDir(dirName)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return "", err
+	}
+
+	return dataCid, nil
+}
+
+func DataCidIsDirectory(sh *shell.Shell, dataCid string) (*bool, error) {
+
+	path := utils.UrlJoin("/ipfs/", dataCid)
+	stat, err := sh.FilesStat(context.Background(), path)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	isFile := false
+	if stat.Type == "directory" {
+		isFile = true
+	}
+
+	return &isFile, nil
+}
+
+func DownloadFromIpfs(sh *shell.Shell, dataCid, outDir string) error {
+	return sh.Get(dataCid, outDir)
 }
