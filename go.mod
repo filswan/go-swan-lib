@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/filecoin-project/boost v1.6.0-rc2
+	github.com/filecoin-project/boost v1.7.0
 	github.com/filecoin-project/go-dagaggregator-unixfs v0.3.0
 	github.com/filecoin-project/go-jsonrpc v0.1.8
 	github.com/google/uuid v1.3.0
@@ -27,3 +27,4 @@ require (
 )
 
 replace github.com/filecoin-project/filecoin-ffi => ./extern/filecoin-ffi
+replace github.com/filecoin-project/boostd-data => github.com/FogMeta/boostd-data v1.6.3
