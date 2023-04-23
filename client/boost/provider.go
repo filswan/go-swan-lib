@@ -77,7 +77,7 @@ func (pc *Client) OfflineDealWithData(ctx context.Context, dealUuid, filePath st
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("dealUuid=[%s] parse failed", dealUid))
 	}
-	offlineDealWithData, err := pc.stub.BoostOfflineDealWithData(ctx, dealUid, filePath)
+	offlineDealWithData, err := pc.stub.BoostOfflineDealWithData(ctx, dealUid, filePath, true)
 	if err != nil {
 		return nil, err
 	}
