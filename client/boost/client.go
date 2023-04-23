@@ -7,6 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
+	"os"
+	"strings"
+
 	"github.com/fatih/color"
 	clinode "github.com/filecoin-project/boost/cli/node"
 	cliutil "github.com/filecoin-project/boost/cli/util"
@@ -31,9 +35,6 @@ import (
 	inet "github.com/libp2p/go-libp2p/core/network"
 	"github.com/mitchellh/go-homedir"
 	"github.com/shopspring/decimal"
-	"net/url"
-	"os"
-	"strings"
 )
 
 const DealProtocolv120 = "/fil/storage/mk/1.2.0"
@@ -476,17 +477,26 @@ func (client *Client) sendDealToMiner(dealP DealParam) (string, error) {
 		providerCollateral = big.Div(big.Mul(bounds.Min, big.NewInt(6)), big.NewInt(5)) // add 20%
 	}
 
+	tipset, err := fullNode.ChainHead(ctx)
+	if err != nil {
+		return "", fmt.Errorf("cannot get chain head: %w", err)
+	}
+
+	head := tipset.Height()
+	logs.GetLogger().Debug("current block height", "number", head)
+
+	if dealP.StartEpoch != 0 && dealP.StartEpochHeadOffset != 0 {
+		return "", errors.New("only one flag from `start-epoch-head-offset' or `start-epoch` can be specified")
+	}
+
 	var startEpoch abi.ChainEpoch
-	if dealP.StartEpoch != 0 {
+
+	if dealP.StartEpochHeadOffset != 0 {
+		startEpoch = head + abi.ChainEpoch(dealP.StartEpochHeadOffset)
+	} else if dealP.StartEpoch != 0 {
 		startEpoch = abi.ChainEpoch(dealP.StartEpoch)
 	} else {
-		tipset, err := fullNode.ChainHead(ctx)
-		if err != nil {
-			return "", fmt.Errorf("getting chain head: %w", err)
-		}
-
-		head := tipset.Height()
-		logs.GetLogger().Debug("current block height", "number", head)
+		// default
 		startEpoch = head + abi.ChainEpoch(5760) // head + 2 days
 	}
 
@@ -600,16 +610,17 @@ func doRpc(ctx context.Context, s inet.Stream, req interface{}, resp interface{}
 }
 
 type DealParam struct {
-	Provider           string `json:"provider"`            // storage provider on-chain address. Required
-	Commp              string `json:"commp"`               // commp of the CAR file. Required
-	PieceSize          uint64 `json:"piece_size"`          // size of the CAR file as a padded piece. Required
-	CarSize            uint64 `json:"car_size"`            // size of the CAR file. Required
-	PayloadCid         string `json:"payload_cid"`         // root CID of the CAR file. Required
-	StartEpoch         int    `json:"start_epoch"`         // start epoch by when the deal should be proved by provider on-chain. default: current chain head + 2 days
-	Duration           int    `json:"duration"`            // duration of the deal in epochs. default is 2880 * 180 == 180 days  518400
-	ProviderCollateral int    `json:"provider_collateral"` // deal collateral that storage miner must put in escrow; if empty, the min collateral for the given piece size will be used
-	StoragePrice       int    `json:"storage_price"`       // storage price in attoFIL per epoch per GiB. default 1
-	Verified           bool   `json:"verified"`            // whether the deal funds should come from verified client data-cap. default true
-	FastRetrieval      bool   `json:"fast_retrieval"`      // indicates that data should be available for fast retrieval. default true
-	Wallet             string `json:"wallet"`              // wallet address to be used to initiate the deal
+	Provider             string `json:"provider"`                // storage provider on-chain address. Required
+	Commp                string `json:"commp"`                   // commp of the CAR file. Required
+	PieceSize            uint64 `json:"piece_size"`              // size of the CAR file as a padded piece. Required
+	CarSize              uint64 `json:"car_size"`                // size of the CAR file. Required
+	PayloadCid           string `json:"payload_cid"`             // root CID of the CAR file. Required
+	StartEpoch           int    `json:"start_epoch"`             // start epoch by when the deal should be proved by provider on-chain. default: current chain head + 2 days
+	StartEpochHeadOffset int    `json:"start_epoch_head_offset"` // start epoch head offset
+	Duration             int    `json:"duration"`                // duration of the deal in epochs. default is 2880 * 180 == 180 days  518400
+	ProviderCollateral   int    `json:"provider_collateral"`     // deal collateral that storage miner must put in escrow; if empty, the min collateral for the given piece size will be used
+	StoragePrice         int    `json:"storage_price"`           // storage price in attoFIL per epoch per GiB. default 1
+	Verified             bool   `json:"verified"`                // whether the deal funds should come from verified client data-cap. default true
+	FastRetrieval        bool   `json:"fast_retrieval"`          // indicates that data should be available for fast retrieval. default true
+	Wallet               string `json:"wallet"`                  // wallet address to be used to initiate the deal
 }
