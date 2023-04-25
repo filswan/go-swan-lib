@@ -129,6 +129,10 @@ func (pc *Client) MarketSetAsk(ctx context.Context, price, verifiedPrice, minPie
 	return pc.stub.MarketSetAsk(ctx, chain_type.BigInt(pri), chain_type.BigInt(vpri), abi.ChainEpoch(qty), abi.PaddedPieceSize(min), abi.PaddedPieceSize(max))
 }
 
+func (pc *Client) GetDealsConsiderOfflineStorageDeals(ctx context.Context) (bool, error) {
+	return pc.stub.DealsConsiderOfflineStorageDeals(ctx)
+}
+
 func statusMessage(resp *types.DealStatusResponse) string {
 	switch resp.DealStatus.Status {
 	case dealcheckpoints.Accepted.String():
