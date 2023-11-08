@@ -26,6 +26,7 @@ const (
 	LOTUS_CLIENT_IMPORT          = "Filecoin.ClientImport"
 	LOTUS_CLIENT_GEN_CAR         = "Filecoin.ClientGenCar"
 	LOTUS_CLIENT_START_DEAL      = "Filecoin.ClientStartDeal"
+	LOTUS_STATE_STORAGE_DEAL     = "Filecoin.StateMarketStorageDeal"
 
 	STAGE_RESERVE_FUNDS     = "StorageDealReserveClientFunds"
 	STAGE_PROPOSAL_ACCEPTED = "StorageDealProposalAccepted"
@@ -353,7 +354,7 @@ func (lotusClient *LotusClient) LotusGetCurrentEpoch() (*int64, error) {
 	return &heightInt64, nil
 }
 
-//"lotus-miner storage-deals list -v | grep -a " + dealCid
+// "lotus-miner storage-deals list -v | grep -a " + dealCid
 func (lotusClient *LotusClient) LotusGetDealStatus(state int) (*string, error) {
 	var params []interface{}
 	params = append(params, state)
@@ -380,7 +381,7 @@ func (lotusClient *LotusClient) LotusGetDealStatus(state int) (*string, error) {
 	return &result, nil
 }
 
-//"lotus client commP " + carFilePath
+// "lotus client commP " + carFilePath
 func (lotusClient *LotusClient) LotusClientCalcCommP(filepath string) (*string, error) {
 	var params []interface{}
 	params = append(params, filepath)
@@ -426,7 +427,7 @@ type ClientFileParam struct {
 	IsCAR bool
 }
 
-//"lotus client import --car " + carFilePath
+// "lotus client import --car " + carFilePath
 func (lotusClient *LotusClient) LotusClientImport(filepath string, isCar bool) (*string, error) {
 	var params []interface{}
 	clientFileParam := ClientFileParam{
@@ -472,7 +473,7 @@ func (lotusClient *LotusClient) LotusClientImport(filepath string, isCar bool) (
 	return &dataCid, nil
 }
 
-//"lotus client generate-car " + srcFilePath + " " + destCarFilePath
+// "lotus client generate-car " + srcFilePath + " " + destCarFilePath
 func (lotusClient *LotusClient) LotusClientGenCar(srcFilePath, destCarFilePath string, srcFilePathIsCar bool) error {
 	var params []interface{}
 	clientFileParam := ClientFileParam{
@@ -701,4 +702,56 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 	}
 
 	return &clientStartDeal.Result.Cid, nil
+}
+
+func (lotusClient *LotusClient) LotusGetDealById(dealId uint64) (*DealInfo, error) {
+	var params []interface{}
+	params = append(params, dealId)
+	params = append(params, []interface{}{})
+	jsonRpcParams := LotusJsonRpcParams{
+		JsonRpc: LOTUS_JSON_RPC_VERSION,
+		Method:  LOTUS_STATE_STORAGE_DEAL,
+		Params:  params,
+		Id:      LOTUS_JSON_RPC_ID,
+	}
+
+	response, err := web.HttpGet(lotusClient.ApiUrl, lotusClient.AccessToken, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	deal := &MarketStorageDeal{}
+	err = json.Unmarshal(response, deal)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return &deal.Result, nil
+}
+
+type MarketStorageDeal struct {
+	Id      int           `json:"id"`
+	JsonRpc string        `json:"jsonrpc"`
+	Result  DealInfo      `json:"result"`
+	Error   *JsonRpcError `json:"error"`
+}
+
+type DealInfo struct {
+	Proposal struct {
+		PieceCID struct {
+			PieceCid string `json:"/"`
+		} `json:"PieceCID"`
+		VerifiedDeal bool   `json:"VerifiedDeal"`
+		Client       string `json:"Client"`
+		Provider     string `json:"Provider"`
+		StartEpoch   int    `json:"StartEpoch"`
+		EndEpoch     int    `json:"EndEpoch"`
+	} `json:"Proposal"`
+	State struct {
+		SectorStartEpoch int `json:"SectorStartEpoch"`
+		LastUpdatedEpoch int `json:"LastUpdatedEpoch"`
+		SlashEpoch       int `json:"SlashEpoch"`
+	} `json:"State"`
 }

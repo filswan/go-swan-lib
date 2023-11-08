@@ -68,16 +68,17 @@ func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsBySt
 }
 
 type UpdateOfflineDealParams struct {
-	DealId     int     `json:"id"`
-	DealCid    *string `json:"deal_cid"`
-	FilePath   *string `json:"file_path"`
-	Status     string  `json:"status"`
-	StartEpoch *int    `json:"start_epoch"`
-	Note       *string `json:"note"`
-	Cost       *string `json:"cost"`
+	DealId      int     `json:"id"`
+	DealCid     *string `json:"deal_cid"`
+	FilePath    *string `json:"file_path"`
+	Status      string  `json:"status"`
+	StartEpoch  *int    `json:"start_epoch"`
+	Note        *string `json:"note"`
+	Cost        *string `json:"cost"`
+	ChainDealId int64   `json:"chain_deal_id"`
 }
 
-//for public and auto-bid task
+// for public and auto-bid task
 func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) error {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
@@ -121,7 +122,7 @@ func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) 
 	return nil
 }
 
-//for public and non auto-bid task
+// for public and non auto-bid task
 func (swanClient *SwanClient) CreateOfflineDeals(fileDescs []*model.FileDesc) (*SwanServerResponse, error) {
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/create_offline_deals")
 	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, fileDescs)
