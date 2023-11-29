@@ -17,4 +17,5 @@ type DealConfig struct {
 	PayloadCid       string
 	PieceCid         string
 	FileSize         int64
+	ClientRepo       string
 }

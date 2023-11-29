@@ -117,6 +117,7 @@ type GetTaskByUuidResultData struct {
 	TotalTaskCount   int                  `json:"total_task_count"`
 	BidCount         int                  `json:"bid_count"`
 	DealCompleteRate string               `json:"deal_complete_rate"`
+	Bids             []model.Bid          `json:"bids"`
 }
 
 func (swanClient *SwanClient) GetTaskByUuid(taskUuid string) (*GetTaskByUuidResult, error) {

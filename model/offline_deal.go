@@ -36,4 +36,5 @@ type OfflineDeal struct {
 	MaxPrice      *decimal.Decimal `json:"max_price"`
 	Duration      *int             `json:"duration"`
 	SourceId      *int             `json:"source_id"`
+	ChainDealId   int64            `json:"chain_deal_id"`
 }

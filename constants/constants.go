@@ -7,6 +7,9 @@ const (
 	STORAGE_SERVER_TYPE_WEB_SERVER  = "web server"
 	STORAGE_SERVER_TYPE_IPFS_SERVER = "ipfs server"
 
+	MARKET_VERSION_1 = "1.1"
+	MARKET_VERSION_2 = "1.2"
+
 	SWAN_API_STATUS_SUCCESS = "success"
 	SWAN_API_STATUS_FAIL    = "fail"
 
@@ -69,7 +72,26 @@ const (
 	DURATION_DEFAULT = 1512000
 
 	DURATION_MIN = 518400
-	DURATION_MAX = 1540000
+	DURATION_MAX = 1555200
 
 	HTTP_API_TIMEOUT_SECOND = 30
+
+	WALLET_TYPE_256 = "secp256k1"
+	WALLET_TYPE_BLS = "bls"
 )
+
+var ChainMap = map[string]string{
+	"1":  "ETH",   // 1     Ethereum Mainnet
+	"2":  "BNB",   // 56    Binance Smart Chain Mainnet
+	"3":  "AVAX",  // 43114 Avalanche C-Chain
+	"4":  "MATIC", // 137   Polygon Mainnet
+	"5":  "FTM",   // 250   Fantom Opera
+	"6":  "xDAI",  // 100   Gnosis Chain (formerly xDai)
+	"7":  "IOTX",  // 4689  IoTeX Network Mainnet
+	"8":  "ONE",   // 1666600000 Harmony Mainnet Shard 0
+	"9":  "BOBA",  // 288   Boba Network
+	"10": "FUSE",  // 122   Fuse Mainnet
+	"11": "JEWEL", // 53935  DFK Chain
+	"12": "EVMOS", // 9001   Evmos
+	"13": "TUS",   // 73772  Swimmer Network
+}

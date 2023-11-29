@@ -7,4 +7,5 @@ type Miner struct {
 	ExpectedSealingTime int    `json:"expected_sealing_time"`
 	StartEpoch          int    `json:"start_epoch"`
 	AutoBidDealPerDay   int    `toml:"auto_bid_deal_per_day"`
+	MarketVersion       string `json:"market_version"`
 }
