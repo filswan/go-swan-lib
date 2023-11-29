@@ -1,10 +1,12 @@
 package model
 
 type DealInfo struct {
-	DealCid    string
-	MinerFid   string
-	StartEpoch int
-	Cost       string
+	DealId        int
+	DealCid       string
+	MinerFid      string
+	StartEpoch    int
+	Cost          string
+	StorageStatus string `json:"StorageStatus,omitempty"`
 }
 type FileDesc struct {
 	Uuid           string

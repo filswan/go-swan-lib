@@ -2,7 +2,9 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/logs"
@@ -11,6 +13,7 @@ import (
 const ADD_URI = "aria2.addUri"
 const STATUS = "aria2.tellStatus"
 const CHANGE_GLOBAL_OPTION = "aria2.changeGlobalOption"
+const Remove = "aria2.remove"
 
 type JsonRpcParams struct {
 	JsonRpc string        `json:"jsonrpc"`
@@ -36,6 +39,8 @@ type Aria2Client struct {
 type Aria2DownloadOption struct {
 	Out string `json:"out"`
 	Dir string `json:"dir"`
+
+	UserAgent string `json:"user-agent,omitempty"`
 }
 
 type Aria2Status struct {
@@ -116,6 +121,9 @@ func (aria2Client *Aria2Client) GenPayload4Download(method string, uri string, o
 	options := Aria2DownloadOption{
 		Out: outFilename,
 		Dir: outDir,
+	}
+	if strings.Contains(uri, "minio") {
+		options.UserAgent = "Mozilla"
 	}
 
 	var params []interface{}
@@ -212,4 +220,39 @@ func (aria2Client *Aria2Client) ChangeMaxConcurrentDownloads(maxConcurrentDownlo
 		return nil
 	}
 	return aria2ChangeMaxConcurrentDownloads
+}
+
+func (aria2Client *Aria2Client) RemoveDownload(gid string) (err error) {
+	if gid == "" {
+		return errors.New("invalid empty gid")
+	}
+	payload := Aria2Payload{
+		JsonRpc: "2.0",
+		Method:  Remove,
+		Params: []interface{}{
+			"token:" + aria2Client.token,
+			gid,
+		},
+	}
+
+	body, err := web.HttpPostNoToken(aria2Client.serverUrl, payload)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return
+	}
+	var resp Aria2Resp
+	if err = json.Unmarshal(body, &resp); err != nil {
+		return
+	}
+	if resp.Error != nil {
+		return errors.New(resp.Error.Message)
+	}
+	return
+}
+
+type Aria2Resp struct {
+	Id      string      `json:"id"`
+	JsonRpc string      `json:"jsonrpc"`
+	Error   *Aria2Error `json:"error"`
+	Result  interface{} `json:"result"`
 }
