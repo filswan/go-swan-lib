@@ -56,7 +56,7 @@ func GetLotusMarket(apiUrl, accessToken, clientApiUrl string) (*LotusMarket, err
 	return lotusMarket, nil
 }
 
-//"lotus client query-ask " + minerFid
+// "lotus client query-ask " + minerFid
 func (lotusMarket *LotusMarket) LotusMarketGetAsk() (*MarketGetAskResultAsk, error) {
 	var params []interface{}
 
@@ -104,7 +104,12 @@ type MarketListIncompleteDeals struct {
 type Deal struct {
 	State       int     `json:"State"`
 	Message     string  `json:"Message"`
+	DealID      uint64  `json:"DealID"`
 	ProposalCid DealCid `json:"ProposalCid"`
+	Proposal    struct {
+		Client   string `json:"Client"`
+		Provider string `json:"Provider"`
+	} `json:"Proposal"`
 }
 
 func (lotusMarket *LotusMarket) LotusGetDeals() ([]Deal, error) {
@@ -132,17 +137,17 @@ func (lotusMarket *LotusMarket) LotusGetDeals() ([]Deal, error) {
 	return deals.Result, nil
 }
 
-func (lotusMarket *LotusMarket) LotusGetDealOnChainStatusFromDeals(deals []Deal, dealCid string) (*string, *string, error) {
+func (lotusMarket *LotusMarket) LotusGetDealOnChainStatusFromDeals(deals []Deal, dealCid string) (string, uint64, *string, *string, error) {
 	if len(deals) == 0 {
 		err := fmt.Errorf("deal list is empty")
 		logs.GetLogger().Error(err)
-		return nil, nil, err
+		return "", 0, nil, nil, err
 	}
 
 	lotusClient, err := LotusGetClient(lotusMarket.ClientApiUrl, "")
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil, nil, err
+		return "", 0, nil, nil, err
 	}
 	for _, deal := range deals {
 		if deal.ProposalCid.DealCid != dealCid {
@@ -152,29 +157,29 @@ func (lotusMarket *LotusMarket) LotusGetDealOnChainStatusFromDeals(deals []Deal,
 		status, err := lotusClient.LotusGetDealStatus(deal.State)
 		if err != nil {
 			logs.GetLogger().Error(err)
-			return nil, nil, err
+			return "", 0, nil, nil, err
 		}
 
-		return status, &deal.Message, nil
+		return deal.Proposal.Provider, deal.DealID, status, &deal.Message, nil
 	}
 
-	return nil, nil, nil
+	return "", 0, nil, nil, nil
 }
 
-//"lotus-miner storage-deals list -v | grep -a " + dealCid
-func (lotusMarket *LotusMarket) LotusGetDealOnChainStatus(dealCid string) (*string, *string, error) {
+// "lotus-miner storage-deals list -v | grep -a " + dealCid
+func (lotusMarket *LotusMarket) LotusGetDealOnChainStatus(dealCid string) (string, uint64, *string, *string, error) {
 	deals, err := lotusMarket.LotusGetDeals()
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil, nil, err
+		return "", 0, nil, nil, err
 	}
 
-	status, message, err := lotusMarket.LotusGetDealOnChainStatusFromDeals(deals, dealCid)
+	minerId, dealId, status, message, err := lotusMarket.LotusGetDealOnChainStatusFromDeals(deals, dealCid)
 	if err != nil {
 		logs.GetLogger().Error(err)
-		return nil, nil, err
+		return "", 0, nil, nil, err
 	}
-	return status, message, nil
+	return minerId, dealId, status, message, nil
 }
 
 func (lotusMarket *LotusMarket) LotusImportData(dealCid string, filepath string) error {

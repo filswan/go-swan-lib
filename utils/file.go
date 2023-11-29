@@ -2,12 +2,15 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/filswan/go-swan-lib/constants"
 	"github.com/filswan/go-swan-lib/logs"
@@ -18,7 +21,7 @@ func IsFileExists(filePath, fileName string) bool {
 	_, err := os.Stat(fileFullPath)
 
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return false
 	}
 
@@ -29,7 +32,7 @@ func IsFileExistsFullPath(fileFullPath string) bool {
 	_, err := os.Stat(fileFullPath)
 
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return false
 	}
 
@@ -40,7 +43,7 @@ func IsPathFile(dirFullPath string) (*bool, error) {
 	fi, err := os.Stat(dirFullPath)
 
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return nil, err
 	}
 
@@ -62,7 +65,7 @@ func GetPathType(dirFullPath string) int {
 	fi, err := os.Stat(dirFullPath)
 
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return constants.PATH_TYPE_NOT_EXIST
 	}
 
@@ -87,7 +90,7 @@ func RemoveFile(filePath, fileName string) {
 func GetFileSize(fileFullPath string) int64 {
 	fi, err := os.Stat(fileFullPath)
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return -1
 	}
 
@@ -98,7 +101,7 @@ func GetFileSize2(dir, fileName string) int64 {
 	fileFullPath := filepath.Join(dir, fileName)
 	fi, err := os.Stat(fileFullPath)
 	if err != nil {
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return -1
 	}
 
@@ -228,7 +231,7 @@ func ReadFile(filePath string) (string, []byte, error) {
 		return "", nil, err
 	}
 
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		logs.GetLogger().Error("failed reading data from file: ", filePath)
 		logs.GetLogger().Error(err)
@@ -255,7 +258,7 @@ func IsDirExists(dir string) bool {
 func CreateDir(dir string) error {
 	if len(dir) == 0 {
 		err := fmt.Errorf("dir is not provided")
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return err
 	}
 
@@ -302,7 +305,7 @@ func GenerateFile(filepath, filename string, filesize int64) {
 func CreateDirIfNotExists(dir, dirName string) error {
 	if IsStrEmpty(&dir) {
 		err := fmt.Errorf("%s directory is required", dirName)
-		logs.GetLogger().Info(err)
+		logs.GetLogger().Error(err)
 		return err
 	}
 
@@ -338,15 +341,80 @@ func CheckDirExists(dir, dirName string) error {
 }
 
 func GetFilesSize(dir string) (*int64, error) {
-	srcFiles, err := ioutil.ReadDir(dir)
+	size, err := DirSize(dir)
 	if err != nil {
-		logs.GetLogger().Error(err)
 		return nil, err
 	}
-	srcFilesSize := int64(0)
-	for _, srcFile := range srcFiles {
-		srcFilesSize = srcFilesSize + srcFile.Size()
+	return &size, nil
+}
+func DirSize(dir string) (size int64, err error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return
 	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		info, err := entry.Info()
+		if err != nil {
+			return 0, err
+		}
+		size += info.Size()
+	}
+	return
+}
 
-	return &srcFilesSize, nil
+func ReadCSVFile(filepath string) ([][]string, error) {
+	b, err := os.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+	reader := csv.NewReader(bytes.NewReader(b))
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Println(err)
+		return readRawCSVFile(b)
+	}
+	return records, nil
+}
+
+func ReadRawCSVFile(filepath string) ([][]string, error) {
+	b, err := os.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+	return readRawCSVFile(b)
+}
+
+func readRawCSVFile(b []byte) ([][]string, error) {
+	scanner := bufio.NewScanner(bytes.NewReader(b))
+	scanner.Split(bufio.ScanLines)
+	var records [][]string
+	colsCount := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(records) == 0 {
+			cols := strings.Split(line, ",")
+			records = append(records, cols)
+			colsCount = len(cols)
+		} else {
+			cols := make([]string, colsCount)
+			index := 0
+			for i := 0; i < colsCount; i++ {
+				if i == colsCount-1 {
+					cols[i] = line[index:]
+					break
+				}
+				idx := strings.Index(line[index:], ",")
+				if idx == -1 {
+					break
+				}
+				cols[i] = line[index : index+idx]
+				index += idx + 1
+			}
+			records = append(records, cols)
+		}
+	}
+	return records, nil
 }

@@ -1,9 +1,14 @@
 package swan
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/constants"
@@ -35,4 +40,58 @@ func (swanClient *SwanClient) CheckDatacap(wallet string) (bool, error) {
 	isVerified := data["is_verified"].(bool)
 
 	return isVerified, nil
+}
+
+func (swanClient *SwanClient) StatisticsChainInfo(chainId string) error {
+	chainName, ok := constants.ChainMap[chainId]
+	if !ok {
+		return errors.New(fmt.Sprintf("not support chainId: %s", chainId))
+	}
+	err := swanClient.GetJwtTokenUp3Times()
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	var req struct {
+		ChainName string `json:"chain_name"`
+		UserKey   string `json:"user_key"`
+	}
+	req.UserKey = swanClient.ApiKey
+	req.ChainName = chainName
+	reqParam, _ := json.Marshal(req)
+	buffer := bytes.NewBuffer(reqParam)
+
+	client := http.Client{
+		Timeout: 30 * time.Second,
+	}
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "statistics/chain")
+	if _, err := client.Post(apiUrl, "application/json", buffer); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (swanClient *SwanClient) StatisticsNodeStatus() error {
+	err := swanClient.GetJwtTokenUp3Times()
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return err
+	}
+
+	var req struct {
+		UserKey string `json:"user_key"`
+	}
+	req.UserKey = swanClient.ApiKey
+	reqParam, _ := json.Marshal(req)
+	buffer := bytes.NewBuffer(reqParam)
+
+	client := http.Client{
+		Timeout: 30 * time.Second,
+	}
+	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "statistics/node")
+	if _, err = client.Post(apiUrl, "application/json", buffer); err != nil {
+		return err
+	}
+	return nil
 }

@@ -52,6 +52,7 @@ type UpdateMinerConfigParams struct {
 	ExpectedSealingTime int    `json:"expected_sealing_time"`
 	StartEpoch          int    `json:"start_epoch"`
 	AutoBidDealPerDay   int    `json:"auto_bid_deal_per_day"`
+	MarketVersion       string `json:"market_version"`
 }
 
 func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner model.Miner) error {
@@ -91,6 +92,7 @@ func (swanClient *SwanClient) UpdateMinerBidConf(minerFid string, confMiner mode
 		ExpectedSealingTime: confMiner.ExpectedSealingTime,
 		StartEpoch:          confMiner.StartEpoch,
 		AutoBidDealPerDay:   confMiner.AutoBidDealPerDay,
+		MarketVersion:       confMiner.MarketVersion,
 	}
 
 	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, params)

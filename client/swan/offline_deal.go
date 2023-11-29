@@ -68,16 +68,17 @@ func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsBySt
 }
 
 type UpdateOfflineDealParams struct {
-	DealId     int     `json:"id"`
-	DealCid    *string `json:"deal_cid"`
-	FilePath   *string `json:"file_path"`
-	Status     string  `json:"status"`
-	StartEpoch *int    `json:"start_epoch"`
-	Note       *string `json:"note"`
-	Cost       *string `json:"cost"`
+	DealId      int     `json:"id"`
+	DealCid     *string `json:"deal_cid"`
+	FilePath    *string `json:"file_path"`
+	Status      string  `json:"status"`
+	StartEpoch  *int    `json:"start_epoch"`
+	Note        *string `json:"note"`
+	Cost        *string `json:"cost"`
+	ChainDealId int64   `json:"chain_deal_id"`
 }
 
-//for public and auto-bid task
+// for public and auto-bid task
 func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) error {
 	err := swanClient.GetJwtTokenUp3Times()
 	if err != nil {
@@ -121,7 +122,7 @@ func (swanClient *SwanClient) UpdateOfflineDeal(params UpdateOfflineDealParams) 
 	return nil
 }
 
-//for public and non auto-bid task
+// for public and non auto-bid task
 func (swanClient *SwanClient) CreateOfflineDeals(fileDescs []*model.FileDesc) (*SwanServerResponse, error) {
 	apiUrl := utils.UrlJoin(swanClient.ApiUrl, "offline_deals/create_offline_deals")
 	response, err := web.HttpPost(apiUrl, swanClient.SwanToken, fileDescs)
@@ -144,4 +145,56 @@ func (swanClient *SwanClient) CreateOfflineDeals(fileDescs []*model.FileDesc) (*
 	}
 
 	return swanServerResponse, nil
+}
+
+func (swanClient *SwanClient) GetDealListByTaskUuid(taskUuId string, pageNum int) (*DealListByTaskUuIdResp, error) {
+	apiUrl := fmt.Sprintf("%s/tasks/%s?limit=100&offset=%d", swanClient.ApiUrl, taskUuId, 100*pageNum)
+	response, err := web.HttpGet(apiUrl, swanClient.SwanToken, "")
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	dealListByTaskUuIdResp := DealListByTaskUuIdResp{}
+	err = json.Unmarshal([]byte(response), &dealListByTaskUuIdResp)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if !strings.EqualFold(dealListByTaskUuIdResp.Status, constants.SWAN_API_STATUS_SUCCESS) {
+		err := fmt.Errorf("get dealList by taskUuid status:%s failed", dealListByTaskUuIdResp.Status)
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+	return &dealListByTaskUuIdResp, nil
+}
+
+type DealListByTaskUuIdResp struct {
+	Data struct {
+		Deal []struct {
+			DealCid     string `json:"deal_cid"`
+			MinerFid    string `json:"miner_fid"`
+			Note        string `json:"note"`
+			PayloadCid  string `json:"payload_cid"`
+			PieceCid    string `json:"piece_cid"`
+			StartEpoch  int    `json:"start_epoch"`
+			Status      string `json:"status"`
+			ChainDealId int64  `json:"chain_deal_id"`
+		} `json:"deal"`
+		DealCompleteRate int `json:"deal_complete_rate"`
+		Task             struct {
+			BidMode        int    `json:"bid_mode"`
+			CuratedDataset string `json:"curated_dataset"`
+			Description    string `json:"description"`
+			Duration       int    `json:"duration"`
+			Status         string `json:"status"`
+			TaskName       string `json:"task_name"`
+			Type           string `json:"type"`
+			Uuid           string `json:"uuid"`
+		} `json:"task"`
+		TotalDealCount int `json:"total_deal_count"`
+		TotalItems     int `json:"total_items"`
+	} `json:"data"`
+	Status string `json:"status"`
 }
