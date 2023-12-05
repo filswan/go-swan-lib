@@ -616,6 +616,7 @@ func (lotusClient *LotusClient) CheckDealConfig(dealConfig *model.DealConfig) (*
 	return &minerPrice, nil
 }
 
+// LotusClientStartDeal starts deal after check config
 func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfig) (*string, error) {
 	minerPrice, err := lotusClient.CheckDealConfig(dealConfig)
 	if err != nil {
@@ -628,6 +629,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 	return lotusClient.StartDeal(pieceSize, *epochPrice.BigInt(), dealConfig)
 }
 
+// LotusClientStartDeal starts deal with config
 func (lotusClient *LotusClient) StartDeal(pieceSize int64, epochPrice big.Int, dealConfig *model.DealConfig) (*string, error) {
 	if !dealConfig.SkipConfirmation {
 		logs.GetLogger().Info("Do you confirm to submit the deal?")
