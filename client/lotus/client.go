@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"os"
 	"strings"
 
@@ -621,12 +622,13 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
-
 	pieceSize, sectorSize := utils.CalculatePieceSize(dealConfig.FileSize, false)
 	cost := utils.CalculateRealCost(sectorSize, *minerPrice)
-
 	epochPrice := cost.Mul(decimal.NewFromFloat(constants.LOTUS_PRICE_MULTIPLE_1E18))
+	return lotusClient.StartDeal(pieceSize, *epochPrice.BigInt(), dealConfig)
+}
 
+func (lotusClient *LotusClient) StartDeal(pieceSize int64, epochPrice big.Int, dealConfig *model.DealConfig) (*string, error) {
 	if !dealConfig.SkipConfirmation {
 		logs.GetLogger().Info("Do you confirm to submit the deal?")
 		logs.GetLogger().Info("Press Y/y to continue, other key to quit")
@@ -665,7 +667,7 @@ func (lotusClient *LotusClient) LotusClientStartDeal(dealConfig *model.DealConfi
 		Data:              clientStartDealParamData,
 		Wallet:            dealConfig.SenderWallet,
 		Miner:             dealConfig.MinerFid,
-		EpochPrice:        epochPrice.BigInt().String(),
+		EpochPrice:        epochPrice.String(),
 		MinBlocksDuration: dealConfig.Duration,
 		DealStartEpoch:    dealConfig.StartEpoch,
 		FastRetrieval:     dealConfig.FastRetrieval,
