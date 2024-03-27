@@ -24,4 +24,6 @@ type Task struct {
 	SourceId             int              `json:"source_id"`
 	Duration             int              `json:"duration"`
 	MaxAutoBidCopyNumber int              `json:"max_auto_bid_copy_number"`
+	ClientAddr           string           `json:"client_addr"`
+	DealType             int              `json:"deal_type"`
 }

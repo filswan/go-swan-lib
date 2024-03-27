@@ -7,6 +7,9 @@ type DealInfo struct {
 	StartEpoch    int
 	Cost          string
 	StorageStatus string `json:"StorageStatus,omitempty"`
+	ClientAddr    string
+	AllocationID  uint64
+	Type          int
 }
 type FileDesc struct {
 	Uuid           string

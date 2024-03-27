@@ -78,6 +78,9 @@ const (
 
 	WALLET_TYPE_256 = "secp256k1"
 	WALLET_TYPE_BLS = "bls"
+
+	DEAL_TYPE_DEFAULT = 0
+	DEAL_TYPE_DDO     = 1
 )
 
 var ChainMap = map[string]string{

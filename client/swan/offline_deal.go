@@ -68,14 +68,16 @@ func (swanClient *SwanClient) GetOfflineDealsByStatus(params GetOfflineDealsBySt
 }
 
 type UpdateOfflineDealParams struct {
-	DealId      int     `json:"id"`
-	DealCid     *string `json:"deal_cid"`
-	FilePath    *string `json:"file_path"`
-	Status      string  `json:"status"`
-	StartEpoch  *int    `json:"start_epoch"`
-	Note        *string `json:"note"`
-	Cost        *string `json:"cost"`
-	ChainDealId int64   `json:"chain_deal_id"`
+	DealId       int     `json:"id"`
+	DealCid      *string `json:"deal_cid"`
+	FilePath     *string `json:"file_path"`
+	Status       string  `json:"status"`
+	StartEpoch   *int    `json:"start_epoch"`
+	Note         *string `json:"note"`
+	Cost         *string `json:"cost"`
+	ChainDealId  int64   `json:"chain_deal_id"`
+	ClientAddr   string  `json:"client_addr"`
+	AllocationID uint64  `json:"allocation_id"`
 }
 
 // for public and auto-bid task

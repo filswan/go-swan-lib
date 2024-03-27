@@ -37,4 +37,7 @@ type OfflineDeal struct {
 	Duration      *int             `json:"duration"`
 	SourceId      *int             `json:"source_id"`
 	ChainDealId   int64            `json:"chain_deal_id"`
+	ClientAddr    string           `json:"client_addr"`
+	AllocationID  uint64           `json:"allocation_id"`
+	Type          int              `json:"type"`
 }
