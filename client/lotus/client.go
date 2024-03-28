@@ -29,6 +29,8 @@ const (
 	LOTUS_CLIENT_START_DEAL      = "Filecoin.ClientStartDeal"
 	LOTUS_STATE_STORAGE_DEAL     = "Filecoin.StateMarketStorageDeal"
 
+	LOTUS_STATE_CLAIM = "Filecoin.StateGetClaim"
+
 	STAGE_RESERVE_FUNDS     = "StorageDealReserveClientFunds"
 	STAGE_PROPOSAL_ACCEPTED = "StorageDealProposalAccepted"
 
@@ -733,6 +735,60 @@ func (lotusClient *LotusClient) LotusGetDealById(dealId uint64) (*DealInfo, erro
 	}
 
 	return &deal.Result, nil
+}
+
+func (lotusClient *LotusClient) LotusStateClaim(minerFid string, claimId uint64) (*ClaimInfo, error) {
+	var params []interface{}
+	params = append(params, minerFid)
+	params = append(params, claimId)
+	params = append(params, nil)
+
+	jsonRpcParams := LotusJsonRpcParams{
+		JsonRpc: LOTUS_JSON_RPC_VERSION,
+		Method:  LOTUS_STATE_CLAIM,
+		Params:  params,
+		Id:      LOTUS_JSON_RPC_ID,
+	}
+
+	timeOutSecond := constants.HTTP_API_TIMEOUT_SECOND
+	response, err := web.HttpGetNoTokenTimeout(lotusClient.ApiUrl, jsonRpcParams, &timeOutSecond)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	claimInfo := &ClaimInfo{}
+	err = json.Unmarshal(response, claimInfo)
+	if err != nil {
+		err := fmt.Errorf("miner:%s,%s", minerFid, err.Error())
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	if claimInfo.Error != nil {
+		err := fmt.Errorf("miner:%s,code:%d,message:%s", minerFid, claimInfo.Error.Code, claimInfo.Error.Message)
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+	return claimInfo, nil
+}
+
+type ClaimInfo struct {
+	Id      int    `json:"id"`
+	JsonRpc string `json:"jsonrpc"`
+	Result  struct {
+		Provider uint64 `json:"Provider"`
+		Client   uint64 `json:"Client"`
+		Data     struct {
+			DataCid string `json:"/"`
+		} `json:"Data"`
+		Size      uint64 `json:"Size"`
+		TermMin   int64  `json:"TermMin"`
+		TermMax   int64  `json:"TermMax"`
+		TermStart int64  `json:"TermStart"`
+		Sector    uint64 `json:"Sector"`
+	} `json:"result"`
+	Error *JsonRpcError `json:"error"`
 }
 
 type MarketStorageDeal struct {
